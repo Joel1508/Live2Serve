@@ -1,5 +1,6 @@
 import 'package:app/Screens/homeScreen/accounting/add_transaction.dart';
 import 'package:app/Screens/homeScreen/accounting/history.dart';
+import 'package:app/Screens/homeScreen/accounting/others/others.dart';
 import 'package:flutter/material.dart';
 
 class AccountingScreen extends StatelessWidget {
@@ -218,7 +219,12 @@ class AccountingScreen extends StatelessWidget {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
-                          // Navigate to Others Screen
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => OtherScreen(),
+                            ),
+                          );
                         },
                         child: Text('Others'),
                         style: ElevatedButton.styleFrom(
