@@ -83,7 +83,7 @@ class _WelcomeState extends State<Welcome> {
                   // Skip button
                   ElevatedButton(
                     onPressed: () {
-                      Navigator.pushReplacementNamed(context, '/accounting');
+                      Navigator.pushReplacementNamed(context, '/home_screen');
                     },
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(

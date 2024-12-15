@@ -1,4 +1,6 @@
 import 'package:app/Screens/homeScreen/accounting/accounting.dart';
+import 'package:app/Screens/homeScreen/add_tool.dart';
+import 'package:app/Screens/homeScreen/invoice/invoice.dart';
 import 'package:app/Screens/homeScreen/partners/partners.dart';
 import 'package:app/Screens/homeScreen/customers/customers.dart';
 import 'package:flutter/material.dart';
@@ -65,7 +67,7 @@ class HomeScreen extends StatelessWidget {
                   _buildGridButton(context, 'Partners', '/partners'),
                   _buildGridButton(context, 'Project', '/project'),
                   _buildGridButton(context, 'Accounting', '/accounting'),
-                  _buildGridButton(context, 'Bill history', '/bill_history'),
+                  _buildGridButton(context, 'Bill history', '/invoice'),
                   _buildGridButton(context, 'Goals', '/goals'),
                 ],
               ),
@@ -74,13 +76,21 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: const [
+        items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle_outline),
+            icon: IconButton(
+              icon: Icon(Icons.add_circle_outline),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AddToolScreen()),
+                );
+              },
+            ),
             label: '',
           ),
           BottomNavigationBarItem(
@@ -143,29 +153,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-/*
-// Placeholder screens
-class CustomersScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Customers')),
-      body: Center(child: Text('Customers Screen')),
-    );
-  }
-}
-
-class PartnersScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Partners')),
-      body: Center(child: Text('Partners Screen')),
-    );
-  }
-}
-*/
-// Similarly, create other screens for Project, Accounting, Bill History, and Goals.
 
 // Main Function to Set Up Routes
 void main() {
@@ -177,6 +164,7 @@ void main() {
       '/partners': (context) => PartnersScreen(),
       '/customers': (context) => CustomersScreen(),
       '/accounting': (context) => AccountingScreen(),
+      '/invoice': (context) => InvoiceScreen(),
     },
   ));
 }

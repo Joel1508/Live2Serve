@@ -9,8 +9,15 @@ import 'package:app/Screens/homeScreen/accounting/accounting.dart';
 import 'package:app/Screens/homeScreen/accounting/add_transaction.dart';
 import 'package:app/Screens/homeScreen/accounting/date.dart';
 import 'package:app/Screens/homeScreen/accounting/history.dart';
+import 'package:app/Screens/homeScreen/accounting/others/banks.dart';
+import 'package:app/Screens/homeScreen/accounting/others/credits.dart';
+import 'package:app/Screens/homeScreen/accounting/others/goals.dart';
+import 'package:app/Screens/homeScreen/accounting/others/savings.dart';
+import 'package:app/Screens/homeScreen/add_client_invoice.dart';
+import 'package:app/Screens/homeScreen/add_tool.dart';
 import 'package:app/Screens/homeScreen/customers/add_customer.dart';
 import 'package:app/Screens/homeScreen/home_screen.dart';
+import 'package:app/Screens/homeScreen/invoice/invoice.dart';
 import 'package:app/Screens/homeScreen/partners/add_partner.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -48,6 +55,12 @@ class MyApp extends StatelessWidget {
         '/accounting': (context) => AccountingScreen(),
         '/add_transaction': (context) => AddTransactionScreen(),
         '/history': (context) => HistoryScreen(),
+        '/banks': (context) => BanksScreen(),
+        '/credits': (context) => CreditsScreen(),
+        '/goals': (context) => GoalsScreen(),
+        '/savings': (context) => SavingsScreen(),
+        '/add_tool': (context) => AddToolScreen(),
+        '/invoice': (context) => InvoiceScreen(),
         '/date': (context) => DateTimePickerScreen(),
         '/partners': (context) => PartnersScreen(),
         '/add_partners': (context) => const AddPartnerScreen(),
@@ -55,6 +68,7 @@ class MyApp extends StatelessWidget {
         '/add_customer': (context) => const AddCustomerScreen(
               initialData: {},
             ),
+        '/add_client_invoice': (context) => InvoiceClientScreen(),
       },
     );
   }
