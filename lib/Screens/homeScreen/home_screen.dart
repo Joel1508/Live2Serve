@@ -3,6 +3,7 @@ import 'package:app/Screens/homeScreen/add_tool.dart';
 import 'package:app/Screens/homeScreen/invoice/invoice.dart';
 import 'package:app/Screens/homeScreen/partners/partners.dart';
 import 'package:app/Screens/homeScreen/customers/customers.dart';
+import 'package:app/Screens/homeScreen/project/project.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -165,6 +166,7 @@ void main() {
       '/customers': (context) => CustomersScreen(),
       '/accounting': (context) => AccountingScreen(),
       '/invoice': (context) => InvoiceScreen(),
+      '/project': (context) => HydroponicBedsScreen(),
     },
   ));
 }

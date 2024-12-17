@@ -35,7 +35,7 @@ class _WelcomeState extends State<Welcome> {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(16.0),
                     child: Image.asset(
-                      'assets/lettuce.png',
+                      'assets/images/lettuce.png',
                       height: 120,
                       width: 120,
                       fit: BoxFit.cover,

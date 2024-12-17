@@ -184,7 +184,7 @@ class SignUpScreen extends StatelessWidget {
                           // Continue with Google Button
                           ElevatedButton.icon(
                             icon: Image.asset(
-                              'assets/google.png',
+                              'assets/images/google.png',
                               width: 24,
                               height: 24,
                             ),
@@ -223,7 +223,7 @@ class SignUpScreen extends StatelessWidget {
                   width: 300,
                   height: 150,
                   child: Image.asset(
-                    'assets/tubo.png',
+                    'assets/images/tubo.png',
                     fit: BoxFit.contain,
                   ),
                 ),

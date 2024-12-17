@@ -214,7 +214,7 @@ class LogInScreen extends StatelessWidget {
                 width: 300,
                 height: 150,
                 child: Image.asset(
-                  'assets/tubo.png',
+                  'assets/images/tubo.png',
                 ),
               ),
             ],
