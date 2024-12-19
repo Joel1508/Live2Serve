@@ -1,6 +1,6 @@
 import 'package:app/Screens/homeScreen/accounting/others/banks.dart';
 import 'package:app/Screens/homeScreen/accounting/others/credits.dart';
-import 'package:app/Screens/homeScreen/accounting/others/goals_acc.dart';
+import 'package:app/Screens/homeScreen/accounting/others/metas.dart';
 import 'package:app/Screens/homeScreen/accounting/others/savings.dart';
 import 'package:flutter/material.dart';
 

@@ -21,17 +21,22 @@ import 'package:app/Screens/homeScreen/invoice/invoice.dart';
 import 'package:app/Screens/homeScreen/partners/add_partner.dart';
 import 'package:app/Screens/homeScreen/project/interactive_map.dart';
 import 'package:app/Screens/homeScreen/project/project.dart';
+import 'package:app/Screens/homeScreen/settings.dart';
+import 'package:app/Screens/homeScreen/user.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 import 'Screens/homeScreen/customers/customers.dart';
 import 'Screens/homeScreen/partners/partners.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Supabase with the URL and anon key
   await Supabase.initialize(
-    url: 'https://fqdpwiskvyiopqgxuaml.supabase.co',
+    url:
+        'https://fqdpwiskvyiopqgxuaml.supabase.co', // Replace with your Supabase project URL
     anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxZHB3aXNrdnlpb3BxZ3h1YW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM1MDM3MzYsImV4cCI6MjA0OTA3OTczNn0.dkxwbnUkKb2fcpzEFR2uoNCsY_f06wntVxWrZsuxt70',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxZHB3aXNrdnlpb3BxZ3h1YW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM1MDM3MzYsImV4cCI6MjA0OTA3OTczNn0.dkxwbnUkKb2fcpzEFR2uoNCsY_f06wntVxWrZsuxt70', // Replace with your Supabase anon key
   );
 
   runApp(const MyApp());
@@ -73,6 +78,8 @@ class MyApp extends StatelessWidget {
         '/project': (context) => HydroponicBedsScreen(),
         '/interactive_map': (context) => InteractiveMapScreen(),
         '/goals': (context) => GoalsApp(),
+        '/user': (context) => const UserScreen(),
+        '/settings': (context) => const SettingsScreen(),
       },
     );
   }

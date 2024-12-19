@@ -1,9 +1,12 @@
 import 'package:app/Screens/homeScreen/accounting/accounting.dart';
 import 'package:app/Screens/homeScreen/add_tool.dart';
+import 'package:app/Screens/homeScreen/goals/goals.dart';
 import 'package:app/Screens/homeScreen/invoice/invoice.dart';
 import 'package:app/Screens/homeScreen/partners/partners.dart';
 import 'package:app/Screens/homeScreen/customers/customers.dart';
 import 'package:app/Screens/homeScreen/project/project.dart';
+import 'package:app/Screens/homeScreen/settings.dart';
+import 'package:app/Screens/homeScreen/user.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -30,7 +33,8 @@ class HomeScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.settings, color: Colors.black),
             onPressed: () {
-              // TODO: Navigate to settings screen
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => SettingsScreen()));
             },
           ),
         ],
@@ -101,7 +105,8 @@ class HomeScreen extends StatelessWidget {
         ],
         currentIndex: 0, // Home is active
         onTap: (index) {
-          // TODO: Handle navigation between tabs
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => UserScreen()));
         },
       ),
     );
@@ -167,6 +172,7 @@ void main() {
       '/accounting': (context) => AccountingScreen(),
       '/invoice': (context) => InvoiceScreen(),
       '/project': (context) => HydroponicBedsScreen(),
+      '/goals': (context) => GoalsApp(),
     },
   ));
 }
