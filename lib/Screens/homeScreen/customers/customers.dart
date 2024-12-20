@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:app/Screens/homeScreen/customers/add_customer.dart';
 
 class CustomersScreen extends StatefulWidget {
@@ -8,6 +9,28 @@ class CustomersScreen extends StatefulWidget {
 
 class _CustomersScreenState extends State<CustomersScreen> {
   List<Map<String, dynamic>> customersList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCustomers();
+  }
+
+  // Fetch the customer list from Supabase
+  Future<void> _fetchCustomers() async {
+    final response =
+        await Supabase.instance.client.from('customers').select().execute();
+
+    if (response.error != null) {
+      print('Error: ${response.error?.message}');
+    } else {
+      final List<dynamic> customers = response.data;
+      print('Customers: $customers');
+      setState(() {
+        customersList = List<Map<String, dynamic>>.from(customers);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -210,4 +233,8 @@ class _CustomersScreenState extends State<CustomersScreen> {
       },
     );
   }
+}
+
+extension on PostgrestFilterBuilder<PostgrestList> {
+  execute() {}
 }

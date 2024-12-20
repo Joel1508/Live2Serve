@@ -19,13 +19,19 @@ class AuthService {
   // Log In
   Future<void> logIn(String email, String password) async {
     try {
-      final response = await supabase.auth
-          .signInWithPassword(email: email, password: password);
-      if (response.session == null) {
-        throw Exception('Login failed');
+      final AuthResponse response = await supabase.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+
+      // Check if the session or user is null
+      if (response.session == null || response.user == null) {
+        throw Exception(
+            'Authentication failed. Please check your credentials.');
       }
     } catch (e) {
-      throw Exception('Error during login: ${e.toString()}');
+      // Forward the error message for debugging
+      throw Exception('Log in failed: $e');
     }
   }
 

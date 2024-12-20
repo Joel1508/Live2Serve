@@ -16,10 +16,12 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   final TextEditingController addressController = TextEditingController();
   final TextEditingController idController = TextEditingController();
 
+  // Cancel function to go back to the previous screen
   void cancel() {
     Navigator.pop(context);
   }
 
+  // Function to add customer details and validate the form
   void addCustomer() {
     String name = nameController.text;
     String contact = contactController.text;
@@ -27,13 +29,16 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
     String address = addressController.text;
     String id = idController.text;
 
+    // Check if all fields are filled
     if (name.isNotEmpty &&
         contact.isNotEmpty &&
         email.isNotEmpty &&
         address.isNotEmpty &&
         id.isNotEmpty) {
+      // Generate a unique customer code
       String uniqueCode = randomAlphaNumeric(12);
 
+      // Pass the customer data back to the previous screen
       Navigator.pop(context, {
         'name': name,
         'contact': contact,
@@ -43,6 +48,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
         'uniqueCode': uniqueCode,
       });
     } else {
+      // Show error message if fields are not completed
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please complete all fields')),
       );
@@ -71,6 +77,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Name field
             TextField(
               controller: nameController,
               decoration: const InputDecoration(
@@ -79,6 +86,8 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
               ),
             ),
             const SizedBox(height: 16),
+
+            // Contact field
             TextField(
               controller: contactController,
               keyboardType: TextInputType.phone,
@@ -88,6 +97,8 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
               ),
             ),
             const SizedBox(height: 16),
+
+            // Email field
             TextField(
               controller: emailController,
               keyboardType: TextInputType.emailAddress,
@@ -97,6 +108,8 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
               ),
             ),
             const SizedBox(height: 16),
+
+            // Address field
             TextField(
               controller: addressController,
               decoration: const InputDecoration(
@@ -105,6 +118,8 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
               ),
             ),
             const SizedBox(height: 16),
+
+            // ID/NIT field
             TextField(
               controller: idController,
               decoration: const InputDecoration(
@@ -113,6 +128,8 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
               ),
             ),
             const SizedBox(height: 16),
+
+            // Action buttons (Cancel and Add)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

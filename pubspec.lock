@@ -232,6 +232,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
+  hcaptcha_flutter:
+    dependency: "direct main"
+    description:
+      name: hcaptcha_flutter
+      sha256: f75756e6e0c19f4ba5d62dd0bee60b6e079011cf62b9716d5e4e5a5d0810c97b
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.1+1"
   http:
     dependency: transitive
     description:

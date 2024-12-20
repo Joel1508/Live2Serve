@@ -4,14 +4,38 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 
 class LogInScreen extends StatelessWidget {
-  LogInScreen({super.key});
+  LogInScreen({Key? key}) : super(key: key);
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
   final AuthService authService = AuthService();
-  final LocalAuthentication auth =
-      LocalAuthentication(); // Local authentication instance
+  final LocalAuthentication auth = LocalAuthentication();
+
+  Future<bool> _authenticateWithBiometrics() async {
+    try {
+      bool canCheckBiometrics = await auth.canCheckBiometrics;
+      if (!canCheckBiometrics) return false;
+
+      List<BiometricType> availableBiometrics =
+          await auth.getAvailableBiometrics();
+
+      if (availableBiometrics.isEmpty) return false;
+
+      // Attempt biometric authentication
+      return await auth.authenticate(
+        localizedReason: 'Please authenticate to access your account',
+        options: const AuthenticationOptions(
+          useErrorDialogs: true,
+          stickyAuth: true,
+        ),
+      );
+    } catch (e) {
+      // Log the error for debugging purposes
+      print('Biometric authentication error: $e');
+      return false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,12 +47,12 @@ class LogInScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // Circular Design and Title
               Padding(
                 padding: const EdgeInsets.only(top: 50.0),
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    // Circular Background
                     Container(
                       width: 300,
                       height: 300,
@@ -37,49 +61,46 @@ class LogInScreen extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                     ),
-                    // Text Inside the Circle
-                    const SizedBox(
-                      width: 300,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "FRES.CO",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFFFAFAD8),
-                            ),
+                    const Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "FRES.CO",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFFFAFAD8),
                           ),
-                          SizedBox(height: 25),
-                          Text(
-                            "Log In",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 42,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFFF17372A),
-                            ),
+                        ),
+                        SizedBox(height: 25),
+                        Text(
+                          "Log In",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 42,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFFF17372A),
                           ),
-                          SizedBox(height: 5),
-                          Text(
-                            "To Continue",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFFFAFAD8),
-                            ),
+                        ),
+                        SizedBox(height: 5),
+                        Text(
+                          "To Continue",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFFFAFAD8),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 30),
-              // Glassy Effect Container for Entire Section
+
+              // Glassy Input Section
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
@@ -95,122 +116,109 @@ class LogInScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(5),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: Column(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 16),
+                    // Email Field
+                    TextField(
+                      controller: emailController,
+                      decoration: const InputDecoration(
+                        hintText: 'Email',
+                        prefixIcon: Icon(Icons.email),
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Password Field
+                    TextField(
+                      controller: passwordController,
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                        hintText: 'Password',
+                        prefixIcon: Icon(Icons.lock),
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    // Log In Button
+                    ElevatedButton(
+                      onPressed: () async {
+                        try {
+                          // Attempt login with email and password
+                          await authService.logIn(
+                            emailController.text,
+                            passwordController.text,
+                          );
+
+                          // Navigate directly to the home screen after login
+                          Navigator.pushNamed(
+                            context,
+                            '/home_screen',
+                          );
+                        } catch (error) {
+                          String errorMessage = error.toString();
+                          if (errorMessage
+                              .contains('Invalid login credentials')) {
+                            errorMessage =
+                                'Invalid email or password. Please try again.';
+                          }
+
+                          // Show error message
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(errorMessage)),
+                          );
+                        }
+                      },
+                      child: const Text('Log in'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFF8ABC8B),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30.0),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 40, vertical: 15),
+                        textStyle: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    // "Create an Account" and "Forgot Password?"
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const SizedBox(height: 16),
-                        // Email Field
-                        TextField(
-                          controller: emailController,
-                          decoration: const InputDecoration(
-                            hintText: 'Email',
-                            prefixIcon: Icon(Icons.email),
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        // Password Field
-                        TextField(
-                          controller: passwordController,
-                          obscureText: true,
-                          decoration: const InputDecoration(
-                            hintText: 'Password',
-                            prefixIcon: Icon(Icons.lock),
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        // Log In Button
-                        ElevatedButton(
-                          onPressed: () async {
-                            try {
-                              await authService.logIn(
-                                emailController.text,
-                                passwordController.text,
-                              );
-
-                              // Trigger biometric authentication if login successful
-                              bool isAuthenticated =
-                                  await _authenticateWithBiometrics();
-
-                              if (isAuthenticated) {
-                                Navigator.pushNamed(
-                                  context,
-                                  '/home_screen',
-                                );
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text('Authentication failed.')),
-                                );
-                              }
-                            } catch (error) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Error: $error')),
-                              );
-                            }
-                          },
-                          child: const Text('Log in'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFF8ABC8B),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30.0),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 40, vertical: 15),
-                            textStyle: const TextStyle(
-                              fontSize: 18,
+                        GestureDetector(
+                          onTap: () => Navigator.pushNamed(context, '/sign_up'),
+                          child: const Text(
+                            'Create an account',
+                            style: TextStyle(
+                              color: Color(0xFFF17372A),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-                        const SizedBox(height: 10),
-                        // "Create an Account" and "Forgot Password?"
-                        TextButton(
-                          onPressed: () =>
-                              Navigator.pushNamed(context, '/sign_up'),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              GestureDetector(
-                                onTap: () =>
-                                    Navigator.pushNamed(context, '/sign_up'),
-                                child: const Text(
-                                  'Create an account',
-                                  style: TextStyle(
-                                    color: Color(0xFFF17372A),
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 50),
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.pushNamed(
-                                      context, '/recover_password');
-                                },
-                                child: const Text(
-                                  'Forgot Password?',
-                                  style: TextStyle(
-                                    color: Color(0xFFF17372A),
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
+                        const SizedBox(width: 50),
+                        GestureDetector(
+                          onTap: () =>
+                              Navigator.pushNamed(context, '/recover_password'),
+                          child: const Text(
+                            'Forgot Password?',
+                            style: TextStyle(
+                              color: Color(0xFFF17372A),
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ],
                     ),
-                  ),
+                  ],
                 ),
               ),
               const SizedBox(height: 40),
-              Container(
+              // Bottom Image
+              SizedBox(
                 width: 300,
                 height: 150,
                 child: Image.asset(
@@ -222,40 +230,5 @@ class LogInScreen extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  // Method to authenticate using biometrics (Face ID or Fingerprint)
-  Future<bool> _authenticateWithBiometrics() async {
-    try {
-      bool isAvailable = await auth.canCheckBiometrics;
-      if (!isAvailable) {
-        return false;
-      }
-
-      List<BiometricType> availableBiometrics =
-          await auth.getAvailableBiometrics();
-      if (availableBiometrics.isEmpty) {
-        return false;
-      }
-
-      // Checking if Face ID or Fingerprint is available
-      if (availableBiometrics.contains(BiometricType.face)) {
-        print('Face ID is available');
-      }
-      if (availableBiometrics.contains(BiometricType.fingerprint)) {
-        print('Fingerprint is available');
-      }
-
-      bool authenticated = await auth.authenticate(
-        localizedReason: 'Please authenticate to access your account',
-        options: const AuthenticationOptions(
-          useErrorDialogs: true,
-          stickyAuth: true,
-        ),
-      );
-      return authenticated;
-    } catch (e) {
-      return false;
-    }
   }
 }
