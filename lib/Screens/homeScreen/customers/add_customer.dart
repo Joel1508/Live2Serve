@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:random_string/random_string.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AddCustomerScreen extends StatefulWidget {
   const AddCustomerScreen({Key? key, required Map<String, dynamic> initialData})
@@ -16,13 +17,15 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   final TextEditingController addressController = TextEditingController();
   final TextEditingController idController = TextEditingController();
 
+  bool isLoading = false;
+
   // Cancel function to go back to the previous screen
   void cancel() {
     Navigator.pop(context);
   }
 
   // Function to add customer details and validate the form
-  void addCustomer() {
+  void addCustomer() async {
     String name = nameController.text;
     String contact = contactController.text;
     String email = emailController.text;
@@ -38,15 +41,37 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
       // Generate a unique customer code
       String uniqueCode = randomAlphaNumeric(12);
 
-      // Pass the customer data back to the previous screen
-      Navigator.pop(context, {
+      // Create a map to hold the data to insert into Supabase
+      final customerData = {
         'name': name,
         'contact': contact,
         'email': email,
         'address': address,
         'id': id,
         'uniqueCode': uniqueCode,
-      });
+      };
+
+      try {
+        // Insert the customer data into Supabase
+        final response = await Supabase.instance.client
+            .from('customers')
+            .insert([customerData]);
+
+        if (response.error != null) {
+          // Handle the error (if any)
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: ${response.error?.message}')),
+          );
+        } else {
+          // Success, navigate back with the new customer data
+          Navigator.pop(context, customerData);
+        }
+      } catch (error) {
+        // Handle any other errors
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('An error occurred: $error')),
+        );
+      }
     } else {
       // Show error message if fields are not completed
       ScaffoldMessenger.of(context).showSnackBar(

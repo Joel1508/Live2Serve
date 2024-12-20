@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:app/Screens/homeScreen/customers/add_customer.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CustomersScreen extends StatefulWidget {
+  const CustomersScreen({Key? key}) : super(key: key);
+
   @override
-  _CustomersScreenState createState() => _CustomersScreenState();
+  State<CustomersScreen> createState() => _CustomersScreenState();
 }
 
 class _CustomersScreenState extends State<CustomersScreen> {
-  List<Map<String, dynamic>> customersList = [];
+  List<Map<String, dynamic>> customerList = [];
 
   @override
   void initState() {
@@ -16,19 +18,19 @@ class _CustomersScreenState extends State<CustomersScreen> {
     _fetchCustomers();
   }
 
-  // Fetch the customer list from Supabase
+  // Fetch the customer list from supabase
   Future<void> _fetchCustomers() async {
-    final response =
-        await Supabase.instance.client.from('customers').select().execute();
+    try {
+      final response = await Supabase.instance.client
+          .from('customers')
+          .select()
+          .order('created_at', ascending: false);
 
-    if (response.error != null) {
-      print('Error: ${response.error?.message}');
-    } else {
-      final List<dynamic> customers = response.data;
-      print('Customers: $customers');
       setState(() {
-        customersList = List<Map<String, dynamic>>.from(customers);
+        customerList = List<Map<String, dynamic>>.from(response);
       });
+    } catch (error) {
+      print('Error fetching customers: $error');
     }
   }
 
@@ -67,14 +69,16 @@ class _CustomersScreenState extends State<CustomersScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (context) =>
-                            AddCustomerScreen(initialData: {}),
+                            const AddCustomerScreen(initialData: {}),
                       ),
                     );
 
                     if (newCustomer != null) {
                       setState(() {
-                        customersList.add(newCustomer);
+                        customerList.add(newCustomer);
                       });
+                      // Optionally refresh the list from Supabase
+                      _fetchCustomers();
                     }
                   },
                 ),
@@ -91,14 +95,14 @@ class _CustomersScreenState extends State<CustomersScreen> {
                     BoxShadow(
                       color: Colors.grey.withOpacity(0.3),
                       blurRadius: 5,
-                      offset: Offset(0, 3),
+                      offset: const Offset(0, 3),
                     ),
                   ],
                 ),
                 child: ListView.builder(
-                  itemCount: customersList.length,
+                  itemCount: customerList.length,
                   itemBuilder: (context, index) {
-                    return _buildCustomerRow(customersList[index]);
+                    return _buildCustomerRow(customerList[index]);
                   },
                 ),
               ),
@@ -184,15 +188,15 @@ class _CustomersScreenState extends State<CustomersScreen> {
 
     if (updatedCustomer != null) {
       setState(() {
-        final index = customersList.indexOf(customer);
-        customersList[index] = updatedCustomer;
+        final index = customerList.indexOf(customer);
+        customerList[index] = updatedCustomer;
       });
     }
   }
 
   void _deleteCustomer(Map<String, dynamic> customer) {
     setState(() {
-      customersList.remove(customer);
+      customerList.remove(customer);
     });
   }
 
@@ -233,8 +237,4 @@ class _CustomersScreenState extends State<CustomersScreen> {
       },
     );
   }
-}
-
-extension on PostgrestFilterBuilder<PostgrestList> {
-  execute() {}
 }
