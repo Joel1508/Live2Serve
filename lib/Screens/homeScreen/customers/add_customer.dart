@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:random_string/random_string.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'customer_repository.dart';
+import 'customer.dart';
 
 class AddCustomerScreen extends StatefulWidget {
-  const AddCustomerScreen({Key? key, required Map<String, dynamic> initialData})
+  final Customer? existingCustomer;
+
+  const AddCustomerScreen({Key? key, required this.existingCustomer})
       : super(key: key);
 
   @override
@@ -18,163 +23,114 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   final TextEditingController idController = TextEditingController();
 
   bool isLoading = false;
+  late CustomerRepository customerRepo;
 
-  // Cancel function to go back to the previous screen
-  void cancel() {
-    Navigator.pop(context);
+  @override
+  void initState() {
+    super.initState();
+    _initializeRepository();
+    _initializeConnectivityListener();
   }
 
-  // Function to add customer details and validate the form
-  void addCustomer() async {
-    String name = nameController.text;
-    String contact = contactController.text;
-    String email = emailController.text;
-    String address = addressController.text;
-    String id = idController.text;
+  Future<void> _initializeRepository() async {
+    final customerBox = await Hive.openBox('customerBox');
+    customerRepo = CustomerRepository(customerBox: customerBox);
+  }
 
-    // Check if all fields are filled
-    if (name.isNotEmpty &&
-        contact.isNotEmpty &&
-        email.isNotEmpty &&
-        address.isNotEmpty &&
-        id.isNotEmpty) {
-      // Generate a unique customer code
-      String uniqueCode = randomAlphaNumeric(12);
-
-      // Create a map to hold the data to insert into Supabase
-      final customerData = {
-        'name': name,
-        'contact': contact,
-        'email': email,
-        'address': address,
-        'id': id,
-        'uniqueCode': uniqueCode,
-      };
-
-      try {
-        // Insert the customer data into Supabase
-        final response = await Supabase.instance.client
-            .from('customers')
-            .insert([customerData]);
-
-        if (response.error != null) {
-          // Handle the error (if any)
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: ${response.error?.message}')),
-          );
-        } else {
-          // Success, navigate back with the new customer data
-          Navigator.pop(context, customerData);
-        }
-      } catch (error) {
-        // Handle any other errors
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('An error occurred: $error')),
-        );
+  void _initializeConnectivityListener() {
+    Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
+      if (result != ConnectivityResult.none) {
+        customerRepo.syncUnsentCustomers();
       }
-    } else {
-      // Show error message if fields are not completed
+    });
+  }
+
+  Future<void> addCustomer() async {
+    final name = nameController.text.trim();
+    final contact = contactController.text.trim();
+    final email = emailController.text.trim();
+    final address = addressController.text.trim();
+    final idNit = idController.text.trim();
+    final uniqueCode = generateUniqueCode();
+
+    if (name.isEmpty ||
+        contact.isEmpty ||
+        email.isEmpty ||
+        address.isEmpty ||
+        idNit.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please complete all fields')),
+        const SnackBar(content: Text('Please fill out all fields.')),
       );
+      return;
     }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final customer = Customer(
+        name: name,
+        contactNumber: contact,
+        email: email,
+        address: address,
+        idNit: idNit,
+        uniqueCode: uniqueCode,
+        id: '',
+        contact: '',
+        isSynced: false,
+      );
+
+      await customerRepo.addCustomer(customer as Customer?);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Customer $name added successfully! Sync pending.'),
+        ),
+      );
+      Navigator.pop(context, customer); // Return the customer object
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to add customer: $e')),
+      );
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  String generateUniqueCode() {
+    return randomAlphaNumeric(12).toUpperCase();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFDEDCDD),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFDEDCDD),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: cancel,
-        ),
-        centerTitle: true,
-        title: const Text(
-          'Add Customer',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-        ),
+        title: const Text('Add Customer'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Name field
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(
-                labelText: 'Name',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Contact field
-            TextField(
-              controller: contactController,
-              keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(
-                labelText: 'Contact Number',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Email field
-            TextField(
-              controller: emailController,
-              keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Address field
-            TextField(
-              controller: addressController,
-              decoration: const InputDecoration(
-                labelText: 'Address',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // ID/NIT field
-            TextField(
-              controller: idController,
-              decoration: const InputDecoration(
-                labelText: 'ID/NIT',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Action buttons (Cancel and Add)
+            _buildTextField(nameController, 'Name'),
+            _buildTextField(contactController, 'Contact Number', isPhone: true),
+            _buildTextField(emailController, 'Email', isEmail: true),
+            _buildTextField(addressController, 'Address'),
+            _buildTextField(idController, 'ID/NIT'),
+            const SizedBox(height: 20),
+            if (isLoading) const CircularProgressIndicator(),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 ElevatedButton(
-                  onPressed: cancel,
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFD8D0BD)),
-                  child: const Text(
-                    'Cancel',
-                    style: TextStyle(color: Colors.black),
-                  ),
+                  onPressed: () => Navigator.pop(context, null),
+                  child: const Text('Cancel'),
                 ),
+                const Spacer(),
                 ElevatedButton(
                   onPressed: addCustomer,
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFD8D0BD)),
-                  child: const Text(
-                    'Add',
-                    style: TextStyle(color: Colors.black),
-                  ),
+                  child: const Text('Add'),
                 ),
               ],
             ),
@@ -182,5 +138,34 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildTextField(TextEditingController controller, String label,
+      {bool isPhone = false, bool isEmail = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextField(
+        controller: controller,
+        keyboardType: isPhone
+            ? TextInputType.phone
+            : isEmail
+                ? TextInputType.emailAddress
+                : TextInputType.text,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    contactController.dispose();
+    emailController.dispose();
+    addressController.dispose();
+    idController.dispose();
+    super.dispose();
   }
 }

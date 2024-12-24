@@ -1,8 +1,21 @@
-import 'package:app/Screens/homeScreen/home_screen.dart';
+import 'package:app/repositories/customer_repository.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hive/hive.dart';
+import 'package:app/Screens/homeScreen/home_screen.dart' as home_screen;
+import 'package:hive_flutter/hive_flutter.dart';
+import 'goal.dart'; // Import the Goal class
 
-void main() => runApp(GoalsApp());
+void main() async {
+  // Initialize Hive before the app runs
+  await Hive.initFlutter();
+
+  // Open the boxes required for the app
+  await Hive.openBox<Goal>('goalsBox'); // Open a Hive box to store the goals
+  await Hive.openBox<Customer>(
+      'customerBox'); // Open the Hive box to store the customers
+
+  runApp(GoalsApp());
+}
 
 class GoalsApp extends StatelessWidget {
   @override
@@ -22,43 +35,27 @@ class GoalsScreen extends StatefulWidget {
 class _GoalsScreenState extends State<GoalsScreen> {
   final int startYear = 2024;
   final int endYear = 2030;
-  Map<String, Map<String, List<Map<String, String>>>> goalsData = {};
+  late Box<Goal> goalsBox;
 
   @override
   void initState() {
     super.initState();
-    _loadGoals();
+    goalsBox = Hive.box<Goal>('goalsBox'); // Open the Hive box here
   }
 
-  Future<void> _loadGoals() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+  void _addGoal(String year, String month, Goal goal) {
     setState(() {
-      // Load saved goals
-      // Example JSON structure
-      String? data = prefs.getString('goalsData');
-      goalsData = data != null
-          ? Map<String, Map<String, List<Map<String, String>>>>.from(
-              Map.fromIterable(data as Iterable))
-          : {};
+      goalsBox.add(goal); // Add goal to the Hive box
     });
-  }
-
-  void _addGoal(String year, String month, Map<String, String> goal) async {
-    setState(() {
-      goalsData.putIfAbsent(year, () => {});
-      goalsData[year]?.putIfAbsent(month, () => []);
-      goalsData[year]?[month]?.add(goal);
-    });
-
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString('goalsData', goalsData.toString());
   }
 
   Widget _buildMonthWidget(String year, String month) {
-    final goals = goalsData[year]?[month] ?? [];
+    final goals = goalsBox.values
+        .where((goal) => goal.date.startsWith('$year-$month'))
+        .toList();
+
     return GestureDetector(
       onTap: () {
-        // Show goals or empty state
         showModalBottomSheet(
           context: context,
           builder: (_) => _buildGoalsModal(goals),
@@ -83,7 +80,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
     );
   }
 
-  Widget _buildGoalsModal(List<Map<String, String>> goals) {
+  Widget _buildGoalsModal(List<Goal> goals) {
     return Container(
       padding: EdgeInsets.all(16),
       child: goals.isNotEmpty
@@ -92,8 +89,8 @@ class _GoalsScreenState extends State<GoalsScreen> {
               itemBuilder: (context, index) {
                 final goal = goals[index];
                 return ListTile(
-                  title: Text(goal['title']!),
-                  subtitle: Text(goal['description']!),
+                  title: Text(goal.title),
+                  subtitle: Text(goal.description),
                 );
               },
             )
@@ -113,7 +110,13 @@ class _GoalsScreenState extends State<GoalsScreen> {
           onPressed: () {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => HomeScreen()),
+              MaterialPageRoute(
+                builder: (context) => home_screen.HomeScreen(
+                  customerRepo: CustomerRepository(
+                    customerBox: Hive.box<Customer>('customerBox'),
+                  ),
+                ),
+              ),
             );
           },
         ),
@@ -187,11 +190,12 @@ class _GoalsScreenState extends State<GoalsScreen> {
               onPressed: () {
                 final selectedYear = date.split('-')[0];
                 final selectedMonth = date.split('-')[1].toUpperCase();
-                _addGoal(selectedYear, selectedMonth, {
-                  'title': title,
-                  'description': description,
-                  'date': date,
-                });
+                Goal newGoal = Goal(
+                  title: title,
+                  description: description,
+                  date: date,
+                );
+                _addGoal(selectedYear, selectedMonth, newGoal);
                 Navigator.pop(context);
               },
               child: Text('Save Goal'),

@@ -16,34 +16,55 @@ import 'package:app/Screens/homeScreen/add_client_invoice.dart';
 import 'package:app/Screens/homeScreen/add_tool.dart';
 import 'package:app/Screens/homeScreen/customers/add_customer.dart';
 import 'package:app/Screens/homeScreen/goals/goals.dart';
-import 'package:app/Screens/homeScreen/home_screen.dart';
 import 'package:app/Screens/homeScreen/invoice/invoice.dart';
-import 'package:app/Screens/homeScreen/partners/add_partner.dart';
 import 'package:app/Screens/homeScreen/project/interactive_map.dart';
 import 'package:app/Screens/homeScreen/project/project.dart';
 import 'package:app/Screens/homeScreen/settings.dart';
 import 'package:app/Screens/homeScreen/user.dart';
+import 'package:app/repositories/customer_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'Screens/homeScreen/customers/customers.dart';
 import 'Screens/homeScreen/partners/partners.dart';
 
-void main() async {
+Future<void> main() async {
+  // Ensure WidgetsFlutterBinding is initialized
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Supabase with the URL and anon key
+  // Initialize Hive and open required boxes
+  final directory = await getApplicationDocumentsDirectory();
+  Hive.init(directory.path);
+
+  await Hive.openBox('customerBox');
+  await Hive.openBox('partnerBox');
+  await Hive.openBox('accountingBox');
+  await Hive.openBox('invoiceBox');
+  await Hive.openBox('projectBox');
+  await Hive.openBox('goalsBox');
+
+  // Get the opened customerBox
+  var customerBox = Hive.box('customerBox');
+
+  // Initialize your customerRepo, passing Hive's instance and customerBox
+  final customerRepo = CustomerRepository(customerBox: customerBox);
+
+  // Initialize Supabase
   await Supabase.initialize(
-    url:
-        'https://fqdpwiskvyiopqgxuaml.supabase.co', // Replace with your Supabase project URL
+    url: 'https://fqdpwiskvyiopqgxuaml.supabase.co',
     anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxZHB3aXNrdnlpb3BxZ3h1YW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM1MDM3MzYsImV4cCI6MjA0OTA3OTczNn0.dkxwbnUkKb2fcpzEFR2uoNCsY_f06wntVxWrZsuxt70', // Replace with your Supabase anon key
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxZHB3aXNrdnlpb3BxZ3h1YW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM1MDM3MzYsImV4cCI6MjA0OTA3OTczNn0.dkxwbnUkKb2fcpzEFR2uoNCsY_f06wntVxWrZsuxt70',
   );
 
-  runApp(const MyApp());
+  // Run the app, passing the repository to MyApp
+  runApp(MyApp(customerRepo: customerRepo));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final CustomerRepository customerRepo;
+
+  const MyApp({super.key, required this.customerRepo});
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +78,7 @@ class MyApp extends StatelessWidget {
         '/intro3': (context) => const IntroductionScreen3(),
         '/sign_up': (context) => SignUpScreen(),
         '/log_in': (context) => LogInScreen(),
-        '/home_screen': (context) => HomeScreen(),
+        '/home_screen': (context) => HomeScreen(customerRepo: customerRepo),
         '/recover_password': (context) => RecoverPasswordScreen(),
         '/accounting': (context) => AccountingScreen(),
         '/add_transaction': (context) => AddTransactionScreen(),
@@ -68,11 +89,12 @@ class MyApp extends StatelessWidget {
         '/add_tool': (context) => AddToolScreen(),
         '/invoice': (context) => InvoiceScreen(),
         '/date': (context) => DateTimePickerScreen(),
-        '/partners': (context) => PartnersScreen(),
-        '/add_partners': (context) => const AddPartnerScreen(),
-        '/customers': (context) => CustomersScreen(),
+        '/partners': (context) =>
+            PartnersScreen(partnerBox: Hive.box('partnerBox')),
+        '/add_partners': (context) => AddPartnerScreen(),
+        '/customers': (context) => CustomersScreen(customerRepo: customerRepo),
         '/add_customer': (context) => const AddCustomerScreen(
-              initialData: {},
+              existingCustomer: null,
             ),
         '/add_client_invoice': (context) => InvoiceClientScreen(),
         '/project': (context) => HydroponicBedsScreen(),

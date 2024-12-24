@@ -1,32 +1,70 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:crypto/crypto.dart';
+import 'dart:convert';
 
 class AddPartnerScreen extends StatefulWidget {
-  final Map<String, dynamic>? initialData;
+  final Map<String, dynamic>? existingPartner;
 
-  const AddPartnerScreen({Key? key, this.initialData}) : super(key: key);
+  const AddPartnerScreen({Key? key, this.existingPartner}) : super(key: key);
 
   @override
   State<AddPartnerScreen> createState() => _AddPartnerScreenState();
 }
 
 class _AddPartnerScreenState extends State<AddPartnerScreen> {
-  late TextEditingController nameController;
-  late TextEditingController descriptionController;
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
   List<String> selectedFiles = [];
+  bool isLoading = false;
+  late Box _partnersBox;
 
   @override
   void initState() {
     super.initState();
-    // Initialize controllers with data from initialData or empty strings
-    nameController = TextEditingController(
-      text: widget.initialData?['name'] ?? '',
-    );
-    descriptionController = TextEditingController(
-      text: widget.initialData?['description'] ?? '',
-    );
-    selectedFiles = widget.initialData?['files']?.cast<String>() ?? [];
+    _initializeHive();
+    _initializeFields();
+    _initializeConnectivityListener();
+  }
+
+  // Initialize Hive
+  Future<void> _initializeHive() async {
+    await Hive.initFlutter();
+    _partnersBox = await Hive.openBox('partnersBox',
+        encryptionCipher: _getEncryptionCipher());
+  }
+
+  // Get encryption cipher for Hive (Optional)
+  HiveAesCipher _getEncryptionCipher() {
+    final key = sha256
+        .convert(utf8.encode('your-secure-password'))
+        .bytes
+        .sublist(0, 32);
+    return HiveAesCipher(key);
+  }
+
+  void _initializeFields() {
+    if (widget.existingPartner != null) {
+      nameController.text = widget.existingPartner!['name'] ?? '';
+      descriptionController.text = widget.existingPartner!['description'] ?? '';
+      selectedFiles = List<String>.from(widget.existingPartner!['files'] ?? []);
+    }
+  }
+
+  void _initializeConnectivityListener() {
+    Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
+      if (result != ConnectivityResult.none) {
+        _syncUnsentPartners();
+      }
+    });
+  }
+
+  Future<void> _syncUnsentPartners() async {
+    // Implement synchronization logic for unsynced partners.
+    print('Syncing unsent partners...');
   }
 
   Future<void> pickFiles() async {
@@ -52,189 +90,136 @@ class _AddPartnerScreenState extends State<AddPartnerScreen> {
     }
   }
 
-  void cancel() {
-    Navigator.pop(context);
-  }
+  void addPartner() async {
+    final name = nameController.text.trim();
+    final description = descriptionController.text.trim();
 
-  void addPartner() {
-    String name = nameController.text;
-    String description = descriptionController.text;
+    if (name.isEmpty || description.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill out all fields.')),
+      );
+      return;
+    }
 
-    if (name.isNotEmpty && description.isNotEmpty) {
-      // Handle saving data logic here
-      Navigator.pop(context, {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final partner = {
         'name': name,
         'description': description,
         'files': selectedFiles,
-      });
-    } else {
+        'isSynced': false,
+      };
+
+      await _savePartner(partner);
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please complete all fields')),
+        SnackBar(
+            content: Text('Partner "$name" added successfully! Sync pending.')),
       );
+      Navigator.pop(context, partner);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to add partner: $e')),
+      );
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
     }
+  }
+
+  // Save partner to Hive
+  Future<void> _savePartner(Map<String, dynamic> partner) async {
+    await _partnersBox.add(partner);
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    descriptionController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFDEDCDD),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFDEDCDD),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: cancel,
-        ),
-        centerTitle: true,
-        title: const Text(
-          'Add Partner',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-        ),
+        title: const Text('Add Partner'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(
-                labelText: 'Partner Name',
-                labelStyle: TextStyle(color: Colors.black),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(15)),
-                  borderSide: BorderSide(color: Colors.black),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(15)),
-                  borderSide: BorderSide(color: Colors.black45),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(15)),
-                  borderSide: BorderSide(color: Color(0xFFFD8D0BD)),
-                ),
-              ),
-            ),
+            _buildTextField(nameController, 'Partner Name'),
             const SizedBox(height: 16),
-            Container(
-              height: 120,
-              child: TextField(
-                controller: descriptionController,
-                maxLines: 4,
-                decoration: const InputDecoration(
-                  labelText: 'Description',
-                  labelStyle: TextStyle(color: Colors.black),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(15)),
-                    borderSide: BorderSide(color: Colors.black),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(15)),
-                    borderSide: BorderSide(color: Colors.black87),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(15)),
-                    borderSide: BorderSide(color: Color(0xFFFD8D0BD)),
-                  ),
-                ),
-              ),
-            ),
+            _buildTextField(descriptionController, 'Description', maxLines: 3),
             const SizedBox(height: 16),
-            const Text(
-              'Attach Files',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            const SizedBox(height: 8),
+            _buildFilePicker(),
+            const SizedBox(height: 20),
+            if (isLoading) const CircularProgressIndicator(),
             Row(
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () => pickImage(ImageSource.camera),
-                  icon: const Icon(Icons.camera_alt, color: Colors.black),
-                  label: const Text('Camera',
-                      style: TextStyle(
-                          color: Colors.black, fontWeight: FontWeight.bold)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFEAEDE6),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton.icon(
-                  onPressed: () => pickImage(ImageSource.gallery),
-                  icon: const Icon(Icons.photo, color: Colors.black),
-                  label: const Text('Gallery',
-                      style: TextStyle(
-                          color: Colors.black, fontWeight: FontWeight.bold)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFEAEDE6),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton.icon(
-                  onPressed: pickFiles,
-                  icon: const Icon(Icons.attach_file, color: Colors.black),
-                  label: const Text('Files',
-                      style: TextStyle(
-                          color: Colors.black, fontWeight: FontWeight.bold)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFEAEDE6),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: ListView.builder(
-                itemCount: selectedFiles.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    leading: const Icon(Icons.file_present),
-                    title: Text(selectedFiles[index].split('/').last),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 ElevatedButton(
-                  onPressed: cancel,
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFD8D0BD)),
-                  child: const Text('Cancel',
-                      style: TextStyle(
-                          color: Colors.black, fontWeight: FontWeight.bold)),
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
                 ),
+                const Spacer(),
                 ElevatedButton(
                   onPressed: addPartner,
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFD8D0BD)),
-                  child: const Text(
-                    'Add',
-                    style: TextStyle(
-                        color: Colors.black, fontWeight: FontWeight.bold),
-                  ),
+                  child: const Text('Add'),
                 ),
               ],
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildTextField(TextEditingController controller, String label,
+      {int maxLines = 1}) {
+    return TextField(
+      controller: controller,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+      ),
+    );
+  }
+
+  Widget _buildFilePicker() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Attach Files',
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            ElevatedButton.icon(
+              onPressed: () => pickImage(ImageSource.camera),
+              icon: const Icon(Icons.camera_alt),
+              label: const Text('Camera'),
+            ),
+            const SizedBox(width: 8),
+            ElevatedButton.icon(
+              onPressed: () => pickImage(ImageSource.gallery),
+              icon: const Icon(Icons.photo),
+              label: const Text('Gallery'),
+            ),
+            const SizedBox(width: 8),
+            ElevatedButton.icon(
+              onPressed: pickFiles,
+              icon: const Icon(Icons.attach_file),
+              label: const Text('Files'),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

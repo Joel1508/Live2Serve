@@ -1,15 +1,81 @@
+import 'package:app/repositories/customer_repository.dart';
+import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:app/Screens/homeScreen/accounting/accounting.dart';
 import 'package:app/Screens/homeScreen/add_tool.dart';
+import 'package:app/Screens/homeScreen/customers/customers.dart';
 import 'package:app/Screens/homeScreen/goals/goals.dart';
 import 'package:app/Screens/homeScreen/invoice/invoice.dart';
 import 'package:app/Screens/homeScreen/partners/partners.dart';
-import 'package:app/Screens/homeScreen/customers/customers.dart';
 import 'package:app/Screens/homeScreen/project/project.dart';
 import 'package:app/Screens/homeScreen/settings.dart';
 import 'package:app/Screens/homeScreen/user.dart';
-import 'package:flutter/material.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Hive and open required boxes
+  final directory = await getApplicationDocumentsDirectory();
+  Hive.init(directory.path);
+
+  await Hive.openBox('customerBox');
+  await Hive.openBox('partnerBox');
+  await Hive.openBox('accountingBox');
+  await Hive.openBox('invoiceBox');
+  await Hive.openBox('projectBox');
+  await Hive.openBox('goalsBox');
+
+  // Get the opened customerBox
+  var customerBox = Hive.box('customerBox');
+
+  // Initialize your customerRepo here, passing the customerBox and localDb
+  final customerRepo = CustomerRepository(customerBox: customerBox);
+
+  // Run the app and pass customerRepo
+  runApp(MyApp(customerRepo: customerRepo));
+}
+
+class MyApp extends StatelessWidget {
+  final CustomerRepository customerRepo;
+
+  MyApp({required this.customerRepo});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      initialRoute: '/',
+      routes: {
+        '/': (context) => HomeScreen(customerRepo: customerRepo),
+        '/partners': (context) => PartnersScreen(
+              partnerBox: Hive.box('partnerBox'),
+            ),
+        '/customers': (context) => CustomersScreen(
+              customerRepo: customerRepo,
+            ),
+        '/accounting': (context) => AccountingScreen(
+              accountingBox: Hive.box('accountingBox'),
+            ),
+        '/invoice': (context) => InvoiceScreen(
+              invoiceBox: Hive.box('invoiceBox'),
+            ),
+        '/project': (context) => HydroponicBedsScreen(
+              projectBox: Hive.box('projectBox'),
+            ),
+        '/goals': (context) => GoalsApp(
+              goalsBox: Hive.box('goalsBox'),
+            ),
+      },
+    );
+  }
+}
 
 class HomeScreen extends StatelessWidget {
+  final CustomerRepository customerRepo;
+
+  HomeScreen({required this.customerRepo});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,7 +86,7 @@ class HomeScreen extends StatelessWidget {
         leading: CircleAvatar(
           backgroundColor: Colors.grey[300],
           child: const Text(
-            'JA', // Placeholder initials
+            'JA',
             style: TextStyle(color: Colors.black),
           ),
         ),
@@ -103,7 +169,7 @@ class HomeScreen extends StatelessWidget {
             label: '',
           ),
         ],
-        currentIndex: 0, // Home is active
+        currentIndex: 0,
         onTap: (index) {
           Navigator.push(
               context, MaterialPageRoute(builder: (context) => UserScreen()));
@@ -158,21 +224,4 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
-}
-
-// Main Function to Set Up Routes
-void main() {
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    initialRoute: '/',
-    routes: {
-      '/': (context) => HomeScreen(),
-      '/partners': (context) => PartnersScreen(),
-      '/customers': (context) => CustomersScreen(),
-      '/accounting': (context) => AccountingScreen(),
-      '/invoice': (context) => InvoiceScreen(),
-      '/project': (context) => HydroponicBedsScreen(),
-      '/goals': (context) => GoalsApp(),
-    },
-  ));
 }

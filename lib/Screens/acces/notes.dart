@@ -1235,3 +1235,11 @@ Future<void> _fetchCustomers() async {
 void setState(Null Function() param0) {}
 
 */
+
+/*
+-----recommendations about security---------
+Hive is simpler and faster for your use case and offers built-in encryption. 
+It’s the best choice unless you need advanced queries.
+Protect your encryption key! Store it securely using platform-specific solutions 
+like Keychain (iOS) or Keystore (Android).
+*/
