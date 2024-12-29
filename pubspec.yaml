@@ -59,6 +59,7 @@ dependencies:
   # Additional packages
   hcaptcha_flutter: ^0.0.1+1
   flutter_picker: ^2.1.0
+  fl_chart: ^0.70.0
   
   # Cupertino icons for iOS styling
   cupertino_icons: ^1.0.8

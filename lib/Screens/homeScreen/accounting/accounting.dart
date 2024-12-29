@@ -1,9 +1,144 @@
-import 'package:app/Screens/homeScreen/accounting/add_transaction.dart';
-import 'package:app/Screens/homeScreen/accounting/history.dart';
-import 'package:app/Screens/homeScreen/accounting/others/others.dart';
+// accounting_screen.dart
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'add_transaction.dart';
+import 'history.dart';
+import 'others/others.dart';
+import 'models/transaction_model.dart';
+import 'models/balance_model.dart';
 
 class AccountingScreen extends StatelessWidget {
+  final accountingBox;
+  final Box<Transaction> transactionBox = Hive.box('transactions');
+  final Box<Balance> balanceBox = Hive.box('balance');
+
+  AccountingScreen({Key? key, required this.accountingBox}) : super(key: key);
+
+  // Get current balance
+  double getCurrentBalance() {
+    final balance = balanceBox.get('current',
+        defaultValue: Balance(currentBalance: 0.0, history: []));
+    return balance?.currentBalance ?? 0.0;
+  }
+
+  // Get balance history for the graph
+  List<FlSpot> getBalanceSpots() {
+    final balance =
+        balanceBox.get('current', defaultValue: Balance(currentBalance: 0.0));
+
+    // safely access balance.history
+    final history = balance?.history ?? [];
+
+    // Convert balance history to graph points
+    List<FlSpot> spots = [];
+    if (history.isNotEmpty) {
+      // Sort history by date
+      final sortedHistory = List.from(history)
+        ..sort((a, b) => a.date.compareTo(b.date));
+
+      // Create spots for the graph
+      for (int i = 0; i < sortedHistory.length; i++) {
+        spots.add(FlSpot(i.toDouble(), sortedHistory[i].amount));
+      }
+    } else {
+      // If no history, show current balance as single point
+      spots.add(FlSpot(0, balance?.currentBalance ?? 0.0));
+    }
+
+    return spots;
+  }
+
+  Widget _buildBalanceChart() {
+    return Container(
+      height: 200,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          colors: [Colors.pinkAccent, Colors.purpleAccent],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 8,
+            offset: Offset(2, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'BALANCE',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+          SizedBox(height: 8),
+          ValueListenableBuilder(
+            valueListenable: balanceBox.listenable(),
+            builder: (context, Box<Balance> box, _) {
+              final currentBalance = getCurrentBalance();
+              return Text(
+                '\$${currentBalance.toStringAsFixed(2)}',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 32,
+                ),
+              );
+            },
+          ),
+          SizedBox(height: 16),
+          Expanded(
+            child: ValueListenableBuilder(
+              valueListenable: balanceBox.listenable(),
+              builder: (context, Box<Balance> box, _) {
+                final spots = getBalanceSpots();
+                return LineChart(
+                  LineChartData(
+                    gridData: FlGridData(show: false),
+                    titlesData: FlTitlesData(show: false),
+                    borderData: FlBorderData(show: false),
+                    minX: 0,
+                    maxX: spots.length.toDouble() - 1,
+                    minY: spots
+                            .map((spot) => spot.y)
+                            .reduce((a, b) => a < b ? a : b) -
+                        100,
+                    maxY: spots
+                            .map((spot) => spot.y)
+                            .reduce((a, b) => a > b ? a : b) +
+                        100,
+                    lineBarsData: [
+                      LineChartBarData(
+                        spots: spots,
+                        isCurved: true,
+                        color: Colors.white,
+                        barWidth: 2,
+                        isStrokeCapRound: true,
+                        dotData: FlDotData(show: false),
+                        belowBarData: BarAreaData(
+                          show: true,
+                          color: Colors.white.withOpacity(0.2),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -17,9 +152,7 @@ class AccountingScreen extends StatelessWidget {
               children: [
                 IconButton(
                   icon: Icon(Icons.arrow_back),
-                  onPressed: () {
-                    Navigator.pop(context); // Navigate back
-                  },
+                  onPressed: () => Navigator.pop(context),
                 ),
                 const Text(
                   'ACCOUNTING',
@@ -35,140 +168,10 @@ class AccountingScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // Balance Chart Card
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                gradient: LinearGradient(
-                  colors: [Colors.pinkAccent, Colors.purpleAccent],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 8,
-                    offset: Offset(2, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'BALANCE',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    '\$10,000',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 32,
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  // Placeholder for chart
-                  Container(
-                    height: 100,
-                    color: Colors.transparent, // Placeholder chart area
-                    alignment: Alignment.center,
-                    child: Text(
-                      'Chart Placeholder',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            // Balance Chart
+            _buildBalanceChart(),
 
-            SizedBox(height: 16),
-
-            // Expense and Income Cards
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Expense Card
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    margin: const EdgeInsets.only(right: 8),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      gradient: LinearGradient(
-                        colors: [Colors.pinkAccent, Colors.purpleAccent],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          'EXPENSE',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          '\$0',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // Income Card
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    margin: const EdgeInsets.only(left: 8),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      gradient: LinearGradient(
-                        colors: [Colors.pinkAccent, Colors.purpleAccent],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          'INCOME',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          '\$10,000',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            SizedBox(height: 16),
+            const SizedBox(height: 20),
 
             // Action Buttons
             Column(

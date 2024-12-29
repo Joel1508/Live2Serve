@@ -82,7 +82,8 @@ class MyApp extends StatelessWidget {
         '/log_in': (context) => LogInScreen(),
         '/home_screen': (context) => HomeScreen(customerRepo: customerRepo),
         '/recover_password': (context) => RecoverPasswordScreen(),
-        '/accounting': (context) => AccountingScreen(),
+        '/accounting': (context) =>
+            AccountingScreen(accountingBox: Hive.box('accountingBox')),
         '/add_transaction': (context) => AddTransactionScreen(),
         '/history': (context) => HistoryScreen(),
         '/banks': (context) => BanksScreen(),
