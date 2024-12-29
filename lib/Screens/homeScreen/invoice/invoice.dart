@@ -1,12 +1,43 @@
+// invoice.dart
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'invoice_model.dart';
 
 class InvoiceScreen extends StatefulWidget {
+  final Box invoiceBox;
+
+  const InvoiceScreen({Key? key, required this.invoiceBox}) : super(key: key);
+
   @override
   _InvoiceScreenState createState() => _InvoiceScreenState();
 }
 
 class _InvoiceScreenState extends State<InvoiceScreen> {
   final List<Map<String, dynamic>> _invoices = [];
+  late Box<Invoice> invoiceBox;
+
+  @override
+  void initState() {
+    super.initState();
+    invoiceBox = Hive.box<Invoice>('invoiceBox');
+    _loadInvoices();
+  }
+
+  void _loadInvoices() {
+    final invoices =
+        invoiceBox.values.map((invoice) => invoice.toMap()).toList();
+    setState(() {
+      _invoices.clear();
+      _invoices.addAll(invoices);
+    });
+  }
+
+  // Add new invoice
+  void addInvoice(Map<String, dynamic> invoiceData) {
+    final invoice = Invoice.fromMap(invoiceData);
+    invoiceBox.add(invoice);
+    _loadInvoices();
+  }
 
   void _showInvoiceDetails(Map<String, dynamic> invoice) {
     showModalBottomSheet(

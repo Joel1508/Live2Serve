@@ -1,8 +1,12 @@
+import 'package:app/Screens/homeScreen/project/bed_model.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class InteractiveMapScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final gridStateBox = Hive.box<GridStateModel>('gridStates');
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Interactive Hydroponic Map"),
@@ -15,54 +19,71 @@ class InteractiveMapScreen extends StatelessWidget {
             colors: [
               Color(0xFFD7FBE8),
               Color(0xFFA7E2C7),
-            ], // Gradient background
+            ],
           ),
         ),
-        child: Center(
-          child: GridView.builder(
-            padding: EdgeInsets.all(16),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4, // 4 columns
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-            ),
-            itemCount: 16, // Number of grid cells
-            itemBuilder: (context, index) {
-              bool isPlanted = index % 2 ==
-                  0; // Example condition for planted/unplanted state
-              return GestureDetector(
-                onTap: () {
-                  // Handle interaction
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Selected grid ${index + 1}")),
+        child: ValueListenableBuilder(
+          valueListenable: gridStateBox.listenable(),
+          builder: (context, Box<GridStateModel> box, _) {
+            return Center(
+              child: GridView.builder(
+                padding: EdgeInsets.all(16),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                ),
+                itemCount: 16,
+                itemBuilder: (context, index) {
+                  final gridState = box.get(index) ??
+                      GridStateModel(
+                        gridIndex: index,
+                        isPlanted: false,
+                        lastUpdated: DateTime.now(),
+                      );
+
+                  return GestureDetector(
+                    onTap: () async {
+                      gridState.isPlanted = !gridState.isPlanted;
+                      gridState.lastUpdated = DateTime.now();
+                      await box.put(index, gridState);
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            "Grid ${index + 1} ${gridState.isPlanted ? 'planted' : 'unplanted'}",
+                          ),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 4,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Image.asset(
+                          gridState.isPlanted
+                              ? 'assets/images/siembra.png'
+                              : 'assets/images/vasito.png',
+                          width: 40,
+                          height: 40,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ),
                   );
                 },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 4,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Center(
-                    child: Image.asset(
-                      isPlanted
-                          ? 'assets/images/siembra.png' // Planted image
-                          : 'assets/images/vasito.png', // Unplanted image
-                      width: 40,
-                      height: 40,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ),
     );

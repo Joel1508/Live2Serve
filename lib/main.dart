@@ -15,8 +15,10 @@ import 'package:app/Screens/homeScreen/accounting/others/savings.dart';
 import 'package:app/Screens/homeScreen/add_client_invoice.dart';
 import 'package:app/Screens/homeScreen/add_tool.dart';
 import 'package:app/Screens/homeScreen/customers/add_customer.dart';
+import 'package:app/Screens/homeScreen/goals/goal.dart';
 import 'package:app/Screens/homeScreen/goals/goals.dart';
 import 'package:app/Screens/homeScreen/invoice/invoice.dart';
+import 'package:app/Screens/homeScreen/project/bed_model.dart';
 import 'package:app/Screens/homeScreen/project/interactive_map.dart';
 import 'package:app/Screens/homeScreen/project/project.dart';
 import 'package:app/Screens/homeScreen/settings.dart';
@@ -37,12 +39,12 @@ Future<void> main() async {
   final directory = await getApplicationDocumentsDirectory();
   Hive.init(directory.path);
 
-  await Hive.openBox('customerBox');
+  await Hive.openBox<Customer>('customerBox');
   await Hive.openBox('partnerBox');
   await Hive.openBox('accountingBox');
   await Hive.openBox('invoiceBox');
-  await Hive.openBox('projectBox');
-  await Hive.openBox('goalsBox');
+  await Hive.openBox<BedModel>('projectBox');
+  await Hive.openBox<Goal>('goalsBox');
 
   // Get the opened customerBox
   var customerBox = Hive.box('customerBox');
@@ -87,7 +89,8 @@ class MyApp extends StatelessWidget {
         '/credits': (context) => CreditsScreen(),
         '/savings': (context) => SavingsScreen(),
         '/add_tool': (context) => AddToolScreen(),
-        '/invoice': (context) => InvoiceScreen(),
+        '/invoice': (context) =>
+            InvoiceScreen(invoiceBox: Hive.box('invoiceBox')),
         '/date': (context) => DateTimePickerScreen(),
         '/partners': (context) =>
             PartnersScreen(partnerBox: Hive.box('partnerBox')),
@@ -97,9 +100,10 @@ class MyApp extends StatelessWidget {
               existingCustomer: null,
             ),
         '/add_client_invoice': (context) => InvoiceClientScreen(),
-        '/project': (context) => HydroponicBedsScreen(),
+        '/project': (context) =>
+            HydroponicBedsScreen(projectBox: Hive.box('projectBox')),
         '/interactive_map': (context) => InteractiveMapScreen(),
-        '/goals': (context) => GoalsApp(),
+        '/goals': (context) => GoalsApp(goalsBox: Hive.box('goalBox')),
         '/user': (context) => const UserScreen(),
         '/settings': (context) => const SettingsScreen(),
       },

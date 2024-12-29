@@ -1,36 +1,45 @@
+import 'package:app/Screens/homeScreen/project/bed_model.dart';
 import 'package:app/Screens/homeScreen/project/interactive_map.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:random_string/random_string.dart';
 
 class HydroponicBedsScreen extends StatefulWidget {
+  final Box projectBox;
+
+  const HydroponicBedsScreen({
+    Key? key,
+    required this.projectBox,
+  }) : super(key: key);
+
   @override
   _HydroponicBedsScreenState createState() => _HydroponicBedsScreenState();
 }
 
 class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
-  final List<Bed> _beds = [];
+  late Box<BedModel> _bedsBox;
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _detailsController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
 
-  List<Bed> _filteredBeds = [];
+  List<BedModel> _filteredBeds = [];
   String _searchQuery = "";
-
   String _creationDate = "";
   bool _isDuplicate = false;
-  Bed? _existingBed;
+  BedModel? _existingBed;
 
   @override
   void initState() {
     super.initState();
-    _filteredBeds = _beds; // Initialize with the full list
+    _bedsBox = Hive.box<BedModel>('beds');
+    _filteredBeds = _bedsBox.values.toList();
     _searchController.addListener(_updateSearch);
   }
 
   void _updateSearch() {
     setState(() {
       _searchQuery = _searchController.text.toLowerCase();
-      _filteredBeds = _beds
+      _filteredBeds = _bedsBox.values
           .where((bed) =>
               bed.name.toLowerCase().contains(_searchQuery) ||
               bed.code.toLowerCase().contains(_searchQuery))
@@ -50,55 +59,65 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Text("Create New Bed"),
-          content: SingleChildScrollView(
-            child: Column(
-              children: [
-                TextField(
-                  controller: _nameController,
-                  decoration: InputDecoration(labelText: "Bed Name"),
-                  onChanged: (value) {
-                    _checkForDuplicate(value);
-                  },
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text("Create New Bed"),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: _nameController,
+                      decoration: InputDecoration(labelText: "Bed Name"),
+                      onChanged: (value) {
+                        _checkForDuplicate(value);
+                        setState(() {}); // Refresh dialog state
+                      },
+                    ),
+                    SizedBox(height: 10),
+                    TextField(
+                      controller: _detailsController,
+                      decoration: InputDecoration(labelText: "Details"),
+                      maxLines: 3,
+                    ),
+                    SizedBox(height: 10),
+                    Text("Creation Date: $_creationDate"),
+                    if (_isDuplicate && _existingBed != null) ...[
+                      SizedBox(height: 10),
+                      Text(
+                        "Duplicate found: ${_existingBed!.name}\nCode: ${_existingBed!.code}",
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ]
+                  ],
                 ),
-                SizedBox(height: 10),
-                TextField(
-                  controller: _detailsController,
-                  decoration: InputDecoration(labelText: "Details"),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text("Cancel"),
                 ),
-                SizedBox(height: 10),
-                Text("Creation Date: $_creationDate"),
-                if (_isDuplicate && _existingBed != null) ...[
-                  SizedBox(height: 10),
-                  Text(
-                    "Duplicate found: ${_existingBed!.name}. Code: ${_existingBed!.code}",
-                    style: TextStyle(
-                        color: Colors.red, fontWeight: FontWeight.bold),
-                  ),
-                ]
+                ElevatedButton(
+                  onPressed: _addBed,
+                  child: Text("Save"),
+                ),
               ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text("Cancel"),
-            ),
-            ElevatedButton(
-              onPressed: _addBed,
-              child: Text("Save"),
-            ),
-          ],
+            );
+          },
         );
       },
     );
   }
 
   void _checkForDuplicate(String name) {
-    final duplicate = _beds.firstWhere(
+    final beds = _bedsBox.values;
+    final duplicate = beds.firstWhere(
       (bed) => bed.name.toLowerCase() == name.toLowerCase(),
-      orElse: () => Bed.empty(),
+      orElse: () => BedModel.empty(),
     );
 
     setState(() {
@@ -112,28 +131,28 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
     });
   }
 
-  void _addBed() {
+  Future<void> _addBed() async {
     if (_nameController.text.isEmpty || _detailsController.text.isEmpty) return;
 
     final name = _nameController.text;
     final code = _existingBed?.code ?? randomAlphaNumeric(6);
 
-    final newBed = Bed(
+    final newBed = BedModel(
       name: name,
       code: code,
       creationDate: _creationDate,
       details: _detailsController.text,
     );
 
+    await _bedsBox.add(newBed);
     setState(() {
-      _beds.add(newBed);
-      _filteredBeds = _beds; // Update filtered list
+      _filteredBeds = _bedsBox.values.toList();
     });
 
     Navigator.of(context).pop();
   }
 
-  void _viewBedDetails(Bed bed) {
+  void _viewBedDetails(BedModel bed) {
     showDialog(
       context: context,
       builder: (context) {
@@ -179,7 +198,7 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
                 ),
               );
             },
-            icon: Icon(Icons.map), // Button to navigate to the interactive map
+            icon: Icon(Icons.map),
           )
         ],
         bottom: PreferredSize(
@@ -202,40 +221,38 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
           ),
         ),
       ),
-      body: _filteredBeds.isEmpty
-          ? Center(child: Text("No beds found"))
-          : ListView.builder(
-              itemCount: _filteredBeds.length,
-              itemBuilder: (context, index) {
-                final bed = _filteredBeds[index];
-                return Card(
-                  child: ListTile(
-                    title: Text(bed.name),
-                    subtitle:
-                        Text("Code: ${bed.code} | Date: ${bed.creationDate}"),
-                    onTap: () => _viewBedDetails(bed),
-                  ),
+      body: ValueListenableBuilder(
+        valueListenable: _bedsBox.listenable(),
+        builder: (context, Box<BedModel> box, _) {
+          final beds =
+              _searchQuery.isEmpty ? box.values.toList() : _filteredBeds;
+
+          return beds.isEmpty
+              ? Center(child: Text("No beds found"))
+              : ListView.builder(
+                  itemCount: beds.length,
+                  itemBuilder: (context, index) {
+                    final bed = beds[index];
+                    return Card(
+                      child: ListTile(
+                        title: Text(bed.name),
+                        subtitle: Text(
+                            "Code: ${bed.code} | Date: ${bed.creationDate}"),
+                        onTap: () => _viewBedDetails(bed),
+                      ),
+                    );
+                  },
                 );
-              },
-            ),
+        },
+      ),
     );
   }
-}
 
-class Bed {
-  final String name;
-  final String code;
-  final String creationDate;
-  final String details;
-
-  Bed({
-    required this.name,
-    required this.code,
-    required this.creationDate,
-    required this.details,
-  });
-
-  static Bed empty() => Bed(name: "", code: "", creationDate: "", details: "");
-
-  bool get isNotEmpty => name.isNotEmpty;
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _detailsController.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
 }

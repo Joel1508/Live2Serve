@@ -1,8 +1,8 @@
 import 'package:hive/hive.dart';
 
-part 'goal.g.dart'; // This will generate the 'goal.g.dart' file
+part 'goal.g.dart';
 
-@HiveType(typeId: 1) // Use a unique ID for this class
+@HiveType(typeId: 3)
 class Goal {
   @HiveField(0)
   final String title;

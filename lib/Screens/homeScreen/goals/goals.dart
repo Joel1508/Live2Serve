@@ -3,31 +3,33 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:app/Screens/homeScreen/home_screen.dart' as home_screen;
 import 'package:hive_flutter/hive_flutter.dart';
-import 'goal.dart'; // Import the Goal class
-
-void main() async {
-  // Initialize Hive before the app runs
-  await Hive.initFlutter();
-
-  // Open the boxes required for the app
-  await Hive.openBox<Goal>('goalsBox'); // Open a Hive box to store the goals
-  await Hive.openBox<Customer>(
-      'customerBox'); // Open the Hive box to store the customers
-
-  runApp(GoalsApp());
-}
+import 'goal.dart';
 
 class GoalsApp extends StatelessWidget {
+  final Box<Goal> goalsBox;
+
+  const GoalsApp({
+    Key? key,
+    required this.goalsBox,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: GoalsScreen(),
+      home: GoalsScreen(goalsBox: goalsBox),
       debugShowCheckedModeBanner: false,
     );
   }
 }
 
 class GoalsScreen extends StatefulWidget {
+  final Box<Goal> goalsBox;
+
+  const GoalsScreen({
+    Key? key,
+    required this.goalsBox,
+  }) : super(key: key);
+
   @override
   _GoalsScreenState createState() => _GoalsScreenState();
 }
@@ -35,22 +37,13 @@ class GoalsScreen extends StatefulWidget {
 class _GoalsScreenState extends State<GoalsScreen> {
   final int startYear = 2024;
   final int endYear = 2030;
-  late Box<Goal> goalsBox;
-
-  @override
-  void initState() {
-    super.initState();
-    goalsBox = Hive.box<Goal>('goalsBox'); // Open the Hive box here
-  }
 
   void _addGoal(String year, String month, Goal goal) {
-    setState(() {
-      goalsBox.add(goal); // Add goal to the Hive box
-    });
+    widget.goalsBox.add(goal);
   }
 
   Widget _buildMonthWidget(String year, String month) {
-    final goals = goalsBox.values
+    final goals = widget.goalsBox.values
         .where((goal) => goal.date.startsWith('$year-$month'))
         .toList();
 
@@ -121,39 +114,44 @@ class _GoalsScreenState extends State<GoalsScreen> {
           },
         ),
       ),
-      body: ListView.builder(
-        itemCount: endYear - startYear + 1,
-        itemBuilder: (context, index) {
-          String year = (startYear + index).toString();
-          return Column(
-            children: [
-              Text(
-                year,
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              GridView.count(
-                crossAxisCount: 3,
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
+      body: ValueListenableBuilder(
+        valueListenable: widget.goalsBox.listenable(),
+        builder: (context, Box<Goal> box, _) {
+          return ListView.builder(
+            itemCount: endYear - startYear + 1,
+            itemBuilder: (context, index) {
+              String year = (startYear + index).toString();
+              return Column(
                 children: [
-                  for (String month in [
-                    "JAN",
-                    "FEB",
-                    "MAR",
-                    "APR",
-                    "MAY",
-                    "JUN",
-                    "JUL",
-                    "AGO",
-                    "SEP",
-                    "OCT",
-                    "NOV",
-                    "DEC"
-                  ])
-                    _buildMonthWidget(year, month)
+                  Text(
+                    year,
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                  GridView.count(
+                    crossAxisCount: 3,
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    children: [
+                      for (String month in [
+                        "JAN",
+                        "FEB",
+                        "MAR",
+                        "APR",
+                        "MAY",
+                        "JUN",
+                        "JUL",
+                        "AGO",
+                        "SEP",
+                        "OCT",
+                        "NOV",
+                        "DEC"
+                      ])
+                        _buildMonthWidget(year, month)
+                    ],
+                  ),
                 ],
-              ),
-            ],
+              );
+            },
           );
         },
       ),
@@ -188,15 +186,17 @@ class _GoalsScreenState extends State<GoalsScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                final selectedYear = date.split('-')[0];
-                final selectedMonth = date.split('-')[1].toUpperCase();
-                Goal newGoal = Goal(
-                  title: title,
-                  description: description,
-                  date: date,
-                );
-                _addGoal(selectedYear, selectedMonth, newGoal);
-                Navigator.pop(context);
+                if (title.isNotEmpty && date.isNotEmpty) {
+                  final selectedYear = date.split('-')[0];
+                  final selectedMonth = date.split('-')[1].toUpperCase();
+                  Goal newGoal = Goal(
+                    title: title,
+                    description: description,
+                    date: date,
+                  );
+                  _addGoal(selectedYear, selectedMonth, newGoal);
+                  Navigator.pop(context);
+                }
               },
               child: Text('Save Goal'),
             ),
