@@ -1,54 +1,24 @@
-import 'package:hive/hive.dart'; // Assuming you're using Hive for local storage
-import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter/material.dart';
 
-// CustomerRepository class to interact with local database (Hive) and any remote databases
 class CustomerRepository {
   final Box customerBox;
 
-  // Constructor to accept localDb and customerBox
   CustomerRepository({required this.customerBox});
 
-  // Add a new customer
   Future<void> addCustomer(Customer customer) async {
-    // Logic to save customer (e.g., via Supabase or SQLite)
-    print('Customer added: ${customer.name}');
-
-    // Save customer in Hive (customerBox)
-    await customerBox.add({
-      'name': customer.name,
-      'contactNumber': customer.contactNumber,
-      'email': customer.email,
-      'address': customer.address,
-    });
+    await customerBox.add(customer);
   }
 
-  // Retrieve a list of customers
   Future<List<Customer>> getCustomers() async {
-    final customersData =
-        customerBox.values.map((e) => Map<String, dynamic>.from(e)).toList();
-    return customersData.map((data) {
-      return Customer(
-        name: data['name'],
-        contactNumber: data['contactNumber'],
-        email: data['email'],
-        address: data['address'],
-        idNit: data['ID/NIT'],
-        id: '',
-        uniqueCode: '',
-        contact: '',
-        isSynced: false,
-      );
-    }).toList();
+    return customerBox.values.cast<Customer>().toList();
   }
 
-  // Sync unsent customers with a remote server (e.g., Supabase, Firebase, etc.)
   Future<void> syncUnsentCustomers() async {
     List<Customer> customers = await getCustomers();
-
     for (var customer in customers) {
       print('Syncing customer: ${customer.name}');
-      // Simulate syncing process to a remote server
     }
   }
 }

@@ -1,9 +1,10 @@
+import 'package:app/repositories/customer_repository.dart'
+    show Customer, CustomerRepository;
 import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:random_string/random_string.dart';
-import 'customer_repository.dart';
-import 'customer.dart';
+import 'CustomerModel.dart' as model;
 
 class AddCustomerScreen extends StatefulWidget {
   final Customer? existingCustomer;
@@ -69,7 +70,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
     });
 
     try {
-      final customer = Customer(
+      final customer = model.Customer(
         name: name,
         contactNumber: contact,
         email: email,
@@ -81,7 +82,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
         isSynced: false,
       );
 
-      await customerRepo.addCustomer(customer as Customer?);
+      await customerRepo.addCustomer(customer as Customer);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

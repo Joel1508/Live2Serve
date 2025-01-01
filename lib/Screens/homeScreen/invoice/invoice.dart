@@ -1,7 +1,7 @@
 // invoice.dart
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'invoice_model.dart';
+import 'models/invoice_model.dart';
 
 class InvoiceScreen extends StatefulWidget {
   final Box invoiceBox;

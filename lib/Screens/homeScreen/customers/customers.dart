@@ -189,7 +189,8 @@ class _CustomersScreenState extends State<CustomersScreen> {
     final updatedCustomer = await Navigator.push<Customer?>(
       context,
       MaterialPageRoute<Customer?>(
-        builder: (context) => AddCustomerScreen(existingCustomer: customerObj),
+        builder: (context) =>
+            AddCustomerScreen(existingCustomer: customerObj as Customer?),
       ),
     );
 

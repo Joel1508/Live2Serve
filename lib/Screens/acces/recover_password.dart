@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RecoverPasswordScreen extends StatefulWidget {
   @override
@@ -10,41 +11,58 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
   bool _isLoading = false;
 
   Future<void> _recoverPassword() async {
+    final email = _emailController.text.trim();
+
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter your email address.')),
+      );
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
 
-    // Add your logic to handle password recovery (e.g., call to Supabase or API)
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      // Supabase API for password recovery
+      await Supabase.instance.client.auth.resetPasswordForEmail(email);
 
-    setState(() {
-      _isLoading = false;
-    });
-
-    // Show a snackbar or navigate to another screen upon success/failure
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Password recovery link sent!')),
-    );
-
-    // You could navigate to a different screen after success (e.g., back to the login screen)
-    Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password recovery link sent!')),
+      );
+      Navigator.pop(context); // Navigate back to the previous screen
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An error occurred: $e')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF3EAF5),
+      backgroundColor:
+          const Color(0xFFF3EAF5), // Replace with your primary background color
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor:
+            Colors.transparent, // Replace with your preferred app bar color
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back,
+              color: Colors.black), // Customize icon color
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
         title: const Text(
           'Recover Password',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.bold), // Customize text style
         ),
       ),
       body: Padding(
@@ -56,7 +74,9 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
             const Text(
               'Enter your email address to receive a password recovery link.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold), // Customize text style
             ),
             const SizedBox(height: 30),
             TextField(
@@ -75,8 +95,10 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
                   ? const CircularProgressIndicator(color: Colors.white)
                   : const Text('Send Recovery Link'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFF8ABC8B),
-                foregroundColor: Colors.white,
+                backgroundColor:
+                    const Color(0xFF8AB6F8), // Replace with your button color
+                foregroundColor:
+                    Colors.white, // Replace with your button text color
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(30.0),
                 ),
