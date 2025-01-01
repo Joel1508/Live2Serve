@@ -7,16 +7,15 @@ import 'goal.dart';
 
 class GoalsApp extends StatelessWidget {
   final Box<Goal> goalsBox;
+  final CustomerRepository customerRepo;
 
-  const GoalsApp({
-    Key? key,
-    required this.goalsBox,
-  }) : super(key: key);
+  const GoalsApp({Key? key, required this.goalsBox, required this.customerRepo})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: GoalsScreen(goalsBox: goalsBox),
+      home: GoalsScreen(goalsBox: goalsBox, customerRepo: customerRepo),
       debugShowCheckedModeBanner: false,
     );
   }
@@ -28,6 +27,7 @@ class GoalsScreen extends StatefulWidget {
   const GoalsScreen({
     Key? key,
     required this.goalsBox,
+    required CustomerRepository customerRepo,
   }) : super(key: key);
 
   @override

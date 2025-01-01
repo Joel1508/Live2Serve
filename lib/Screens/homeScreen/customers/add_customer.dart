@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:random_string/random_string.dart';
-import 'CustomerModel.dart' as model;
+import 'models/customer_model.dart' as model;
 
 class AddCustomerScreen extends StatefulWidget {
   final Customer? existingCustomer;

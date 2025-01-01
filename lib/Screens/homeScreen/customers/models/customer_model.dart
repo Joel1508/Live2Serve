@@ -1,7 +1,8 @@
+// lib/Screens/homeScreen/customers/models/customer_model.dart
 import 'package:hive/hive.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-part 'customer.g.dart';
+part 'customer_model.g.dart';
 
 @HiveType(typeId: 0)
 @JsonSerializable()

@@ -1,16 +1,14 @@
 import 'package:app/repositories/customer_repository.dart';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:app/Screens/homeScreen/accounting/accounting.dart';
-import 'package:app/Screens/homeScreen/add_tool.dart';
 import 'package:app/Screens/homeScreen/customers/customers.dart';
 import 'package:app/Screens/homeScreen/goals/goals.dart';
 import 'package:app/Screens/homeScreen/invoice/invoice.dart';
 import 'package:app/Screens/homeScreen/partners/partners.dart';
 import 'package:app/Screens/homeScreen/project/project.dart';
-import 'package:app/Screens/homeScreen/settings.dart';
-import 'package:app/Screens/homeScreen/user.dart';
+import 'package:app/Screens/homeScreen/project/interactive_map.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -65,30 +63,82 @@ class MyApp extends StatelessWidget {
             ),
         '/goals': (context) => GoalsApp(
               goalsBox: Hive.box('goalsBox'),
+              customerRepo: customerRepo,
             ),
       },
     );
   }
 }
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   final CustomerRepository customerRepo;
 
   HomeScreen({required this.customerRepo});
 
   @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _selectedIndex = 0;
+
+  final List<Widget> _screens = [
+    HydroponicBedsScreen(projectBox: Hive.box('projectBox')),
+    InteractiveMapScreen(),
+    AccountingScreen(accountingBox: Hive.box('accountingBox')),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFFDEDCDD),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: CircleAvatar(
-          backgroundColor: Colors.grey[300],
-          child: const Text(
-            'JA',
-            style: TextStyle(color: Colors.black),
-          ),
+        leading: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircleAvatar(
+              backgroundColor: Colors.orange[300],
+              child: const Text(
+                'L',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+            ),
+            const SizedBox(width: 4),
+            CircleAvatar(
+              backgroundColor: Colors.blue[300],
+              child: const Text(
+                'S',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+            ),
+            const SizedBox(width: 4),
+            CircleAvatar(
+              backgroundColor: Colors.green[300],
+              child: const Text(
+                'N',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+            ),
+          ],
         ),
         centerTitle: true,
         title: const Text(
@@ -99,128 +149,29 @@ class HomeScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.settings, color: Colors.black),
             onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => SettingsScreen()));
+              // no actions
             },
           ),
         ],
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: Text(
-              'Key metrics',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ),
-          SizedBox(
-            height: 200,
-            child: PageView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                _buildPlaceholderCard('Accounts Graph Placeholder'),
-                _buildPlaceholderCard('Card Details Placeholder'),
-                _buildPlaceholderCard('Stock Metrics Placeholder'),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: GridView.count(
-                crossAxisCount: 3,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                children: [
-                  _buildGridButton(context, 'Customers', '/customers'),
-                  _buildGridButton(context, 'Partners', '/partners'),
-                  _buildGridButton(context, 'Project', '/project'),
-                  _buildGridButton(context, 'Accounting', '/accounting'),
-                  _buildGridButton(context, 'Bill history', '/invoice'),
-                  _buildGridButton(context, 'Goals', '/goals'),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+      body: _screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
-        items: [
+        items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: '',
+            icon: Icon(Icons.list),
+            label: 'Beds',
           ),
           BottomNavigationBarItem(
-            icon: IconButton(
-              icon: Icon(Icons.add_circle_outline),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => AddToolScreen()),
-                );
-              },
-            ),
-            label: '',
+            icon: Icon(Icons.map),
+            label: 'Map',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: '',
+            icon: Icon(Icons.account_balance_wallet),
+            label: 'Accounting',
           ),
         ],
-        currentIndex: 0,
-        onTap: (index) {
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => UserScreen()));
-        },
-      ),
-    );
-  }
-
-  Widget _buildGridButton(BuildContext context, String label, String route) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.pushNamed(context, route);
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
-              blurRadius: 5,
-              offset: Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPlaceholderCard(String text) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.3),
-            blurRadius: 5,
-            offset: Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Center(
-        child: Text(text),
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
       ),
     );
   }

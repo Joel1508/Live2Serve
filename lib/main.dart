@@ -21,8 +21,7 @@ import 'package:app/Screens/homeScreen/invoice/invoice.dart';
 import 'package:app/Screens/homeScreen/project/bed_model.dart';
 import 'package:app/Screens/homeScreen/project/interactive_map.dart';
 import 'package:app/Screens/homeScreen/project/project.dart';
-import 'package:app/Screens/homeScreen/settings.dart';
-import 'package:app/Screens/homeScreen/user.dart';
+import 'package:app/Screens/homeScreen/user_settings/user.dart';
 import 'package:app/repositories/customer_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
@@ -104,9 +103,9 @@ class MyApp extends StatelessWidget {
         '/project': (context) =>
             HydroponicBedsScreen(projectBox: Hive.box('projectBox')),
         '/interactive_map': (context) => InteractiveMapScreen(),
-        '/goals': (context) => GoalsApp(goalsBox: Hive.box('goalBox')),
+        '/goals': (context) =>
+            GoalsApp(goalsBox: Hive.box('goalBox'), customerRepo: customerRepo),
         '/user': (context) => const UserScreen(),
-        '/settings': (context) => const SettingsScreen(),
       },
     );
   }

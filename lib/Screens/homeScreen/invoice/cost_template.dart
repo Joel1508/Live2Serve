@@ -1,6 +1,5 @@
 import 'package:app/Screens/homeScreen/invoice/models/cost_model.dart';
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 class CostManagementScreen extends StatefulWidget {
   @override
@@ -9,7 +8,6 @@ class CostManagementScreen extends StatefulWidget {
 
 class _CostManagementScreenState extends State<CostManagementScreen> {
   final _formKey = GlobalKey<FormState>();
-  late Box<CostTemplate> _templatesBox;
 
   final _costNameController = TextEditingController();
   final _costPerUnitController = TextEditingController();
@@ -22,7 +20,6 @@ class _CostManagementScreenState extends State<CostManagementScreen> {
   @override
   void initState() {
     super.initState();
-    _templatesBox = Hive.box<CostTemplate>('costTemplates');
   }
 
   void _addNewCost() {

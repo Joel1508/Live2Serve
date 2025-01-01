@@ -542,15 +542,3 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     }
   }
 }
-
-extension on PostgrestFilterBuilder {
-  execute() {}
-}
-
-extension on String {
-  get error => null;
-
-  get data => null;
-
-  void clear() {}
-}

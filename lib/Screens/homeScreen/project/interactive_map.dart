@@ -33,7 +33,7 @@ class InteractiveMapScreen extends StatelessWidget {
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
                 ),
-                itemCount: 16,
+                itemCount: 16, // Example, use actual number of beds
                 itemBuilder: (context, index) {
                   final gridState = box.get(index) ??
                       GridStateModel(
@@ -43,17 +43,28 @@ class InteractiveMapScreen extends StatelessWidget {
                       );
 
                   return GestureDetector(
-                    onTap: () async {
+                    onTap: () {
                       gridState.isPlanted = !gridState.isPlanted;
                       gridState.lastUpdated = DateTime.now();
-                      await box.put(index, gridState);
-
+                      box.put(index, gridState);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
                             "Grid ${index + 1} ${gridState.isPlanted ? 'planted' : 'unplanted'}",
                           ),
                         ),
+                      );
+
+                      // Optionally, show more details from the bed
+                      final bed = Hive.box<BedModel>('beds').get(index);
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: Text('Bed Information'),
+                            content: Text('Name: ${bed?.name ?? 'Unknown'}'),
+                          );
+                        },
                       );
                     },
                     child: Container(
