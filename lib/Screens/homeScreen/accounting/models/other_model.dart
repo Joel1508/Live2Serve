@@ -68,25 +68,3 @@ class Credit extends HiveObject {
     required this.dueDate,
   });
 }
-
-@HiveType(typeId: 6)
-class Goal extends HiveObject {
-  @HiveField(0)
-  final String title;
-
-  @HiveField(1)
-  double currentAmount;
-
-  @HiveField(2)
-  final double targetAmount;
-
-  @HiveField(3)
-  final DateTime deadline;
-
-  Goal({
-    required this.title,
-    required this.currentAmount,
-    required this.targetAmount,
-    required this.deadline,
-  });
-}

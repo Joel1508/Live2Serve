@@ -70,7 +70,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
     });
 
     try {
-      final customer = model.Customer(
+      final customer = model.CustomerModel(
         name: name,
         contactNumber: contact,
         email: email,

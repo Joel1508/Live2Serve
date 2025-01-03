@@ -1,28 +1,38 @@
+import 'package:app/Screens/homeScreen/accounting/others/accounting_goal.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
-class GoalsScreen extends StatefulWidget {
+class AccountingGoalsScreen extends StatefulWidget {
+  final Box<AccountingGoal> goalsBox;
+
+  const AccountingGoalsScreen({Key? key, required this.goalsBox})
+      : super(key: key);
+
   @override
-  _GoalsScreenState createState() => _GoalsScreenState();
+  _AccountingGoalsScreenState createState() => _AccountingGoalsScreenState();
 }
 
-class _GoalsScreenState extends State<GoalsScreen> {
-  final List<Map<String, dynamic>> _goals = [];
+class _AccountingGoalsScreenState extends State<AccountingGoalsScreen> {
   final TextEditingController _goalController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
   DateTime? _selectedDate;
 
   void _addGoal() {
-    final goal = _goalController.text;
+    final title = _goalController.text;
     final amount = double.tryParse(_amountController.text);
 
-    if (goal.isNotEmpty && amount != null && _selectedDate != null) {
+    if (title.isNotEmpty && amount != null && _selectedDate != null) {
+      final newGoal = AccountingGoal(
+        title: title,
+        amount: amount,
+        date: _selectedDate!,
+        progress: 0.0,
+      );
+
+      widget.goalsBox.add(newGoal); // Add to Hive Box
+
       setState(() {
-        _goals.add({
-          'goal': goal,
-          'amount': amount,
-          'date': _selectedDate,
-          'progress': 0.0,
-        });
         _goalController.clear();
         _amountController.clear();
         _selectedDate = null;
@@ -31,12 +41,20 @@ class _GoalsScreenState extends State<GoalsScreen> {
   }
 
   void _updateProgress(int index, double progressAmount) {
-    setState(() {
-      final goal = _goals[index];
-      final newProgress =
-          (goal['progress'] * goal['amount'] + progressAmount) / goal['amount'];
-      _goals[index]['progress'] = newProgress.clamp(0.0, 1.0);
-    });
+    final goal = widget.goalsBox.getAt(index);
+
+    if (goal != null) {
+      final updatedGoal = AccountingGoal(
+        title: goal.title,
+        amount: goal.amount,
+        date: goal.date,
+        progress: (goal.progress * goal.amount + progressAmount) / goal.amount,
+      );
+
+      widget.goalsBox.putAt(index, updatedGoal); // Update in Hive Box
+
+      setState(() {});
+    }
   }
 
   Future<void> _pickDate() async {
@@ -56,124 +74,66 @@ class _GoalsScreenState extends State<GoalsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Goals"),
-        backgroundColor: Colors.green,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
+      appBar: AppBar(title: Text('Accounting Goals')),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
               controller: _goalController,
-              decoration: InputDecoration(labelText: "Goal Description"),
+              decoration: InputDecoration(labelText: 'Goal Title'),
             ),
-            TextField(
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
               controller: _amountController,
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(labelText: "Target Amount (\$)"),
+              decoration: InputDecoration(labelText: 'Amount'),
             ),
-            Row(
-              children: [
-                Text(_selectedDate == null
-                    ? "Select Deadline"
-                    : "Deadline: ${_selectedDate!.toLocal().toString().split(' ')[0]}"),
-                TextButton(
-                  onPressed: _pickDate,
-                  child: Text("Pick Date"),
-                ),
-              ],
-            ),
-            ElevatedButton(
-              onPressed: _addGoal,
-              child: Text("Add Goal"),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-            ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _goals.length,
-                itemBuilder: (context, index) {
-                  final goal = _goals[index];
-                  return Card(
-                    margin: EdgeInsets.symmetric(vertical: 8.0),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            goal['goal'],
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                              "Target Amount: \$${goal['amount'].toStringAsFixed(2)}"),
-                          Text(
-                              "Deadline: ${goal['date'].toLocal().toString().split(' ')[0]}"),
-                          SizedBox(height: 8),
-                          LinearProgressIndicator(
-                            value: goal['progress'],
-                            color: Colors.green,
-                            backgroundColor: Colors.grey[300],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                  "Progress: ${(goal['progress'] * 100).toStringAsFixed(0)}%"),
-                              TextButton(
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      final TextEditingController
-                                          progressController =
-                                          TextEditingController();
-                                      return AlertDialog(
-                                        title: Text("Update Progress"),
-                                        content: TextField(
-                                          controller: progressController,
-                                          keyboardType: TextInputType.number,
-                                          decoration: InputDecoration(
-                                              labelText:
-                                                  "Progress Amount (\$)"),
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () {
-                                              final progressAmount =
-                                                  double.tryParse(
-                                                      progressController.text);
-                                              if (progressAmount != null &&
-                                                  progressAmount >= 0) {
-                                                _updateProgress(
-                                                    index, progressAmount);
-                                              }
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: Text("Update"),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
-                                },
-                                child: Text("Edit Progress"),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ElevatedButton(
+              onPressed: _pickDate,
+              child: Text(
+                _selectedDate == null
+                    ? 'Select Date'
+                    : 'Selected: ${_selectedDate!.toLocal()}'.split(' ')[0],
               ),
             ),
-          ],
-        ),
+          ),
+          ElevatedButton(
+            onPressed: _addGoal,
+            child: Text('Add Goal'),
+          ),
+          Expanded(
+            child: ValueListenableBuilder(
+              valueListenable: widget.goalsBox.listenable(),
+              builder: (context, Box<AccountingGoal> box, _) {
+                if (box.isEmpty) {
+                  return Center(child: Text('No goals yet.'));
+                }
+
+                return ListView.builder(
+                  itemCount: box.length,
+                  itemBuilder: (context, index) {
+                    final goal = box.getAt(index);
+                    return ListTile(
+                      title: Text(goal!.title),
+                      subtitle: Text(
+                          'Amount: \$${goal.amount}, Progress: ${(goal.progress * 100).toStringAsFixed(1)}%'),
+                      trailing: IconButton(
+                        icon: Icon(Icons.edit),
+                        onPressed: () => _updateProgress(index, 10.0),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

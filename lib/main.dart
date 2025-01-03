@@ -15,8 +15,10 @@ import 'package:app/Screens/homeScreen/accounting/others/savings.dart';
 import 'package:app/Screens/homeScreen/add_client_invoice.dart';
 import 'package:app/Screens/homeScreen/add_tool.dart';
 import 'package:app/Screens/homeScreen/customers/add_customer.dart';
+import 'package:app/Screens/homeScreen/customers/models/customer_model.dart';
 import 'package:app/Screens/homeScreen/goals/goal.dart';
 import 'package:app/Screens/homeScreen/goals/goals.dart';
+import 'package:app/Screens/homeScreen/home_screen.dart';
 import 'package:app/Screens/homeScreen/invoice/invoice.dart';
 import 'package:app/Screens/homeScreen/project/bed_model.dart';
 import 'package:app/Screens/homeScreen/project/interactive_map.dart';
@@ -38,15 +40,33 @@ Future<void> main() async {
   final directory = await getApplicationDocumentsDirectory();
   Hive.init(directory.path);
 
-  await Hive.openBox<Customer>('customerBox');
-  await Hive.openBox('partnerBox');
-  await Hive.openBox('accountingBox');
-  await Hive.openBox('invoiceBox');
-  await Hive.openBox<BedModel>('projectBox');
-  await Hive.openBox<Goal>('goalsBox');
+  // Register your adapters (make sure these are registered before opening boxes)
+  Hive.registerAdapter(CustomerModelAdapter());
+  Hive.registerAdapter(BedModelAdapter());
+  Hive.registerAdapter(GoalAdapter());
+
+  // Open boxes with checks
+  if (!Hive.isBoxOpen('customerBox')) {
+    await Hive.openBox<Customer>('customerBox');
+  }
+  if (!Hive.isBoxOpen('partnerBox')) {
+    await Hive.openBox('partnerBox');
+  }
+  if (!Hive.isBoxOpen('accountingBox')) {
+    await Hive.openBox('accountingBox');
+  }
+  if (!Hive.isBoxOpen('invoiceBox')) {
+    await Hive.openBox('invoiceBox');
+  }
+  if (!Hive.isBoxOpen('projectBox')) {
+    await Hive.openBox<BedModel>('projectBox');
+  }
+  if (!Hive.isBoxOpen('goalsBox')) {
+    await Hive.openBox<Goal>('goalsBox');
+  }
 
   // Get the opened customerBox
-  var customerBox = Hive.box('customerBox');
+  var customerBox = Hive.box<Customer>('customerBox');
 
   // Initialize your customerRepo, passing Hive's instance and customerBox
   final customerRepo = CustomerRepository(customerBox: customerBox);
@@ -81,8 +101,9 @@ class MyApp extends StatelessWidget {
         '/log_in': (context) => LogInScreen(),
         '/home_screen': (context) => HomeScreen(customerRepo: customerRepo),
         '/recover_password': (context) => RecoverPasswordScreen(),
-        '/accounting': (context) =>
-            AccountingScreen(accountingBox: Hive.box('accountingBox')),
+        '/accounting': (context) => AccountingScreen(
+            accountingBox: Hive.box('accountingBox'),
+            customerRepo: customerRepo),
         '/add_transaction': (context) => AddTransactionScreen(),
         '/history': (context) => HistoryScreen(),
         '/banks': (context) => BanksScreen(),

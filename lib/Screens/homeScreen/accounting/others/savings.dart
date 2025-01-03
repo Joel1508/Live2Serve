@@ -47,7 +47,7 @@ class _SavingsScreenState extends State<SavingsScreen> {
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFE0BBE4), Color(0xFF957DAD)],
+            colors: [Color(0xFFFCFCFCF), Color(0xFFFDEDCDD)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),

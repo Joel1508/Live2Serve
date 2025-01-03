@@ -6,17 +6,17 @@ part of 'customer_model.dart';
 // TypeAdapterGenerator
 // **************************************************************************
 
-class CustomerAdapter extends TypeAdapter<Customer> {
+class CustomerModelAdapter extends TypeAdapter<CustomerModel> {
   @override
   final int typeId = 0;
 
   @override
-  Customer read(BinaryReader reader) {
+  CustomerModel read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return Customer(
+    return CustomerModel(
       name: fields[0] as String,
       contactNumber: fields[1] as String,
       email: fields[2] as String,
@@ -30,7 +30,7 @@ class CustomerAdapter extends TypeAdapter<Customer> {
   }
 
   @override
-  void write(BinaryWriter writer, Customer obj) {
+  void write(BinaryWriter writer, CustomerModel obj) {
     writer
       ..writeByte(9)
       ..writeByte(0)
@@ -59,7 +59,7 @@ class CustomerAdapter extends TypeAdapter<Customer> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is CustomerAdapter &&
+      other is CustomerModelAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
@@ -68,7 +68,8 @@ class CustomerAdapter extends TypeAdapter<Customer> {
 // JsonSerializableGenerator
 // **************************************************************************
 
-Customer _$CustomerFromJson(Map<String, dynamic> json) => Customer(
+CustomerModel _$CustomerModelFromJson(Map<String, dynamic> json) =>
+    CustomerModel(
       name: json['name'] as String,
       contactNumber: json['contactNumber'] as String,
       email: json['email'] as String,
@@ -80,7 +81,8 @@ Customer _$CustomerFromJson(Map<String, dynamic> json) => Customer(
       isSynced: json['isSynced'] as bool,
     );
 
-Map<String, dynamic> _$CustomerToJson(Customer instance) => <String, dynamic>{
+Map<String, dynamic> _$CustomerModelToJson(CustomerModel instance) =>
+    <String, dynamic>{
       'name': instance.name,
       'contactNumber': instance.contactNumber,
       'email': instance.email,

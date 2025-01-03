@@ -1,10 +1,12 @@
+import 'package:app/Screens/homeScreen/goals/goal.dart';
+import 'package:app/Screens/homeScreen/goals/goals.dart';
+import 'package:app/Screens/homeScreen/user_settings/user.dart';
 import 'package:app/repositories/customer_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:app/Screens/homeScreen/accounting/accounting.dart';
 import 'package:app/Screens/homeScreen/customers/customers.dart';
-import 'package:app/Screens/homeScreen/goals/goals.dart';
 import 'package:app/Screens/homeScreen/invoice/invoice.dart';
 import 'package:app/Screens/homeScreen/partners/partners.dart';
 import 'package:app/Screens/homeScreen/project/project.dart';
@@ -17,27 +19,45 @@ Future<void> main() async {
   final directory = await getApplicationDocumentsDirectory();
   Hive.init(directory.path);
 
-  await Hive.openBox('customerBox');
-  await Hive.openBox('partnerBox');
-  await Hive.openBox('accountingBox');
-  await Hive.openBox('invoiceBox');
-  await Hive.openBox('projectBox');
-  await Hive.openBox('goalsBox');
+  // Open the boxes only once in the main function
+  var customerBox = await Hive.openBox('customerBox');
+  var partnerBox = await Hive.openBox('partnerBox');
+  var accountingBox = await Hive.openBox('accountingBox');
+  var invoiceBox = await Hive.openBox('invoiceBox');
+  var projectBox = await Hive.openBox('projectBox');
+  final Box<Goal> goalsBox = await Hive.openBox<Goal>('goalsBox');
 
-  // Get the opened customerBox
-  var customerBox = Hive.box('customerBox');
-
-  // Initialize your customerRepo here, passing the customerBox and localDb
+  // Initialize your customerRepo here, passing the customerBox
   final customerRepo = CustomerRepository(customerBox: customerBox);
 
-  // Run the app and pass customerRepo
-  runApp(MyApp(customerRepo: customerRepo));
+  // Run the app and pass customerRepo and the opened boxes
+  runApp(MyApp(
+    customerRepo: customerRepo,
+    partnerBox: partnerBox,
+    accountingBox: accountingBox,
+    invoiceBox: invoiceBox,
+    projectBox: projectBox,
+    goalsBox: goalsBox,
+  ));
 }
 
 class MyApp extends StatelessWidget {
   final CustomerRepository customerRepo;
+  final Box partnerBox;
+  final Box accountingBox;
+  final Box invoiceBox;
+  final Box projectBox;
+  final Box<Goal> goalsBox;
 
-  MyApp({required this.customerRepo});
+  // Constructor to accept the repositories and boxes
+  MyApp({
+    required this.customerRepo,
+    required this.partnerBox,
+    required this.accountingBox,
+    required this.invoiceBox,
+    required this.projectBox,
+    required this.goalsBox,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -45,26 +65,16 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       routes: {
-        '/': (context) => HomeScreen(customerRepo: customerRepo),
-        '/partners': (context) => PartnersScreen(
-              partnerBox: Hive.box('partnerBox'),
-            ),
-        '/customers': (context) => CustomersScreen(
-              customerRepo: customerRepo,
-            ),
+        '/home_screen': (context) => HomeScreen(customerRepo: customerRepo),
+        '/partners': (context) => PartnersScreen(partnerBox: partnerBox),
+        '/customers': (context) => CustomersScreen(customerRepo: customerRepo),
         '/accounting': (context) => AccountingScreen(
-              accountingBox: Hive.box('accountingBox'),
-            ),
-        '/invoice': (context) => InvoiceScreen(
-              invoiceBox: Hive.box('invoiceBox'),
-            ),
-        '/project': (context) => HydroponicBedsScreen(
-              projectBox: Hive.box('projectBox'),
-            ),
-        '/goals': (context) => GoalsApp(
-              goalsBox: Hive.box('goalsBox'),
-              customerRepo: customerRepo,
-            ),
+            accountingBox: accountingBox, customerRepo: customerRepo),
+        '/invoice': (context) => InvoiceScreen(invoiceBox: invoiceBox),
+        '/project': (context) => HydroponicBedsScreen(projectBox: projectBox),
+        '/goals': (context) =>
+            GoalsScreen(goalsBox: goalsBox, customerRepo: customerRepo),
+        '/user': (context) => UserScreen(),
       },
     );
   }
@@ -81,12 +91,19 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  late final List<Widget> _screens;
 
-  final List<Widget> _screens = [
-    HydroponicBedsScreen(projectBox: Hive.box('projectBox')),
-    InteractiveMapScreen(),
-    AccountingScreen(accountingBox: Hive.box('accountingBox')),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _screens = [
+      HydroponicBedsScreen(projectBox: Hive.box('projectBox')),
+      InteractiveMapScreen(),
+      AccountingScreen(
+          accountingBox: Hive.box('accountingBox'),
+          customerRepo: widget.customerRepo),
+    ];
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -94,6 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  // Function to display the add panel
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -108,10 +126,9 @@ class _HomeScreenState extends State<HomeScreen> {
               child: const Text(
                 'L',
                 style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18),
               ),
             ),
             const SizedBox(width: 4),
@@ -120,10 +137,9 @@ class _HomeScreenState extends State<HomeScreen> {
               child: const Text(
                 'S',
                 style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18),
               ),
             ),
             const SizedBox(width: 4),
@@ -132,10 +148,9 @@ class _HomeScreenState extends State<HomeScreen> {
               child: const Text(
                 'N',
                 style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18),
               ),
             ),
           ],
@@ -149,29 +164,105 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.settings, color: Colors.black),
             onPressed: () {
-              // no actions
+              // Settings action
             },
           ),
         ],
       ),
-      body: _screens[_selectedIndex],
+      body: Column(
+        children: [
+          // Key Metrics Section
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              'Key Metrics',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+            ),
+          ),
+          // Horizontal containers for Key Metrics
+          Container(
+            height: 100,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                _buildContainer('Container 1'),
+                _buildContainer('Container 2'),
+                _buildContainer('Container 3'),
+              ],
+            ),
+          ),
+          // Features Section
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              'Features',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+            ),
+          ),
+          // 3x2 grid of feature cards
+          Expanded(
+            child: GridView.count(
+              crossAxisCount: 3,
+              children: [
+                _buildFeatureCard('Customers', Icons.person),
+                _buildFeatureCard('Partners', Icons.group),
+                _buildFeatureCard('Project', Icons.business),
+                _buildFeatureCard('Accounting', Icons.account_balance_wallet),
+                _buildFeatureCard('Bill History', Icons.history),
+                _buildFeatureCard('Goals', Icons.flag),
+              ],
+            ),
+          ),
+        ],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.list),
-            label: 'Beds',
+            icon: Icon(Icons.home),
+            label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.map),
-            label: 'Map',
+            icon: Icon(Icons.add),
+            label: 'Add',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance_wallet),
-            label: 'Accounting',
+            icon: Icon(Icons.person),
+            label: 'Profile',
           ),
         ],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
+      ),
+    );
+  }
+
+  // Helper method to build containers
+  Widget _buildContainer(String title) {
+    return Container(
+      width: 150,
+      margin: const EdgeInsets.all(8.0),
+      decoration: BoxDecoration(
+        color: Colors.grey[300],
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Center(child: Text(title)),
+    );
+  }
+
+  // Helper method to build feature cards
+  Widget _buildFeatureCard(String title, IconData icon) {
+    return Card(
+      color: Colors.blue[50],
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 30, color: Colors.blue),
+          Text(title,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        ],
       ),
     );
   }

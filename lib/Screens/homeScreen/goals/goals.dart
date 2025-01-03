@@ -1,6 +1,5 @@
 import 'package:app/repositories/customer_repository.dart';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 import 'package:app/Screens/homeScreen/home_screen.dart' as home_screen;
 import 'package:hive_flutter/hive_flutter.dart';
 import 'goal.dart';
@@ -81,9 +80,36 @@ class _GoalsScreenState extends State<GoalsScreen> {
               itemCount: goals.length,
               itemBuilder: (context, index) {
                 final goal = goals[index];
-                return ListTile(
-                  title: Text(goal.title),
-                  subtitle: Text(goal.description),
+                return Card(
+                  child: ListTile(
+                    title: Text(goal.title),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (goal.description.isNotEmpty) Text(goal.description),
+                        SizedBox(height: 4),
+                        LinearProgressIndicator(
+                          value: goal.progressPercentage / 100,
+                          backgroundColor: Colors.grey[200],
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          '\$${goal.currentAmount.toStringAsFixed(2)} / \$${goal.targetAmount.toStringAsFixed(2)}',
+                          style: TextStyle(
+                            color:
+                                goal.isOverdue ? Colors.red : Colors.grey[600],
+                          ),
+                        ),
+                        Text(
+                          'Deadline: ${goal.formattedDate}',
+                          style: TextStyle(
+                            color:
+                                goal.isOverdue ? Colors.red : Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 );
               },
             )
@@ -166,41 +192,108 @@ class _GoalsScreenState extends State<GoalsScreen> {
 
   void _showAddGoalForm() {
     String title = '', description = '', date = '';
+    double targetAmount = 0.0;
+    DateTime? deadline;
+    final formKey = GlobalKey<FormState>();
+
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true, // Makes the modal expandable
       builder: (_) => Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(
-              onChanged: (value) => title = value,
-              decoration: InputDecoration(labelText: 'Title'),
-            ),
-            TextField(
-              onChanged: (value) => description = value,
-              decoration: InputDecoration(labelText: 'Description'),
-            ),
-            TextField(
-              onChanged: (value) => date = value,
-              decoration: InputDecoration(labelText: 'Date (YYYY-MM-DD)'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (title.isNotEmpty && date.isNotEmpty) {
-                  final selectedYear = date.split('-')[0];
-                  final selectedMonth = date.split('-')[1].toUpperCase();
-                  Goal newGoal = Goal(
-                    title: title,
-                    description: description,
-                    date: date,
-                  );
-                  _addGoal(selectedYear, selectedMonth, newGoal);
-                  Navigator.pop(context);
-                }
-              },
-              child: Text('Save Goal'),
-            ),
-          ],
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          left: 16,
+          right: 16,
+          top: 16,
+        ),
+        child: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Title'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a title';
+                  }
+                  return null;
+                },
+                onChanged: (value) => title = value,
+              ),
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Description'),
+                onChanged: (value) => description = value,
+              ),
+              TextFormField(
+                decoration: InputDecoration(
+                  labelText: 'Target Amount',
+                  prefixText: '\$',
+                ),
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a target amount';
+                  }
+                  if (double.tryParse(value) == null ||
+                      double.parse(value) <= 0) {
+                    return 'Please enter a valid amount';
+                  }
+                  return null;
+                },
+                onChanged: (value) {
+                  if (value.isNotEmpty) {
+                    targetAmount = double.tryParse(value) ?? 0.0;
+                  }
+                },
+              ),
+              TextFormField(
+                decoration: InputDecoration(
+                  labelText: 'Date (YYYY-MM-DD)',
+                  hintText: '2024-01-31',
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a date';
+                  }
+                  try {
+                    deadline = DateTime.parse(value);
+                    if (deadline!.isBefore(DateTime.now())) {
+                      return 'Date cannot be in the past';
+                    }
+                    date = value;
+                    return null;
+                  } catch (e) {
+                    return 'Please enter a valid date in YYYY-MM-DD format';
+                  }
+                },
+                onChanged: (value) => date = value,
+              ),
+              SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  if (formKey.currentState!.validate()) {
+                    final selectedYear = date.split('-')[0];
+                    final selectedMonth = date.split('-')[1].toUpperCase();
+
+                    Goal newGoal = Goal(
+                      title: title,
+                      description: description,
+                      date: date,
+                      targetAmount: targetAmount,
+                      deadline: deadline!,
+                      currentAmount: 0.0, // Starting with zero progress
+                    );
+
+                    _addGoal(selectedYear, selectedMonth, newGoal);
+                    Navigator.pop(context);
+                  }
+                },
+                child: Text('Save Goal'),
+              ),
+              SizedBox(height: 16), // Bottom padding
+            ],
+          ),
         ),
       ),
     );

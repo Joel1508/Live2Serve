@@ -1,17 +1,21 @@
+import 'package:app/Screens/homeScreen/accounting/others/others.dart';
+import 'package:app/repositories/customer_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'add_transaction.dart';
 import 'history.dart';
-import 'others/others.dart';
 import 'models/transaction_model.dart';
 import 'models/balance_model.dart';
 
 class AccountingScreen extends StatelessWidget {
   final Box<Transaction> transactionBox = Hive.box('transactions');
   final Box<Balance> balanceBox = Hive.box('balance');
+  final CustomerRepository customerRepo;
 
-  AccountingScreen({Key? key, required Box accountingBox}) : super(key: key);
+  AccountingScreen(
+      {Key? key, required Box accountingBox, required this.customerRepo})
+      : super(key: key);
 
   // Get current balance
   double getCurrentBalance() {
@@ -54,7 +58,7 @@ class AccountingScreen extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         gradient: LinearGradient(
-          colors: [Colors.pinkAccent, Colors.purpleAccent],
+          colors: [Color(0xFFFCFCFCF), Color(0xFFFDEDCDD)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -223,7 +227,8 @@ class AccountingScreen extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => OtherScreen(),
+                              builder: (context) =>
+                                  OthersScreen(customerRepo: customerRepo),
                             ),
                           );
                         },

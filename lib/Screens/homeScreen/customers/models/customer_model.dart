@@ -6,7 +6,7 @@ part 'customer_model.g.dart';
 
 @HiveType(typeId: 0)
 @JsonSerializable()
-class Customer {
+class CustomerModel {
   @HiveField(0)
   final String name;
 
@@ -34,8 +34,7 @@ class Customer {
   @HiveField(8)
   final bool isSynced;
 
-  // Constructor
-  Customer({
+  CustomerModel({
     required this.name,
     required this.contactNumber,
     required this.email,
@@ -47,12 +46,11 @@ class Customer {
     required this.isSynced,
   });
 
-  // Add JSON serialization methods here
-  factory Customer.fromJson(Map<String, dynamic> json) =>
-      _$CustomerFromJson(json);
-  Map<String, dynamic> toJson() => _$CustomerToJson(this);
+  factory CustomerModel.fromJson(Map<String, dynamic> json) =>
+      _$CustomerModelFromJson(json);
 
-  // Convert the Customer object to a Map for Hive storage
+  Map<String, dynamic> toJson() => _$CustomerModelToJson(this);
+
   Map<String, dynamic> toMap() {
     return {
       'name': name,
@@ -67,9 +65,8 @@ class Customer {
     };
   }
 
-  // Convert a Map back to a Customer object
-  factory Customer.fromMap(Map<String, dynamic> map) {
-    return Customer(
+  factory CustomerModel.fromMap(Map<String, dynamic> map) {
+    return CustomerModel(
       name: map['name'],
       contactNumber: map['contactNumber'],
       email: map['email'],

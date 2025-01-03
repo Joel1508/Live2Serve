@@ -1,31 +1,28 @@
 import 'package:app/Screens/homeScreen/accounting/others/banks.dart';
 import 'package:app/Screens/homeScreen/accounting/others/credits.dart';
-import 'package:app/Screens/homeScreen/accounting/others/metas.dart';
 import 'package:app/Screens/homeScreen/accounting/others/savings.dart';
+import 'package:app/Screens/homeScreen/goals/goal.dart';
+import 'package:app/Screens/homeScreen/goals/goals.dart';
+import 'package:app/repositories/customer_repository.dart';
 import 'package:flutter/material.dart';
-
-void main() {
-  runApp(OtherScreen());
-}
-
-class OtherScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: OthersScreen(),
-    );
-  }
-}
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class OthersScreen extends StatelessWidget {
+  final CustomerRepository customerRepo;
+
+  const OthersScreen({
+    Key? key,
+    required this.customerRepo,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFE0BBE4), Color(0xFF957DAD)],
+            colors: [Color(0xFFFCFCFCF), Color(0xFFFDEDCDD)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -84,8 +81,7 @@ class OthersScreen extends StatelessWidget {
                       _buildButton(context, Icons.credit_card, "Credits",
                           CreditsScreen()),
                       SizedBox(height: 16),
-                      _buildButton(
-                          context, Icons.my_location, "Goals", GoalsScreen()),
+                      _buildGoalsButton(context),
                     ],
                   ),
                 ),
@@ -126,6 +122,56 @@ class OthersScreen extends StatelessWidget {
             context,
             MaterialPageRoute(builder: (context) => targetScreen),
           );
+        },
+      ),
+    );
+  }
+
+  Widget _buildGoalsButton(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 6,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: ListTile(
+        leading: Icon(Icons.my_location, size: 28, color: Colors.purple),
+        title: Text(
+          "Goals",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+            color: Colors.black87,
+          ),
+        ),
+        onTap: () async {
+          // Ensure we're using the correct Goal type from goals/goal.dart
+          Box<Goal> goalsBox;
+          try {
+            goalsBox = Hive.box<Goal>('goals');
+          } catch (e) {
+            // If the box isn't open yet, open it
+            goalsBox = await Hive.openBox<Goal>('goals');
+          }
+
+          if (context.mounted) {
+            // Check if context is still valid after async operation
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => GoalsScreen(
+                  goalsBox: goalsBox,
+                  customerRepo: customerRepo,
+                ),
+              ),
+            );
+          }
         },
       ),
     );

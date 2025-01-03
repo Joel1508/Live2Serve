@@ -1,3 +1,4 @@
+import 'package:app/Screens/homeScreen/home_screen.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
@@ -112,18 +113,4 @@ class Customer {
     required this.contact,
     required this.isSynced,
   });
-}
-
-class HomeScreen extends StatelessWidget {
-  final CustomerRepository customerRepo;
-
-  HomeScreen({required this.customerRepo});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Customer Management')),
-      body: Center(child: Text('Welcome to the Customer App!')),
-    );
-  }
 }

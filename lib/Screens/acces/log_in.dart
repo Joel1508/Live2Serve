@@ -12,31 +12,6 @@ class LogInScreen extends StatelessWidget {
   final AuthService authService = AuthService();
   final LocalAuthentication auth = LocalAuthentication();
 
-  Future<bool> _authenticateWithBiometrics() async {
-    try {
-      bool canCheckBiometrics = await auth.canCheckBiometrics;
-      if (!canCheckBiometrics) return false;
-
-      List<BiometricType> availableBiometrics =
-          await auth.getAvailableBiometrics();
-
-      if (availableBiometrics.isEmpty) return false;
-
-      // Attempt biometric authentication
-      return await auth.authenticate(
-        localizedReason: 'Please authenticate to access your account',
-        options: const AuthenticationOptions(
-          useErrorDialogs: true,
-          stickyAuth: true,
-        ),
-      );
-    } catch (e) {
-      // Log the error for debugging purposes
-      print('Biometric authentication error: $e');
-      return false;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
