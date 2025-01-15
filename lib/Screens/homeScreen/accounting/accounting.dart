@@ -9,13 +9,26 @@ import 'models/transaction_model.dart';
 import 'models/balance_model.dart';
 
 class AccountingScreen extends StatelessWidget {
-  final Box<Transaction> transactionBox = Hive.box('transactions');
-  final Box<Balance> balanceBox = Hive.box('balance');
+  late final Box<Transaction> transactionBox;
+  late final Box<Balance> balanceBox;
   final CustomerRepository customerRepo;
 
   AccountingScreen(
       {Key? key, required Box accountingBox, required this.customerRepo})
-      : super(key: key);
+      : super(key: key) {
+    // Safely access boxes only when needed
+    if (Hive.isBoxOpen('transactions')) {
+      transactionBox = Hive.box<Transaction>('transactions');
+    } else {
+      throw HiveError("Transaction box not opened. Ensure it's initialized.");
+    }
+
+    if (Hive.isBoxOpen('balance')) {
+      balanceBox = Hive.box<Balance>('balance');
+    } else {
+      throw HiveError("Balance box not opened. Ensure it's initialized.");
+    }
+  }
 
   // Get current balance
   double getCurrentBalance() {
@@ -29,22 +42,15 @@ class AccountingScreen extends StatelessWidget {
     final balance =
         balanceBox.get('current', defaultValue: Balance(currentBalance: 0.0));
 
-    // Safely access balance.history
     final history = balance?.history ?? [];
-
-    // Convert balance history to graph points
     List<FlSpot> spots = [];
     if (history.isNotEmpty) {
-      // Sort history by date
       final sortedHistory = List.from(history)
         ..sort((a, b) => a.date.compareTo(b.date));
-
-      // Create spots for the graph
       for (int i = 0; i < sortedHistory.length; i++) {
         spots.add(FlSpot(i.toDouble(), sortedHistory[i].amount));
       }
     } else {
-      // If no history, show current balance as single point
       spots.add(FlSpot(0, balance?.currentBalance ?? 0.0));
     }
 

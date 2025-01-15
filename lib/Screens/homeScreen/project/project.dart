@@ -5,7 +5,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:random_string/random_string.dart';
 
 class HydroponicBedsScreen extends StatefulWidget {
-  final Box projectBox;
+  final Box<BedModel> projectBox;
 
   const HydroponicBedsScreen({
     Key? key,

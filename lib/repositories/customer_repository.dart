@@ -1,4 +1,5 @@
 import 'package:app/Screens/homeScreen/home_screen.dart';
+import 'package:app/Screens/homeScreen/project/bed_model.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
@@ -41,19 +42,21 @@ Future<void> main() async {
 
   // Get the opened customerBox
   var customerBox = Hive.box('customerBox');
+  var projectBox = Hive.box<BedModel>('projectBox');
 
   // Initialize your customerRepo, passing customerBox and localDb
   final customerRepo = CustomerRepository(customerBox: customerBox);
 
   // Run the app and pass customerRepo
-  runApp(MyApp(customerRepo: customerRepo));
+  runApp(MyApp(customerRepo: customerRepo, projectBox: projectBox));
 }
 
 class MyApp extends StatelessWidget {
   final CustomerRepository customerRepo;
+  final Box<BedModel> projectBox;
 
   // Constructor to accept customerRepo
-  MyApp({required this.customerRepo});
+  MyApp({required this.customerRepo, required this.projectBox});
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +64,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       routes: {
-        '/': (context) => HomeScreen(customerRepo: customerRepo),
+        '/': (context) =>
+            HomeScreen(customerRepo: customerRepo, projectBox: projectBox),
         // other routes...
       },
     );

@@ -1,3 +1,4 @@
+import 'package:app/Screens/homeScreen/project/bed_model.dart';
 import 'package:app/repositories/customer_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:app/Screens/homeScreen/home_screen.dart' as home_screen;
@@ -134,6 +135,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                   customerRepo: CustomerRepository(
                     customerBox: Hive.box<Customer>('customerBox'),
                   ),
+                  projectBox: Hive.box<BedModel>('projectBox'),
                 ),
               ),
             );

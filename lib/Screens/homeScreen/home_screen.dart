@@ -1,5 +1,6 @@
 import 'package:app/Screens/homeScreen/goals/goal.dart';
 import 'package:app/Screens/homeScreen/goals/goals.dart';
+import 'package:app/Screens/homeScreen/project/bed_model.dart';
 import 'package:app/Screens/homeScreen/user_settings/user.dart';
 import 'package:app/repositories/customer_repository.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +25,7 @@ Future<void> main() async {
   var partnerBox = await Hive.openBox('partnerBox');
   var accountingBox = await Hive.openBox('accountingBox');
   var invoiceBox = await Hive.openBox('invoiceBox');
-  var projectBox = await Hive.openBox('projectBox');
+  var projectBox = await Hive.openBox<BedModel>('projectBox');
   final Box<Goal> goalsBox = await Hive.openBox<Goal>('goalsBox');
 
   // Initialize your customerRepo here, passing the customerBox
@@ -46,16 +47,16 @@ class MyApp extends StatelessWidget {
   final Box partnerBox;
   final Box accountingBox;
   final Box invoiceBox;
-  final Box projectBox;
+  final Box<BedModel> projectBox; // Define projectBox here
   final Box<Goal> goalsBox;
 
-  // Constructor to accept the repositories and boxes
+  // Constructor
   MyApp({
     required this.customerRepo,
     required this.partnerBox,
     required this.accountingBox,
     required this.invoiceBox,
-    required this.projectBox,
+    required this.projectBox, // Add projectBox as required
     required this.goalsBox,
   });
 
@@ -65,15 +66,23 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       routes: {
-        '/home_screen': (context) => HomeScreen(customerRepo: customerRepo),
+        '/home_screen': (context) => HomeScreen(
+              customerRepo: customerRepo,
+              projectBox: projectBox, // Pass projectBox here
+            ),
         '/partners': (context) => PartnersScreen(partnerBox: partnerBox),
         '/customers': (context) => CustomersScreen(customerRepo: customerRepo),
         '/accounting': (context) => AccountingScreen(
-            accountingBox: accountingBox, customerRepo: customerRepo),
+              accountingBox: accountingBox,
+              customerRepo: customerRepo,
+            ),
         '/invoice': (context) => InvoiceScreen(invoiceBox: invoiceBox),
-        '/project': (context) => HydroponicBedsScreen(projectBox: projectBox),
-        '/goals': (context) =>
-            GoalsScreen(goalsBox: goalsBox, customerRepo: customerRepo),
+        '/project': (context) =>
+            HydroponicBedsScreen(projectBox: projectBox), // Use projectBox here
+        '/goals': (context) => GoalsScreen(
+              goalsBox: goalsBox,
+              customerRepo: customerRepo,
+            ),
         '/user': (context) => UserScreen(),
       },
     );
@@ -82,8 +91,9 @@ class MyApp extends StatelessWidget {
 
 class HomeScreen extends StatefulWidget {
   final CustomerRepository customerRepo;
+  final Box<BedModel> projectBox;
 
-  HomeScreen({required this.customerRepo});
+  HomeScreen({required this.customerRepo, required this.projectBox});
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -97,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _screens = [
-      HydroponicBedsScreen(projectBox: Hive.box('projectBox')),
+      HydroponicBedsScreen(projectBox: widget.projectBox),
       InteractiveMapScreen(),
       AccountingScreen(
           accountingBox: Hive.box('accountingBox'),
@@ -118,42 +128,47 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircleAvatar(
-              backgroundColor: Colors.orange[300],
-              child: const Text(
-                'L',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18),
-              ),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 10),
+          child: Flexible(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircleAvatar(
+                  backgroundColor: Colors.blue[100],
+                  child: const Text(
+                    'L',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                CircleAvatar(
+                  backgroundColor: Colors.blue[100],
+                  child: const Text(
+                    'S',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                CircleAvatar(
+                  backgroundColor: Colors.blue[100],
+                  child: const Text(
+                    'N',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 4),
-            CircleAvatar(
-              backgroundColor: Colors.blue[300],
-              child: const Text(
-                'S',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18),
-              ),
-            ),
-            const SizedBox(width: 4),
-            CircleAvatar(
-              backgroundColor: Colors.green[300],
-              child: const Text(
-                'N',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18),
-              ),
-            ),
-          ],
+          ),
         ),
         centerTitle: true,
         title: const Text(
@@ -181,7 +196,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           // Horizontal containers for Key Metrics
           Container(
-            height: 100,
+            height: 200,
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: [
@@ -201,16 +216,20 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           // 3x2 grid of feature cards
           Expanded(
-            child: GridView.count(
-              crossAxisCount: 3,
-              children: [
-                _buildFeatureCard('Customers', Icons.person),
-                _buildFeatureCard('Partners', Icons.group),
-                _buildFeatureCard('Project', Icons.business),
-                _buildFeatureCard('Accounting', Icons.account_balance_wallet),
-                _buildFeatureCard('Bill History', Icons.history),
-                _buildFeatureCard('Goals', Icons.flag),
-              ],
+            // Move this outside of Padding
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: GridView.count(
+                crossAxisCount: 3,
+                children: [
+                  _buildFeatureCard('Customers', Icons.person),
+                  _buildFeatureCard('Partners', Icons.group),
+                  _buildFeatureCard('Project', Icons.business),
+                  _buildFeatureCard('Accounting', Icons.account_balance_wallet),
+                  _buildFeatureCard('Bill History', Icons.history),
+                  _buildFeatureCard('Goals', Icons.flag),
+                ],
+              ),
             ),
           ),
         ],
@@ -238,14 +257,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Helper method to build containers
   Widget _buildContainer(String title) {
-    return Container(
-      width: 150,
-      margin: const EdgeInsets.all(8.0),
-      decoration: BoxDecoration(
-        color: Colors.grey[300],
-        borderRadius: BorderRadius.circular(8.0),
+    return Padding(
+      padding: const EdgeInsets.only(left: 15),
+      child: Container(
+        width: 360,
+        margin: const EdgeInsets.all(4.0),
+        decoration: BoxDecoration(
+          color: Colors.grey[300],
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: Center(child: Text(title)),
       ),
-      child: Center(child: Text(title)),
     );
   }
 

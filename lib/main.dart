@@ -9,6 +9,8 @@ import 'package:app/Screens/homeScreen/accounting/accounting.dart';
 import 'package:app/Screens/homeScreen/accounting/add_transaction.dart';
 import 'package:app/Screens/homeScreen/accounting/date.dart';
 import 'package:app/Screens/homeScreen/accounting/history.dart';
+import 'package:app/Screens/homeScreen/accounting/models/balance_model.dart';
+import 'package:app/Screens/homeScreen/accounting/models/transaction_model.dart';
 import 'package:app/Screens/homeScreen/accounting/others/banks.dart';
 import 'package:app/Screens/homeScreen/accounting/others/credits.dart';
 import 'package:app/Screens/homeScreen/accounting/others/savings.dart';
@@ -23,6 +25,7 @@ import 'package:app/Screens/homeScreen/invoice/invoice.dart';
 import 'package:app/Screens/homeScreen/project/bed_model.dart';
 import 'package:app/Screens/homeScreen/project/interactive_map.dart';
 import 'package:app/Screens/homeScreen/project/project.dart';
+
 import 'package:app/Screens/homeScreen/user_settings/user.dart';
 import 'package:app/repositories/customer_repository.dart';
 import 'package:flutter/material.dart';
@@ -64,9 +67,17 @@ Future<void> main() async {
   if (!Hive.isBoxOpen('goalsBox')) {
     await Hive.openBox<Goal>('goalsBox');
   }
+  if (!Hive.isBoxOpen('transactions')) {
+    await Hive.openBox<Transaction>('transactions');
+  }
 
-  // Get the opened customerBox
+  if (!Hive.isBoxOpen('balance')) {
+    await Hive.openBox<Balance>('balance');
+  }
+
+  // Get the opened boxes
   var customerBox = Hive.box<Customer>('customerBox');
+  var projectBox = Hive.box<BedModel>('projectBox');
 
   // Initialize your customerRepo, passing Hive's instance and customerBox
   final customerRepo = CustomerRepository(customerBox: customerBox);
@@ -79,13 +90,18 @@ Future<void> main() async {
   );
 
   // Run the app, passing the repository to MyApp
-  runApp(MyApp(customerRepo: customerRepo));
+  runApp(MyApp(
+    customerRepo: customerRepo,
+    projectBox: projectBox,
+  ));
 }
 
 class MyApp extends StatelessWidget {
   final CustomerRepository customerRepo;
+  final Box<BedModel> projectBox;
 
-  const MyApp({super.key, required this.customerRepo});
+  const MyApp(
+      {super.key, required this.customerRepo, required this.projectBox});
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +115,8 @@ class MyApp extends StatelessWidget {
         '/intro3': (context) => const IntroductionScreen3(),
         '/sign_up': (context) => SignUpScreen(),
         '/log_in': (context) => LogInScreen(),
-        '/home_screen': (context) => HomeScreen(customerRepo: customerRepo),
+        '/home_screen': (context) =>
+            HomeScreen(customerRepo: customerRepo, projectBox: projectBox),
         '/recover_password': (context) => RecoverPasswordScreen(),
         '/accounting': (context) => AccountingScreen(
             accountingBox: Hive.box('accountingBox'),
