@@ -23,7 +23,6 @@ import 'package:app/Screens/homeScreen/goals/goals.dart';
 import 'package:app/Screens/homeScreen/home_screen.dart';
 import 'package:app/Screens/homeScreen/invoice/invoice.dart';
 import 'package:app/Screens/homeScreen/project/bed_model.dart';
-import 'package:app/Screens/homeScreen/project/interactive_map.dart';
 import 'package:app/Screens/homeScreen/project/project.dart';
 
 import 'package:app/Screens/homeScreen/user_settings/user.dart';
@@ -132,15 +131,14 @@ class MyApp extends StatelessWidget {
         '/date': (context) => DateTimePickerScreen(),
         '/partners': (context) =>
             PartnersScreen(partnerBox: Hive.box('partnerBox')),
-        '/add_partners': (context) => AddPartnerScreen(),
         '/customers': (context) => CustomersScreen(customerRepo: customerRepo),
-        '/add_customer': (context) => const AddCustomerScreen(
+        '/add_customer': (context) => AddCustomerScreen(
               existingCustomer: null,
+              customerRepository: customerRepo,
             ),
         '/add_client_invoice': (context) => InvoiceClientScreen(),
         '/project': (context) =>
             HydroponicBedsScreen(projectBox: Hive.box('projectBox')),
-        '/interactive_map': (context) => InteractiveMapScreen(),
         '/goals': (context) =>
             GoalsApp(goalsBox: Hive.box('goalBox'), customerRepo: customerRepo),
         '/user': (context) => const UserScreen(),

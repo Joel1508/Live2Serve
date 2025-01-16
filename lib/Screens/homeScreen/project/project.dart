@@ -1,5 +1,4 @@
 import 'package:app/Screens/homeScreen/project/bed_model.dart';
-import 'package:app/Screens/homeScreen/project/interactive_map.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:random_string/random_string.dart';
@@ -31,7 +30,7 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
   @override
   void initState() {
     super.initState();
-    _bedsBox = Hive.box<BedModel>('beds');
+    _bedsBox = widget.projectBox;
     _filteredBeds = _bedsBox.values.toList();
     _searchController.addListener(_updateSearch);
   }
@@ -72,7 +71,7 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
                       decoration: InputDecoration(labelText: "Bed Name"),
                       onChanged: (value) {
                         _checkForDuplicate(value);
-                        setState(() {}); // Refresh dialog state
+                        setState(() {});
                       },
                     ),
                     SizedBox(height: 10),
@@ -189,17 +188,6 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
             onPressed: _showAddBedDialog,
             icon: Icon(Icons.add),
           ),
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => InteractiveMapScreen(),
-                ),
-              );
-            },
-            icon: Icon(Icons.map),
-          )
         ],
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(60),
@@ -233,12 +221,15 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
                   itemCount: beds.length,
                   itemBuilder: (context, index) {
                     final bed = beds[index];
-                    return Card(
-                      child: ListTile(
-                        title: Text(bed.name),
-                        subtitle: Text(
-                            "Code: ${bed.code} | Date: ${bed.creationDate}"),
-                        onTap: () => _viewBedDetails(bed),
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Card(
+                        child: ListTile(
+                          title: Text(bed.name),
+                          subtitle: Text(
+                              "Code: ${bed.code} | Date: ${bed.creationDate}"),
+                          onTap: () => _viewBedDetails(bed),
+                        ),
                       ),
                     );
                   },

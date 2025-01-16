@@ -146,6 +146,7 @@ class _AddPartnerScreenState extends State<AddPartnerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFFF9FAFB),
       appBar: AppBar(
         title: const Text('Add Partner'),
       ),

@@ -21,8 +21,8 @@ class _CustomersScreenState extends State<CustomersScreen> {
   @override
   void initState() {
     super.initState();
+    // Initialize customerBox directly from the repository
     customerBox = widget.customerRepo.customerBox;
-    _initializeHive();
   }
 
   Future<void> _initializeHive() async {
@@ -50,7 +50,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFDEDCD),
+      backgroundColor: const Color(0xFFFF9FAFB),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -90,10 +90,11 @@ class _CustomersScreenState extends State<CustomersScreen> {
             final newCustomer = await Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => AddCustomerScreen(existingCustomer: null),
+                builder: (context) => AddCustomerScreen(
+                    existingCustomer: null,
+                    customerRepository: widget.customerRepo),
               ),
             );
-
             if (newCustomer != null) {
               _addCustomer(newCustomer);
             }
@@ -189,8 +190,10 @@ class _CustomersScreenState extends State<CustomersScreen> {
     final updatedCustomer = await Navigator.push<Customer?>(
       context,
       MaterialPageRoute<Customer?>(
-        builder: (context) =>
-            AddCustomerScreen(existingCustomer: customerObj as Customer?),
+        builder: (context) => AddCustomerScreen(
+          existingCustomer: customerObj as Customer?,
+          customerRepository: widget.customerRepo,
+        ),
       ),
     );
 

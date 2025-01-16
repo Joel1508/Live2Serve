@@ -11,7 +11,6 @@ import 'package:app/Screens/homeScreen/customers/customers.dart';
 import 'package:app/Screens/homeScreen/invoice/invoice.dart';
 import 'package:app/Screens/homeScreen/partners/partners.dart';
 import 'package:app/Screens/homeScreen/project/project.dart';
-import 'package:app/Screens/homeScreen/project/interactive_map.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -108,7 +107,6 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _screens = [
       HydroponicBedsScreen(projectBox: widget.projectBox),
-      InteractiveMapScreen(),
       AccountingScreen(
           accountingBox: Hive.box('accountingBox'),
           customerRepo: widget.customerRepo),
@@ -126,44 +124,52 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Color(0xFFFF9FAFB),
+        leadingWidth: 150,
         elevation: 0,
         leading: Padding(
-          padding: const EdgeInsets.only(left: 10),
-          child: Flexible(
+          padding: const EdgeInsets.only(left: 15),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 CircleAvatar(
-                  backgroundColor: Colors.blue[100],
+                  radius: 12,
+                  backgroundColor: Color(0xFFFFDBDD5),
                   child: const Text(
                     'L',
                     style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18),
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
                   ),
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 2),
                 CircleAvatar(
+                  radius: 12,
                   backgroundColor: Colors.blue[100],
                   child: const Text(
                     'S',
                     style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18),
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
                   ),
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 2),
                 CircleAvatar(
+                  radius: 12,
                   backgroundColor: Colors.blue[100],
                   child: const Text(
                     'N',
                     style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18),
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
                   ),
                 ),
               ],
@@ -216,11 +222,12 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           // 3x2 grid of feature cards
           Expanded(
-            // Move this outside of Padding
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: GridView.count(
                 crossAxisCount: 3,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
                 children: [
                   _buildFeatureCard('Customers', Icons.person),
                   _buildFeatureCard('Partners', Icons.group),
@@ -231,7 +238,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-          ),
+          )
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -271,20 +278,50 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Helper method to build feature cards
+  // Helper method to build feature cards with navigation
   Widget _buildFeatureCard(String title, IconData icon) {
-    return Card(
-      color: Colors.blue[50],
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 30, color: Colors.blue),
-          Text(title,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        ],
+    return InkWell(
+      // Changed from Card to InkWell for better tap feedback
+      onTap: () {
+        // Navigation logic based on the title
+        switch (title) {
+          case 'Customers':
+            Navigator.pushNamed(context, '/customers');
+            break;
+          case 'Partners':
+            Navigator.pushNamed(context, '/partners');
+            break;
+          case 'Project':
+            Navigator.pushNamed(context, '/project');
+            break;
+          case 'Accounting':
+            Navigator.pushNamed(context, '/accounting');
+            break;
+          case 'Bill History':
+            Navigator.pushNamed(context, '/invoice');
+            break;
+          case 'Goals':
+            Navigator.pushNamed(context, '/goals');
+            break;
+        }
+      },
+      child: Card(
+        color: Colors.blue[50],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 30, color: Colors.blue),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
       ),
     );
   }

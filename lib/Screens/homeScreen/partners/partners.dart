@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'dart:convert';
-import 'package:crypto/crypto.dart';
 
 class Partner {
   final String name;
   final String contactNumber;
   final String email;
   final String address;
+  final String description;
   final String id;
 
   Partner({
@@ -15,6 +14,7 @@ class Partner {
     required this.contactNumber,
     required this.email,
     required this.address,
+    required this.description,
     required this.id,
   });
 
@@ -24,24 +24,27 @@ class Partner {
       'contactNumber': contactNumber,
       'email': email,
       'address': address,
+      'description': description,
       'id': id,
     };
   }
 
   factory Partner.fromMap(Map<String, dynamic> map) {
     return Partner(
-      name: map['name'],
-      contactNumber: map['contactNumber'],
-      email: map['email'],
-      address: map['address'],
-      id: map['id'],
+      name: map['name'] ?? '',
+      contactNumber: map['contactNumber'] ?? '',
+      email: map['email'] ?? '',
+      address: map['address'] ?? '',
+      description: map['description'] ?? '',
+      id: map['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
     );
   }
 }
 
 class PartnersScreen extends StatefulWidget {
   final Box partnerBox;
-  PartnersScreen({required this.partnerBox});
+
+  const PartnersScreen({Key? key, required this.partnerBox}) : super(key: key);
 
   @override
   _PartnersScreenState createState() => _PartnersScreenState();
@@ -49,166 +52,260 @@ class PartnersScreen extends StatefulWidget {
 
 class _PartnersScreenState extends State<PartnersScreen> {
   late Box _partnersBox;
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
+
+  List<Map<String, dynamic>> _filteredPartners = [];
+  String _searchQuery = "";
 
   @override
   void initState() {
     super.initState();
-    _initializeHive();
+    _partnersBox = widget.partnerBox;
+    _filteredPartners =
+        _partnersBox.values.toList().cast<Map<String, dynamic>>();
+    _searchController.addListener(_updateSearch);
   }
 
-  Future<void> _initializeHive() async {
-    await Hive.initFlutter();
-    _partnersBox = await Hive.openBox('partnersBox',
-        encryptionCipher: _getEncryptionCipher());
-    setState(() {});
+  void _updateSearch() {
+    setState(() {
+      _searchQuery = _searchController.text.toLowerCase();
+      _filteredPartners = _partnersBox.values
+          .where((dynamic item) {
+            final Map<String, dynamic> partner =
+                Map<String, dynamic>.from(item as Map);
+            final p = Partner.fromMap(partner);
+            return p.name.toLowerCase().contains(_searchQuery) ||
+                p.email.toLowerCase().contains(_searchQuery) ||
+                p.contactNumber.contains(_searchQuery);
+          })
+          .map((dynamic item) => Map<String, dynamic>.from(item as Map))
+          .toList();
+    });
   }
 
-  HiveAesCipher _getEncryptionCipher() {
-    final key = sha256
-        .convert(utf8.encode('your-secure-password'))
-        .bytes
-        .sublist(0, 32);
-    return HiveAesCipher(key);
-  }
+  void _showAddPartnerDialog() {
+    setState(() {
+      _nameController.clear();
+      _phoneController.clear();
+      _emailController.clear();
+      _addressController.clear();
+      _descriptionController.clear();
+    });
 
-  void _addPartner(Partner partner) {
-    _partnersBox.add(partner.toMap());
-    setState(() {});
-  }
-
-  void _deletePartner(int index) {
-    _partnersBox.deleteAt(index);
-    setState(() {});
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Partners'),
-      ),
-      body: ValueListenableBuilder(
-        valueListenable: _partnersBox.listenable(),
-        builder: (context, Box box, _) {
-          if (box.isEmpty) {
-            return Center(
-              child: Text('No partners added yet.'),
-            );
-          }
-          return ListView.builder(
-            itemCount: box.length,
-            itemBuilder: (context, index) {
-              final partnerMap = box.getAt(index) as Map<String, dynamic>;
-              final partner = Partner.fromMap(partnerMap);
-              return ListTile(
-                title: Text(partner.name),
-                subtitle: Text(partner.contactNumber),
-                trailing: IconButton(
-                  icon: Icon(Icons.delete),
-                  onPressed: () => _deletePartner(index),
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Add New Partner"),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: _nameController,
+                  decoration: InputDecoration(labelText: "Name"),
                 ),
-              );
-            },
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final newPartner = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AddPartnerScreen(),
+                SizedBox(height: 10),
+                TextField(
+                  controller: _phoneController,
+                  decoration: InputDecoration(labelText: "Phone"),
+                ),
+                SizedBox(height: 10),
+                TextField(
+                  controller: _emailController,
+                  decoration: InputDecoration(labelText: "Email"),
+                ),
+                SizedBox(height: 10),
+                TextField(
+                  controller: _addressController,
+                  decoration: InputDecoration(labelText: "Address"),
+                ),
+                SizedBox(height: 10),
+                TextField(
+                  controller: _descriptionController,
+                  decoration: InputDecoration(labelText: "Description"),
+                  maxLines: 3,
+                ),
+              ],
             ),
-          );
-          if (newPartner != null && newPartner is Partner) {
-            _addPartner(newPartner);
-          }
-        },
-        child: Icon(Icons.add),
-      ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: _addPartner,
+              child: Text("Save"),
+            ),
+          ],
+        );
+      },
     );
   }
-}
 
-class AddPartnerScreen extends StatelessWidget {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _contactController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _addressController = TextEditingController();
+  void _addPartner() {
+    if (_nameController.text.isEmpty ||
+        _phoneController.text.isEmpty ||
+        _emailController.text.isEmpty ||
+        _addressController.text.isEmpty) return;
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Add Partner'),
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
+    final newPartner = Partner(
+      name: _nameController.text,
+      contactNumber: _phoneController.text,
+      email: _emailController.text,
+      address: _addressController.text,
+      description: _descriptionController.text,
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+    );
+
+    _partnersBox.add(newPartner.toMap());
+    setState(() {
+      _filteredPartners =
+          _partnersBox.values.toList().cast<Map<String, dynamic>>();
+    });
+
+    Navigator.of(context).pop();
+  }
+
+  void _showDeleteConfirmation(int index) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Delete Partner"),
+          content: Text("Are you sure you want to delete this partner?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                _partnersBox.deleteAt(index);
+                Navigator.of(context).pop();
+              },
+              child: Text("Delete"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _viewPartnerDetails(Partner partner) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Partner Details"),
+          content: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              TextFormField(
-                controller: _nameController,
-                decoration: InputDecoration(labelText: 'Name'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a name';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _contactController,
-                decoration: InputDecoration(labelText: 'Contact Number'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a contact number';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _emailController,
-                decoration: InputDecoration(labelText: 'Email'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter an email';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _addressController,
-                decoration: InputDecoration(labelText: 'Address'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter an address';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 16.0),
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    final newPartner = Partner(
-                      name: _nameController.text,
-                      contactNumber: _contactController.text,
-                      email: _emailController.text,
-                      address: _addressController.text,
-                      id: DateTime.now().millisecondsSinceEpoch.toString(),
-                    );
-                    Navigator.pop(context, newPartner);
-                  }
-                },
-                child: Text('Add Partner'),
-              ),
+              Text("Name: ${partner.name}"),
+              Text("Phone: ${partner.contactNumber}"),
+              Text("Email: ${partner.email}"),
+              Text("Address: ${partner.address}"),
+              Text("Description: ${partner.description}"),
             ],
           ),
-        ),
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text("Close"),
+            ),
+          ],
+        );
+      },
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        backgroundColor: Color(0xFFFF9FAFB),
+        appBar: AppBar(
+          title: Text("Partners"),
+          actions: [
+            IconButton(
+              onPressed: _showAddPartnerDialog,
+              icon: Icon(Icons.add),
+            ),
+          ],
+          bottom: PreferredSize(
+            preferredSize: Size.fromHeight(60),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: "Search by Name, Email, or Phone",
+                  prefixIcon: Icon(Icons.search),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        body: ValueListenableBuilder(
+          valueListenable: _partnersBox.listenable(),
+          builder: (context, Box box, _) {
+            final partners = _searchQuery.isEmpty
+                ? box.values
+                    .map((dynamic item) =>
+                        Map<String, dynamic>.from(item as Map))
+                    .toList()
+                : _filteredPartners;
+
+            return partners.isEmpty
+                ? Center(child: Text("No partners found"))
+                : ListView.builder(
+                    itemCount: partners.length,
+                    itemBuilder: (context, index) {
+                      final partner = Partner.fromMap(partners[index]);
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Card(
+                          child: ListTile(
+                            title: Text(partner.name),
+                            subtitle: Text(
+                                "Phone: ${partner.contactNumber} | Email: ${partner.email}"),
+                            trailing: IconButton(
+                              icon: Icon(Icons.delete, color: Colors.red),
+                              onPressed: () => _showDeleteConfirmation(index),
+                            ),
+                            onTap: () => _viewPartnerDetails(partner),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+          },
+        ));
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneController.dispose();
+    _emailController.dispose();
+    _addressController.dispose();
+    _descriptionController.dispose();
+    _searchController.dispose();
+    super.dispose();
   }
 }

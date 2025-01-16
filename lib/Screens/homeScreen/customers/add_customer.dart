@@ -2,14 +2,17 @@ import 'package:app/repositories/customer_repository.dart'
     show Customer, CustomerRepository;
 import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:random_string/random_string.dart';
 import 'models/customer_model.dart' as model;
 
 class AddCustomerScreen extends StatefulWidget {
   final Customer? existingCustomer;
+  final CustomerRepository customerRepository;
 
-  const AddCustomerScreen({Key? key, required this.existingCustomer})
+  const AddCustomerScreen(
+      {Key? key,
+      required this.existingCustomer,
+      required this.customerRepository})
       : super(key: key);
 
   @override
@@ -29,13 +32,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeRepository();
     _initializeConnectivityListener();
-  }
-
-  Future<void> _initializeRepository() async {
-    final customerBox = await Hive.openBox('customerBox');
-    customerRepo = CustomerRepository(customerBox: customerBox);
   }
 
   void _initializeConnectivityListener() {
