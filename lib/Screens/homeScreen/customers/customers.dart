@@ -1,9 +1,7 @@
+import 'package:app/Screens/homeScreen/customers/models/customer_model.dart';
 import 'package:flutter/material.dart';
-import 'package:app/Screens/homeScreen/customers/add_customer.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:app/repositories/customer_repository.dart'
-    show Customer, CustomerRepository;
+import 'package:app/repositories/customer_repository.dart';
 
 class CustomersScreen extends StatefulWidget {
   final CustomerRepository customerRepo;
@@ -16,272 +14,271 @@ class CustomersScreen extends StatefulWidget {
 }
 
 class _CustomersScreenState extends State<CustomersScreen> {
-  late Box customerBox;
+  // MARK: - Properties
+  late Box<CustomerModel> customerBox;
+  List<CustomerModel> _filteredCustomers = [];
+  String _searchQuery = "";
 
+  // MARK: - Controllers
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _idNitController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
+
+  // MARK: - Lifecycle Methods
   @override
   void initState() {
     super.initState();
-    // Initialize customerBox directly from the repository
-    customerBox = widget.customerRepo.customerBox;
+    customerBox = widget.customerRepo.customerBox as Box<CustomerModel>;
+    _filteredCustomers = customerBox.values.toList();
+    _searchController.addListener(_updateSearch);
   }
 
-  Future<void> _initializeHive() async {
-    await Hive.initFlutter();
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneController.dispose();
+    _emailController.dispose();
+    _addressController.dispose();
+    _idNitController.dispose();
+    _descriptionController.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
 
-    const secureStorage = FlutterSecureStorage();
-    String? encryptionKey = await secureStorage.read(key: 'encryptionKey');
+  // MARK: - Private Methods
+  void _clearControllers() {
+    _nameController.clear();
+    _phoneController.clear();
+    _emailController.clear();
+    _addressController.clear();
+    _idNitController.clear();
+    _descriptionController.clear();
+  }
 
-    if (encryptionKey == null) {
-      final key = Hive.generateSecureKey();
-      encryptionKey = key.join(',');
-      await secureStorage.write(key: 'encryptionKey', value: encryptionKey);
-    }
+  void _updateSearch() {
+    setState(() {
+      _searchQuery = _searchController.text.toLowerCase();
+      _filteredCustomers = customerBox.values.where((customer) {
+        return customer.name.toLowerCase().contains(_searchQuery) ||
+            customer.email.toLowerCase().contains(_searchQuery) ||
+            customer.contactNumber.contains(_searchQuery) ||
+            customer.idNit.contains(_searchQuery);
+      }).toList();
+    });
+  }
 
-    final encryptionKeyBytes = encryptionKey.split(',').map(int.parse).toList();
+  void _addCustomer() {
+    if (_nameController.text.isEmpty ||
+        _phoneController.text.isEmpty ||
+        _emailController.text.isEmpty) return;
 
-    customerBox = await Hive.openBox(
-      'customers',
-      encryptionCipher: HiveAesCipher(encryptionKeyBytes),
+    final newCustomer = CustomerModel(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      name: _nameController.text,
+      contactNumber: _phoneController.text,
+      email: _emailController.text,
+      address: _addressController.text,
+      idNit: _idNitController.text,
+      uniqueCode: DateTime.now().millisecondsSinceEpoch.toString(),
+      contact: _phoneController.text,
+      isSynced: false,
     );
 
-    setState(() {});
+    customerBox.add(newCustomer);
+    setState(() {
+      _filteredCustomers = customerBox.values.toList();
+    });
+
+    Navigator.of(context).pop();
+  }
+
+  // MARK: - Dialog Methods
+  void _showAddCustomerDialog() {
+    _clearControllers();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Add New Customer"),
+        content: SingleChildScrollView(
+          child: _buildAddCustomerForm(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: _addCustomer,
+            child: const Text("Save"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteConfirmation(int index) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Delete Customer"),
+        content: const Text("Are you sure you want to delete this customer?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              customerBox.deleteAt(index);
+              setState(() {
+                _filteredCustomers = customerBox.values.toList();
+              });
+              Navigator.of(context).pop();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            child: const Text("Delete"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _viewCustomerDetails(CustomerModel customer) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(customer.name),
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text("Phone: ${customer.contactNumber}"),
+            Text("Email: ${customer.email}"),
+            Text("Address: ${customer.address}"),
+            Text("ID/NIT: ${customer.idNit}"),
+            Text("Unique Code: ${customer.uniqueCode}"),
+            Text("Contact: ${customer.contact}"),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("Close"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // MARK: - UI Builder Methods
+  Widget _buildAddCustomerForm() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        TextField(
+          controller: _nameController,
+          decoration: const InputDecoration(labelText: "Name"),
+        ),
+        const SizedBox(height: 10),
+        TextField(
+          controller: _phoneController,
+          decoration: const InputDecoration(labelText: "Phone"),
+        ),
+        const SizedBox(height: 10),
+        TextField(
+          controller: _emailController,
+          decoration: const InputDecoration(labelText: "Email"),
+        ),
+        const SizedBox(height: 10),
+        TextField(
+          controller: _addressController,
+          decoration: const InputDecoration(labelText: "Address"),
+        ),
+        const SizedBox(height: 10),
+        TextField(
+          controller: _idNitController,
+          decoration: const InputDecoration(labelText: "ID/NIT"),
+        ),
+        const SizedBox(height: 10),
+        TextField(
+          controller: _descriptionController,
+          decoration: const InputDecoration(labelText: "Description"),
+          maxLines: 3,
+        ),
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFF9FAFB),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            const SizedBox(height: 40),
-            _buildHeader(),
-            const SizedBox(height: 16),
-            _buildCustomerList(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        const Text(
-          'Customers',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
+      appBar: AppBar(
+        title: const Text("Customers"),
+        actions: [
+          IconButton(
+            onPressed: _showAddCustomerDialog,
+            icon: const Icon(Icons.add),
           ),
-        ),
-        IconButton(
-          icon: const Icon(Icons.person_add, color: Colors.black),
-          onPressed: () async {
-            final newCustomer = await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => AddCustomerScreen(
-                    existingCustomer: null,
-                    customerRepository: widget.customerRepo),
-              ),
-            );
-            if (newCustomer != null) {
-              _addCustomer(newCustomer);
-            }
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCustomerList() {
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 20.0),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
-              blurRadius: 5,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: ValueListenableBuilder(
-          valueListenable: customerBox.listenable(),
-          builder: (context, Box box, _) {
-            final customerList = box.values.toList();
-            return ListView.builder(
-              itemCount: customerList.length,
-              itemBuilder: (context, index) {
-                return _buildCustomerRow(customerList[index]);
-              },
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCustomerRow(Map customer) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Container(
-        padding: const EdgeInsets.all(8.0),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: Colors.grey[200],
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.person, color: Colors.grey, size: 32),
-            const SizedBox(width: 16),
-            Expanded(
-              child: GestureDetector(
-                onTap: () {
-                  _showCustomerDetails(customer);
-                },
-                child: Text(
-                  customer['name'],
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+        ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(60),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: "Search by Name, Email, Phone, or ID/NIT",
+                prefixIcon: const Icon(Icons.search),
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25),
+                  borderSide: BorderSide.none,
                 ),
               ),
             ),
-            IconButton(
-              icon: const Icon(Icons.more_vert, color: Colors.grey),
-              onPressed: () {
-                _showEditDeleteMenu(customer);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _addCustomer(Map<String, dynamic> customer) {
-    customerBox.add(customer);
-  }
-
-  void _editCustomer(Map<dynamic, dynamic> customer) async {
-    Customer customerObj = Customer(
-        id: customer['id'] ?? '',
-        name: customer['name'] ?? '',
-        contactNumber: customer['contactNumber'] ?? '',
-        email: customer['email'] ?? '',
-        address: customer['address'] ?? '',
-        idNit: customer['ID/NIT'] ?? '',
-        uniqueCode: customer['uniqueCode'] ?? '',
-        contact: customer['contact'] ?? '',
-        isSynced: customer['isSynced'] ?? false);
-
-    final updatedCustomer = await Navigator.push<Customer?>(
-      context,
-      MaterialPageRoute<Customer?>(
-        builder: (context) => AddCustomerScreen(
-          existingCustomer: customerObj as Customer?,
-          customerRepository: widget.customerRepo,
-        ),
-      ),
-    );
-
-    if (updatedCustomer != null) {
-      // No need to check is Customer
-      final index = customerBox.values.toList().indexOf(customer);
-      if (index != -1) {
-        customerBox.putAt(index, {
-          'id': updatedCustomer.id,
-          'name': updatedCustomer.name,
-          'contactNumber': updatedCustomer.contactNumber,
-          'email': updatedCustomer.email,
-          'address': updatedCustomer.address,
-          'ID/NIT': updatedCustomer.idNit,
-          'uniqueCode': updatedCustomer.uniqueCode,
-          'contact': updatedCustomer.contact,
-          'isSynced': updatedCustomer.isSynced
-        });
-      }
-    }
-  }
-
-  void _deleteCustomer(Map customer) {
-    final index = customerBox.values.toList().indexOf(customer);
-    customerBox.deleteAt(index);
-  }
-
-  void _showCustomerDetails(Map customer) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(customer['name']),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: [
-                if (customer['address']?.isNotEmpty ?? false)
-                  Text('Address: ${customer['address']}'),
-                if (customer['contact']?.isNotEmpty ?? false)
-                  Text('Contact: ${customer['contact']}'),
-                if (customer['email']?.isNotEmpty ?? false)
-                  Text('Email: ${customer['email']}'),
-                if (customer['id']?.isNotEmpty ?? false)
-                  Text('ID/NIT: ${customer['id']}'),
-                if (customer['uniqueCode']?.isNotEmpty ?? false)
-                  Text('Code: ${customer['uniqueCode']}'),
-              ],
-            ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Close'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+        ),
+      ),
+      body: ValueListenableBuilder(
+        valueListenable: customerBox.listenable(),
+        builder: (context, Box<CustomerModel> box, _) {
+          final customers =
+              _searchQuery.isEmpty ? box.values.toList() : _filteredCustomers;
 
-  void _showEditDeleteMenu(Map customer) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.edit),
-              title: const Text('Edit'),
-              onTap: () {
-                Navigator.pop(context);
-                _editCustomer(customer);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.delete),
-              title: const Text('Delete'),
-              onTap: () {
-                Navigator.pop(context);
-                _deleteCustomer(customer);
-              },
-            ),
-          ],
-        );
-      },
+          return customers.isEmpty
+              ? const Center(child: Text("No customers found"))
+              : ListView.builder(
+                  itemCount: customers.length,
+                  itemBuilder: (context, index) {
+                    final customer = customers[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Card(
+                        child: ListTile(
+                          title: Text(customer.name),
+                          subtitle: Text(
+                              "Phone: ${customer.contactNumber} | ID/NIT: ${customer.idNit}"),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => _showDeleteConfirmation(index),
+                          ),
+                          onTap: () => _viewCustomerDetails(customer),
+                        ),
+                      ),
+                    );
+                  },
+                );
+        },
+      ),
     );
   }
 }

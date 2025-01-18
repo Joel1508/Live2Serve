@@ -22,7 +22,7 @@ class OthersScreen extends StatelessWidget {
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFFCFCFCF), Color(0xFFFDEDCDD)],
+            colors: [Color(0xFFFCFCFCF), Color(0xFFFF9FAFB)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -108,7 +108,7 @@ class OthersScreen extends StatelessWidget {
         ],
       ),
       child: ListTile(
-        leading: Icon(icon, size: 28, color: Colors.purple),
+        leading: Icon(icon, size: 28, color: Colors.blue),
         title: Text(
           label,
           style: TextStyle(
@@ -141,7 +141,7 @@ class OthersScreen extends StatelessWidget {
         ],
       ),
       child: ListTile(
-        leading: Icon(Icons.my_location, size: 28, color: Colors.purple),
+        leading: Icon(Icons.my_location, size: 28, color: Colors.blue),
         title: Text(
           "Goals",
           style: TextStyle(

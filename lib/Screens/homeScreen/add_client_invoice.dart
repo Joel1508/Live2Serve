@@ -31,13 +31,26 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
     }
   }
 
+  InputDecoration _customInputDecoration(String labelText) {
+    return InputDecoration(
+      labelText: labelText,
+      filled: true,
+      fillColor: Colors.white,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12.0),
+        borderSide: BorderSide.none,
+      ),
+      contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("Client Invoice"),
         centerTitle: true,
-        backgroundColor: Color(0xFFFDEDCDD),
+        backgroundColor: Color(0xFFFF9FAFB),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -48,24 +61,30 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _senderController,
-                    decoration: InputDecoration(
-                      labelText: "Sender",
-                      border: OutlineInputBorder(),
+            Card(
+              elevation: 4.0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _senderController,
+                        decoration: _customInputDecoration("Sender"),
+                      ),
                     ),
-                  ),
+                    IconButton(
+                      icon: Icon(Icons.edit),
+                      onPressed: () {
+                        // Optional: Add functionality if needed
+                      },
+                    ),
+                  ],
                 ),
-                IconButton(
-                  icon: Icon(Icons.edit),
-                  onPressed: () {
-                    // Optional: Add functionality if needed
-                  },
-                ),
-              ],
+              ),
             ),
             SizedBox(height: 16.0),
             Text(
@@ -73,8 +92,8 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 8.0),
-            DropdownButton<String>(
-              isExpanded: true,
+            DropdownButtonFormField<String>(
+              decoration: _customInputDecoration("Select Customer"),
               value: _issuedToOption,
               items: _issuedToOptions.map((String value) {
                 return DropdownMenuItem<String>(
@@ -92,16 +111,13 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
               SizedBox(height: 16.0),
               TextField(
                 controller: _issuedToController,
-                decoration: InputDecoration(
-                  labelText: "New Customer Name",
-                  border: OutlineInputBorder(),
-                ),
+                decoration: _customInputDecoration("New Customer Name"),
               ),
             ],
             if (_issuedToOption == "Select Customer") ...[
               SizedBox(height: 16.0),
-              DropdownButton<String>(
-                isExpanded: true,
+              DropdownButtonFormField<String>(
+                decoration: _customInputDecoration("Registered Customers"),
                 value: _customerList.isNotEmpty ? _customerList.first : null,
                 items: _customerList.map((String customer) {
                   return DropdownMenuItem<String>(
@@ -120,10 +136,7 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
             SizedBox(height: 16.0),
             TextField(
               controller: _nitCcController,
-              decoration: InputDecoration(
-                labelText: "Nit / CC",
-                border: OutlineInputBorder(),
-              ),
+              decoration: _customInputDecoration("Nit / CC"),
               keyboardType: TextInputType.number,
             ),
             SizedBox(height: 16.0),
@@ -138,28 +151,19 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
             SizedBox(height: 16.0),
             TextField(
               controller: _amountController,
-              decoration: InputDecoration(
-                labelText: "Amount",
-                border: OutlineInputBorder(),
-              ),
+              decoration: _customInputDecoration("Amount"),
               keyboardType: TextInputType.number,
             ),
             SizedBox(height: 16.0),
             TextField(
               controller: _detailsController,
-              decoration: InputDecoration(
-                labelText: "Details",
-                border: OutlineInputBorder(),
-              ),
+              decoration: _customInputDecoration("Details"),
               maxLines: 3,
             ),
             SizedBox(height: 16.0),
             TextField(
               controller: _emailController,
-              decoration: InputDecoration(
-                labelText: "Email",
-                border: OutlineInputBorder(),
-              ),
+              decoration: _customInputDecoration("Email"),
               keyboardType: TextInputType.emailAddress,
             ),
             SizedBox(height: 16.0),
@@ -174,13 +178,17 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
                 height: 150.0,
                 width: double.infinity,
                 decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(12.0),
                   border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: _selectedImage != null
-                    ? Image.file(
-                        _selectedImage!,
-                        fit: BoxFit.cover,
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(12.0),
+                        child: Image.file(
+                          _selectedImage!,
+                          fit: BoxFit.cover,
+                        ),
                       )
                     : Icon(
                         Icons.add_a_photo,
@@ -198,7 +206,7 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
                   backgroundColor: Color(0xFFF979DAB),
                   padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0),
+                    borderRadius: BorderRadius.circular(12.0),
                   ),
                 ),
                 child: Text(

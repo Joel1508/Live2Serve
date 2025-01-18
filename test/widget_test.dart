@@ -1,3 +1,4 @@
+import 'package:app/Screens/homeScreen/customers/models/customer_model.dart';
 import 'package:app/Screens/homeScreen/project/bed_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -8,7 +9,7 @@ import 'package:hive/hive.dart';
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Open mock Hive boxes
-    final mockCustomerBox = await Hive.openBox('customerBox');
+    final mockCustomerBox = await Hive.openBox<CustomerModel>('customerBox');
     final mockProjectBox = await Hive.openBox<BedModel>('projectBox');
 
     // Create mock CustomerRepository

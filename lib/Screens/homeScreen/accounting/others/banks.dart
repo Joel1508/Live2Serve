@@ -47,7 +47,7 @@ class _BanksScreenState extends State<BanksScreen> {
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFE0BBE4), Color(0xFF957DAD)],
+            colors: [Color(0xFFFCFCFCF), Color(0xFFFF9FAFB)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -215,7 +215,7 @@ class _BanksScreenState extends State<BanksScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _toggleAddContainer,
-        backgroundColor: Colors.purple,
+        backgroundColor: Color(0xFFF5EBA7D),
         child: Icon(Icons.add, color: Colors.white),
       ),
     );

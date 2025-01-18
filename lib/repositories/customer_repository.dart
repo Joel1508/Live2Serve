@@ -1,24 +1,25 @@
 import 'package:app/Screens/homeScreen/home_screen.dart';
-import 'package:app/Screens/homeScreen/project/bed_model.dart';
-import 'package:hive/hive.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:app/Screens/homeScreen/customers/models/customer_model.dart';
+import 'package:app/Screens/homeScreen/project/bed_model.dart';
 
 class CustomerRepository {
-  final Box customerBox;
+  final Box<CustomerModel> customerBox;
 
   CustomerRepository({required this.customerBox});
 
-  Future<void> addCustomer(Customer customer) async {
+  Future<void> addCustomer(CustomerModel customer) async {
     await customerBox.add(customer);
   }
 
-  Future<List<Customer>> getCustomers() async {
-    return customerBox.values.cast<Customer>().toList();
+  Future<List<CustomerModel>> getCustomers() async {
+    return customerBox.values.toList();
   }
 
   Future<void> syncUnsentCustomers() async {
-    List<Customer> customers = await getCustomers();
+    List<CustomerModel> customers = await getCustomers();
     for (var customer in customers) {
       print('Syncing customer: ${customer.name}');
     }
@@ -29,22 +30,31 @@ class CustomerRepository {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Hive and open required boxes
+  // Initialize Hive
   final directory = await getApplicationDocumentsDirectory();
   Hive.init(directory.path);
 
-  await Hive.openBox('customerBox');
+  // Register Hive Adapters
+  if (!Hive.isAdapterRegistered(0)) {
+    Hive.registerAdapter(CustomerModelAdapter());
+  }
+
+  // Register other adapters if needed
+  // if (!Hive.isAdapterRegistered(1)) {
+  //   Hive.registerAdapter(BedModelAdapter());
+  // }
+
+  // Open typed boxes
+  final customerBox = await Hive.openBox<CustomerModel>('customerBox');
+  final projectBox = await Hive.openBox<BedModel>('projectBox');
+
+  // Open other boxes
   await Hive.openBox('partnerBox');
   await Hive.openBox('accountingBox');
   await Hive.openBox('invoiceBox');
-  await Hive.openBox('projectBox');
   await Hive.openBox('goalsBox');
 
-  // Get the opened customerBox
-  var customerBox = Hive.box('customerBox');
-  var projectBox = Hive.box<BedModel>('projectBox');
-
-  // Initialize your customerRepo, passing customerBox and localDb
+  // Initialize your customerRepo
   final customerRepo = CustomerRepository(customerBox: customerBox);
 
   // Run the app and pass customerRepo
@@ -55,8 +65,8 @@ class MyApp extends StatelessWidget {
   final CustomerRepository customerRepo;
   final Box<BedModel> projectBox;
 
-  // Constructor to accept customerRepo
-  MyApp({required this.customerRepo, required this.projectBox});
+  const MyApp({Key? key, required this.customerRepo, required this.projectBox})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -66,55 +76,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) =>
             HomeScreen(customerRepo: customerRepo, projectBox: projectBox),
-        // other routes...
       },
     );
   }
-}
-
-class LocalDatabase {
-  // Example methods for inserting and retrieving customers from local database (SQLite or any other DB)
-  Future<void> insertCustomer(Map<String, dynamic> customerData) async {
-    // Insert customer data into the local DB (e.g., SQLite)
-    print('Customer inserted into local DB: $customerData');
-  }
-
-  Future<List<Map<String, dynamic>>> getCustomers() async {
-    // Fetch customers from local DB (e.g., SQLite)
-    return [
-      {
-        'name': 'John Doe',
-        'contactNumber': '1234567890',
-        'email': 'john@example.com',
-        'address': '123 Main St',
-        'ID/NIT': '123456'
-      },
-      // Add more mock data as needed
-    ];
-  }
-}
-
-class Customer {
-  final String name;
-  final String contactNumber;
-  final String email;
-  final String address;
-  final String idNit;
-  final String id;
-  final String uniqueCode;
-  final String contact;
-  final bool isSynced;
-
-  // Constructor for Customer class
-  Customer({
-    required this.name,
-    required this.contactNumber,
-    required this.email,
-    required this.address,
-    required this.idNit,
-    required this.id,
-    required this.uniqueCode,
-    required this.contact,
-    required this.isSynced,
-  });
 }

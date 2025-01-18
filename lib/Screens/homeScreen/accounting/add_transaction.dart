@@ -29,14 +29,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFFDEDCDD),
+      backgroundColor: Color(0xFFFF9FAFB),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 48),
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             gradient: LinearGradient(
-              colors: [Color(0xFFFCFCFCF), Color(0xFFFDEDCDD)],
+              colors: [Color(0xFFFCFCFCF), Color(0xFFFF9FAFB)],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),
@@ -218,7 +218,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFF979DAB),
+                    backgroundColor: Color(0xFFF5EBA7D),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),

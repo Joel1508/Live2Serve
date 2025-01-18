@@ -16,22 +16,22 @@ import 'package:app/Screens/homeScreen/accounting/others/credits.dart';
 import 'package:app/Screens/homeScreen/accounting/others/savings.dart';
 import 'package:app/Screens/homeScreen/add_client_invoice.dart';
 import 'package:app/Screens/homeScreen/add_tool.dart';
-import 'package:app/Screens/homeScreen/customers/add_customer.dart';
 import 'package:app/Screens/homeScreen/customers/models/customer_model.dart';
 import 'package:app/Screens/homeScreen/goals/goal.dart';
 import 'package:app/Screens/homeScreen/goals/goals.dart';
 import 'package:app/Screens/homeScreen/home_screen.dart';
 import 'package:app/Screens/homeScreen/invoice/invoice.dart';
+import 'package:app/Screens/homeScreen/invoice/models/invoice_model.dart';
 import 'package:app/Screens/homeScreen/project/bed_model.dart';
 import 'package:app/Screens/homeScreen/project/project.dart';
-
 import 'package:app/Screens/homeScreen/user_settings/user.dart';
-import 'package:app/repositories/customer_repository.dart';
+import 'package:app/repositories/customer_repository.dart'
+    show CustomerRepository, Customer;
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'Screens/homeScreen/customers/customers.dart';
+import 'Screens/homeScreen/customers/customers.dart' as customers_screen;
 import 'Screens/homeScreen/partners/partners.dart';
 
 Future<void> main() async {
@@ -46,10 +46,11 @@ Future<void> main() async {
   Hive.registerAdapter(CustomerModelAdapter());
   Hive.registerAdapter(BedModelAdapter());
   Hive.registerAdapter(GoalAdapter());
+  Hive.registerAdapter(InvoiceAdapter());
 
   // Open boxes with checks
   if (!Hive.isBoxOpen('customerBox')) {
-    await Hive.openBox<Customer>('customerBox');
+    await Hive.openBox<CustomerModel>('customerBox');
   }
   if (!Hive.isBoxOpen('partnerBox')) {
     await Hive.openBox('partnerBox');
@@ -57,14 +58,15 @@ Future<void> main() async {
   if (!Hive.isBoxOpen('accountingBox')) {
     await Hive.openBox('accountingBox');
   }
-  if (!Hive.isBoxOpen('invoiceBox')) {
-    await Hive.openBox('invoiceBox');
-  }
   if (!Hive.isBoxOpen('projectBox')) {
     await Hive.openBox<BedModel>('projectBox');
   }
   if (!Hive.isBoxOpen('goalsBox')) {
-    await Hive.openBox<Goal>('goalsBox');
+    try {
+      await Hive.openBox<Goal>('goalsBox');
+    } catch (e) {
+      print('Error opening goalBox: $e');
+    }
   }
   if (!Hive.isBoxOpen('transactions')) {
     await Hive.openBox<Transaction>('transactions');
@@ -75,8 +77,10 @@ Future<void> main() async {
   }
 
   // Get the opened boxes
-  var customerBox = Hive.box<Customer>('customerBox');
+  var customerBox = Hive.box<CustomerModel>('customerBox');
   var projectBox = Hive.box<BedModel>('projectBox');
+  var invoiceBox = await Hive.openBox<Invoice>('invoiceBox');
+  var toolBox = await Hive.openBox('toolBox');
 
   // Initialize your customerRepo, passing Hive's instance and customerBox
   final customerRepo = CustomerRepository(customerBox: customerBox);
@@ -127,20 +131,17 @@ class MyApp extends StatelessWidget {
         '/savings': (context) => SavingsScreen(),
         '/add_tool': (context) => AddToolScreen(),
         '/invoice': (context) =>
-            InvoiceScreen(invoiceBox: Hive.box('invoiceBox')),
+            InvoiceScreen(invoiceBox: Hive.box<Invoice>('invoiceBox')),
         '/date': (context) => DateTimePickerScreen(),
         '/partners': (context) =>
             PartnersScreen(partnerBox: Hive.box('partnerBox')),
-        '/customers': (context) => CustomersScreen(customerRepo: customerRepo),
-        '/add_customer': (context) => AddCustomerScreen(
-              existingCustomer: null,
-              customerRepository: customerRepo,
-            ),
+        '/customers': (context) =>
+            customers_screen.CustomersScreen(customerRepo: customerRepo),
         '/add_client_invoice': (context) => InvoiceClientScreen(),
         '/project': (context) =>
             HydroponicBedsScreen(projectBox: Hive.box('projectBox')),
-        '/goals': (context) =>
-            GoalsApp(goalsBox: Hive.box('goalBox'), customerRepo: customerRepo),
+        '/goals': (context) => GoalsApp(
+            goalsBox: Hive.box('goalsBox'), customerRepo: customerRepo),
         '/user': (context) => const UserScreen(),
       },
     );

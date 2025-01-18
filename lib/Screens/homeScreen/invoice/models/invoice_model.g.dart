@@ -8,7 +8,7 @@ part of 'invoice_model.dart';
 
 class InvoiceAdapter extends TypeAdapter<Invoice> {
   @override
-  final int typeId = 0;
+  final int typeId = 3;
 
   @override
   Invoice read(BinaryReader reader) {

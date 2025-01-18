@@ -3,44 +3,45 @@ import 'package:hive/hive.dart';
 
 part 'invoice_model.g.dart';
 
-@HiveType(typeId: 0)
+@HiveType(typeId: 3) // Changed from 0 to avoid conflicts
 class Invoice extends HiveObject {
   @HiveField(0)
-  final String reference;
+  late String reference;
 
   @HiveField(1)
-  final String sender;
+  late String sender;
 
   @HiveField(2)
-  final String receiver;
+  late String receiver;
 
   @HiveField(3)
-  final String nit;
+  late String nit;
 
   @HiveField(4)
-  final String dateTime;
+  late String dateTime;
 
   @HiveField(5)
-  final String operation;
+  late String operation;
 
   @HiveField(6)
-  final double amount;
+  late double amount;
 
   @HiveField(7)
-  final String details;
+  late String details;
 
   @HiveField(8)
-  final String email;
+  late String email;
 
   @HiveField(9)
-  final String month;
+  late String month;
 
   @HiveField(10)
-  final String title;
+  late String title;
 
   @HiveField(11)
-  final String description;
+  late String description;
 
+  // Default constructor
   Invoice({
     required this.reference,
     required this.sender,
@@ -55,6 +56,22 @@ class Invoice extends HiveObject {
     required this.title,
     required this.description,
   });
+
+  // Empty constructor for Hive
+  Invoice.empty() {
+    reference = '';
+    sender = '';
+    receiver = '';
+    nit = '';
+    dateTime = '';
+    operation = '';
+    amount = 0.0;
+    details = '';
+    email = '';
+    month = '';
+    title = '';
+    description = '';
+  }
 
   // Convert Invoice to Map
   Map<String, dynamic> toMap() {
@@ -75,7 +92,7 @@ class Invoice extends HiveObject {
   }
 
   // Create Invoice from Map
-  static Invoice fromMap(Map<String, dynamic> map) {
+  factory Invoice.fromMap(Map<String, dynamic> map) {
     return Invoice(
       reference: map['reference'] ?? '',
       sender: map['sender'] ?? '',

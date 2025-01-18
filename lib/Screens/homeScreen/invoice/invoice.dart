@@ -4,7 +4,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'models/invoice_model.dart';
 
 class InvoiceScreen extends StatefulWidget {
-  final Box invoiceBox;
+  final Box<Invoice> invoiceBox;
 
   const InvoiceScreen({Key? key, required this.invoiceBox}) : super(key: key);
 
@@ -125,7 +125,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
       appBar: AppBar(
         title: Text("Invoice History"),
         centerTitle: true,
-        backgroundColor: Colors.purple,
+        backgroundColor: Color(0xFFFCFCFCF),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -143,8 +143,8 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Colors.purple.shade300,
-              Colors.pink.shade200,
+              Color(0xFFFCFCFCF),
+              Color(0xFFFF9FAFB),
             ],
           ),
         ),

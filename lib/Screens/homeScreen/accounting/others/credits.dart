@@ -47,7 +47,7 @@ class _CreditsScreenState extends State<CreditsScreen> {
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFF4A5A5), Color(0xFFDE6464)],
+            colors: [Color(0xFFF4A5A5), Color(0xFFFF9FAFB)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),

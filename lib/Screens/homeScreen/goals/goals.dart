@@ -1,3 +1,4 @@
+import 'package:app/Screens/homeScreen/customers/models/customer_model.dart';
 import 'package:app/Screens/homeScreen/project/bed_model.dart';
 import 'package:app/repositories/customer_repository.dart';
 import 'package:flutter/material.dart';
@@ -133,7 +134,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
               MaterialPageRoute(
                 builder: (context) => home_screen.HomeScreen(
                   customerRepo: CustomerRepository(
-                    customerBox: Hive.box<Customer>('customerBox'),
+                    customerBox: Hive.box<CustomerModel>('customerBox'),
                   ),
                   projectBox: Hive.box<BedModel>('projectBox'),
                 ),

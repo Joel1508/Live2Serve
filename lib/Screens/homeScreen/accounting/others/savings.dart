@@ -223,7 +223,7 @@ class _SavingsScreenState extends State<SavingsScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _toggleAddContainer,
-        backgroundColor: Colors.purple,
+        backgroundColor: Color(0xFFF5EBA7D),
         child: Icon(Icons.add, color: Colors.white),
       ),
     );

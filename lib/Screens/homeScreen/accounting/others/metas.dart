@@ -51,7 +51,7 @@ class _AccountingGoalsScreenState extends State<AccountingGoalsScreen> {
         progress: (goal.progress * goal.amount + progressAmount) / goal.amount,
       );
 
-      widget.goalsBox.putAt(index, updatedGoal); // Update in Hive Box
+      widget.goalsBox.putAt(index, updatedGoal);
 
       setState(() {});
     }

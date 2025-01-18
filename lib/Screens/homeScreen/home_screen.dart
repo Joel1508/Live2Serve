@@ -1,5 +1,9 @@
+import 'package:app/Screens/homeScreen/add_client_invoice.dart';
+import 'package:app/Screens/homeScreen/add_tool.dart';
+import 'package:app/Screens/homeScreen/customers/models/customer_model.dart';
 import 'package:app/Screens/homeScreen/goals/goal.dart';
 import 'package:app/Screens/homeScreen/goals/goals.dart';
+import 'package:app/Screens/homeScreen/invoice/models/invoice_model.dart';
 import 'package:app/Screens/homeScreen/project/bed_model.dart';
 import 'package:app/Screens/homeScreen/user_settings/user.dart';
 import 'package:app/repositories/customer_repository.dart';
@@ -19,11 +23,13 @@ Future<void> main() async {
   final directory = await getApplicationDocumentsDirectory();
   Hive.init(directory.path);
 
+  Hive.registerAdapter(InvoiceAdapter());
+
   // Open the boxes only once in the main function
-  var customerBox = await Hive.openBox('customerBox');
+  var customerBox = await Hive.openBox<CustomerModel>('customerBox');
   var partnerBox = await Hive.openBox('partnerBox');
   var accountingBox = await Hive.openBox('accountingBox');
-  var invoiceBox = await Hive.openBox('invoiceBox');
+  var invoiceBox = await Hive.openBox<Invoice>('invoiceBox');
   var projectBox = await Hive.openBox<BedModel>('projectBox');
   final Box<Goal> goalsBox = await Hive.openBox<Goal>('goalsBox');
 
@@ -45,8 +51,8 @@ class MyApp extends StatelessWidget {
   final CustomerRepository customerRepo;
   final Box partnerBox;
   final Box accountingBox;
-  final Box invoiceBox;
-  final Box<BedModel> projectBox; // Define projectBox here
+  final Box<Invoice> invoiceBox;
+  final Box<BedModel> projectBox;
   final Box<Goal> goalsBox;
 
   // Constructor
@@ -55,7 +61,7 @@ class MyApp extends StatelessWidget {
     required this.partnerBox,
     required this.accountingBox,
     required this.invoiceBox,
-    required this.projectBox, // Add projectBox as required
+    required this.projectBox,
     required this.goalsBox,
   });
 
@@ -83,6 +89,8 @@ class MyApp extends StatelessWidget {
               customerRepo: customerRepo,
             ),
         '/user': (context) => UserScreen(),
+        '/add_client_invoice': (context) => InvoiceClientScreen(),
+        '/add_tool': (context) => AddToolScreen(),
       },
     );
   }
@@ -114,12 +122,59 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+    if (index == 1) {
+      // Show add options bottom sheet
+      _showAddOptions();
+    } else if (index == 2) {
+      // Navigate to user profile
+      Navigator.pushNamed(context, '/user');
+    } else {
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
   }
 
-  // Function to display the add panel
+  void _showAddOptions() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Add New',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 20),
+              ListTile(
+                leading: Icon(Icons.receipt, color: Colors.blue),
+                title: Text('Client Invoice'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/add_client_invoice');
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.nature, color: Colors.green),
+                title: Text('Harvest Invoice'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/add_tool');
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -184,9 +239,7 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings, color: Colors.black),
-            onPressed: () {
-              // Settings action
-            },
+            onPressed: () => Navigator.pushNamed(context, '/user'),
           ),
         ],
       ),
@@ -262,7 +315,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Helper method to build containers
   Widget _buildContainer(String title) {
     return Padding(
       padding: const EdgeInsets.only(left: 15),
@@ -278,12 +330,9 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Helper method to build feature cards with navigation
   Widget _buildFeatureCard(String title, IconData icon) {
     return InkWell(
-      // Changed from Card to InkWell for better tap feedback
       onTap: () {
-        // Navigation logic based on the title
         switch (title) {
           case 'Customers':
             Navigator.pushNamed(context, '/customers');
