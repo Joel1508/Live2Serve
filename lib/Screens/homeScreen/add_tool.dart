@@ -42,7 +42,9 @@ class AddToolScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => InvoiceClientScreen()),
+                        builder: (context) => InvoiceClientScreen(
+                              onInvoiceSaved: (InvoiceModel) {},
+                            )),
                   );
                 },
                 child: Text(

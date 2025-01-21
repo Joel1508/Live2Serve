@@ -23,10 +23,11 @@ import 'package:app/Screens/homeScreen/home_screen.dart';
 import 'package:app/Screens/homeScreen/invoice/invoice.dart';
 import 'package:app/Screens/homeScreen/invoice/models/invoice_model.dart';
 import 'package:app/Screens/homeScreen/project/bed_model.dart';
+import 'package:app/Screens/homeScreen/project/cost_model.dart';
 import 'package:app/Screens/homeScreen/project/project.dart';
 import 'package:app/Screens/homeScreen/user_settings/user.dart';
 import 'package:app/repositories/customer_repository.dart'
-    show CustomerRepository, Customer;
+    show CustomerRepository;
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -47,10 +48,14 @@ Future<void> main() async {
   Hive.registerAdapter(BedModelAdapter());
   Hive.registerAdapter(GoalAdapter());
   Hive.registerAdapter(InvoiceAdapter());
+  Hive.registerAdapter(CostModelAdapter());
 
   // Open boxes with checks
   if (!Hive.isBoxOpen('customerBox')) {
     await Hive.openBox<CustomerModel>('customerBox');
+  }
+  if (!Hive.isBoxOpen('costsBox')) {
+    await Hive.openBox<CostModel>('costsBox');
   }
   if (!Hive.isBoxOpen('partnerBox')) {
     await Hive.openBox('partnerBox');
@@ -71,15 +76,23 @@ Future<void> main() async {
   if (!Hive.isBoxOpen('transactions')) {
     await Hive.openBox<Transaction>('transactions');
   }
-
   if (!Hive.isBoxOpen('balance')) {
     await Hive.openBox<Balance>('balance');
+  }
+  // Add consistent check for invoiceBox
+  if (!Hive.isBoxOpen('invoiceBox')) {
+    try {
+      await Hive.openBox<Invoice>('invoiceBox');
+    } catch (e) {
+      print('Error opening invoiceBox: $e');
+    }
   }
 
   // Get the opened boxes
   var customerBox = Hive.box<CustomerModel>('customerBox');
   var projectBox = Hive.box<BedModel>('projectBox');
-  var invoiceBox = await Hive.openBox<Invoice>('invoiceBox');
+  var invoiceBox =
+      Hive.box<Invoice>('invoiceBox'); // Changed from openBox to box
   var toolBox = await Hive.openBox('toolBox');
 
   // Initialize your customerRepo, passing Hive's instance and customerBox
@@ -92,19 +105,24 @@ Future<void> main() async {
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxZHB3aXNrdnlpb3BxZ3h1YW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM1MDM3MzYsImV4cCI6MjA0OTA3OTczNn0.dkxwbnUkKb2fcpzEFR2uoNCsY_f06wntVxWrZsuxt70',
   );
 
-  // Run the app, passing the repository to MyApp
+  // Run the app, passing the repository and boxes to MyApp
   runApp(MyApp(
     customerRepo: customerRepo,
     projectBox: projectBox,
+    invoiceBox: invoiceBox, // Add invoiceBox to MyApp constructor
   ));
 }
 
 class MyApp extends StatelessWidget {
   final CustomerRepository customerRepo;
   final Box<BedModel> projectBox;
+  final Box<Invoice> invoiceBox;
 
   const MyApp(
-      {super.key, required this.customerRepo, required this.projectBox});
+      {super.key,
+      required this.customerRepo,
+      required this.projectBox,
+      required this.invoiceBox});
 
   @override
   Widget build(BuildContext context) {
@@ -130,14 +148,15 @@ class MyApp extends StatelessWidget {
         '/credits': (context) => CreditsScreen(),
         '/savings': (context) => SavingsScreen(),
         '/add_tool': (context) => AddToolScreen(),
-        '/invoice': (context) =>
-            InvoiceScreen(invoiceBox: Hive.box<Invoice>('invoiceBox')),
+        '/invoice': (context) => InvoiceScreen(),
         '/date': (context) => DateTimePickerScreen(),
         '/partners': (context) =>
             PartnersScreen(partnerBox: Hive.box('partnerBox')),
         '/customers': (context) =>
             customers_screen.CustomersScreen(customerRepo: customerRepo),
-        '/add_client_invoice': (context) => InvoiceClientScreen(),
+        '/add_client_invoice': (context) => InvoiceClientScreen(
+              onInvoiceSaved: (InvoiceModel) {},
+            ),
         '/project': (context) =>
             HydroponicBedsScreen(projectBox: Hive.box('projectBox')),
         '/goals': (context) => GoalsApp(

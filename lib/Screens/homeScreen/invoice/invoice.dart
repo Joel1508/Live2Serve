@@ -1,13 +1,10 @@
 // invoice.dart
+import 'package:app/Screens/homeScreen/add_client_invoice.dart';
+import 'package:app/Screens/homeScreen/invoice/models/invoice_model.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'models/invoice_model.dart';
 
 class InvoiceScreen extends StatefulWidget {
-  final Box<Invoice> invoiceBox;
-
-  const InvoiceScreen({Key? key, required this.invoiceBox}) : super(key: key);
-
   @override
   _InvoiceScreenState createState() => _InvoiceScreenState();
 }
@@ -19,10 +16,12 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
   @override
   void initState() {
     super.initState();
+    // Open the Hive box for invoices
     invoiceBox = Hive.box<Invoice>('invoiceBox');
     _loadInvoices();
   }
 
+  /// Load invoices from the Hive box
   void _loadInvoices() {
     final invoices =
         invoiceBox.values.map((invoice) => invoice.toMap()).toList();
@@ -32,13 +31,30 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
     });
   }
 
-  // Add new invoice
+  void _addNewInvoice() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => InvoiceClientScreen(
+          onInvoiceSaved: (Invoice invoice) {
+            setState(() {
+              invoiceBox.add(invoice);
+              _loadInvoices();
+            });
+          },
+        ),
+      ),
+    );
+  }
+
+  /// Add a new invoice to the Hive box
   void addInvoice(Map<String, dynamic> invoiceData) {
     final invoice = Invoice.fromMap(invoiceData);
     invoiceBox.add(invoice);
     _loadInvoices();
   }
 
+  /// Show invoice details in a bottom sheet
   void _showInvoiceDetails(Map<String, dynamic> invoice) {
     showModalBottomSheet(
       context: context,
@@ -93,6 +109,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
     );
   }
 
+  /// Helper method to build a detail row
   Widget _buildDetailRow(String label, String value, {bool boldValue = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),

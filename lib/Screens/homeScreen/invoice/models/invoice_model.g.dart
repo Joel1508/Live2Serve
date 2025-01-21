@@ -23,19 +23,18 @@ class InvoiceAdapter extends TypeAdapter<Invoice> {
       nit: fields[3] as String,
       dateTime: fields[4] as String,
       operation: fields[5] as String,
-      amount: fields[6] as double,
+      amount: fields[6] as String,
       details: fields[7] as String,
       email: fields[8] as String,
       month: fields[9] as String,
-      title: fields[10] as String,
-      description: fields[11] as String,
+      imagePath: fields[10] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Invoice obj) {
     writer
-      ..writeByte(12)
+      ..writeByte(11)
       ..writeByte(0)
       ..write(obj.reference)
       ..writeByte(1)
@@ -57,9 +56,7 @@ class InvoiceAdapter extends TypeAdapter<Invoice> {
       ..writeByte(9)
       ..write(obj.month)
       ..writeByte(10)
-      ..write(obj.title)
-      ..writeByte(11)
-      ..write(obj.description);
+      ..write(obj.imagePath);
   }
 
   @override

@@ -1,47 +1,43 @@
-// lib/Screens/homeScreen/invoice/invoice_model.dart
+// lib/models/invoice_model.dart
 import 'package:hive/hive.dart';
 
 part 'invoice_model.g.dart';
 
-@HiveType(typeId: 3) // Changed from 0 to avoid conflicts
+@HiveType(typeId: 3)
 class Invoice extends HiveObject {
   @HiveField(0)
-  late String reference;
+  final String reference;
 
   @HiveField(1)
-  late String sender;
+  final String sender;
 
   @HiveField(2)
-  late String receiver;
+  final String receiver;
 
   @HiveField(3)
-  late String nit;
+  final String nit;
 
   @HiveField(4)
-  late String dateTime;
+  final String dateTime;
 
   @HiveField(5)
-  late String operation;
+  final String operation;
 
   @HiveField(6)
-  late double amount;
+  final String amount;
 
   @HiveField(7)
-  late String details;
+  final String details;
 
   @HiveField(8)
-  late String email;
+  final String email;
 
   @HiveField(9)
-  late String month;
+  final String month;
 
   @HiveField(10)
-  late String title;
+  final String? imagePath;
 
-  @HiveField(11)
-  late String description;
-
-  // Default constructor
   Invoice({
     required this.reference,
     required this.sender,
@@ -53,27 +49,9 @@ class Invoice extends HiveObject {
     required this.details,
     required this.email,
     required this.month,
-    required this.title,
-    required this.description,
+    this.imagePath,
   });
 
-  // Empty constructor for Hive
-  Invoice.empty() {
-    reference = '';
-    sender = '';
-    receiver = '';
-    nit = '';
-    dateTime = '';
-    operation = '';
-    amount = 0.0;
-    details = '';
-    email = '';
-    month = '';
-    title = '';
-    description = '';
-  }
-
-  // Convert Invoice to Map
   Map<String, dynamic> toMap() {
     return {
       'reference': reference,
@@ -86,12 +64,12 @@ class Invoice extends HiveObject {
       'details': details,
       'email': email,
       'month': month,
-      'title': title,
-      'description': description,
+      'imagePath': imagePath,
+      'title': receiver, // For list display
+      'description': details, // For list display
     };
   }
 
-  // Create Invoice from Map
   factory Invoice.fromMap(Map<String, dynamic> map) {
     return Invoice(
       reference: map['reference'] ?? '',
@@ -100,12 +78,11 @@ class Invoice extends HiveObject {
       nit: map['nit'] ?? '',
       dateTime: map['dateTime'] ?? '',
       operation: map['operation'] ?? '',
-      amount: (map['amount'] ?? 0.0).toDouble(),
+      amount: map['amount']?.toString() ?? '0',
       details: map['details'] ?? '',
       email: map['email'] ?? '',
       month: map['month'] ?? '',
-      title: map['title'] ?? '',
-      description: map['description'] ?? '',
+      imagePath: map['imagePath'],
     );
   }
 }

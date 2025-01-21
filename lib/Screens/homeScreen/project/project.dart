@@ -1,7 +1,9 @@
-import 'package:app/Screens/homeScreen/project/bed_model.dart';
+import 'package:app/Screens/homeScreen/project/cost.dart';
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:random_string/random_string.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+
+import 'bed_model.dart';
 
 class HydroponicBedsScreen extends StatefulWidget {
   final Box<BedModel> projectBox;
@@ -151,30 +153,12 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
     Navigator.of(context).pop();
   }
 
-  void _viewBedDetails(BedModel bed) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("Bed Details"),
-          content: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("Name: ${bed.name}"),
-              Text("Code: ${bed.code}"),
-              Text("Creation Date: ${bed.creationDate}"),
-              Text("Details: ${bed.details}"),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text("Close"),
-            )
-          ],
-        );
-      },
+  void _navigateToHistoryScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HistoryBedScreen(),
+      ),
     );
   }
 
@@ -184,6 +168,17 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
       appBar: AppBar(
         title: Text("Hydroponic Beds"),
         actions: [
+          IconButton(
+            onPressed: _navigateToHistoryScreen,
+            icon: Icon(Icons.history),
+          ),
+          IconButton(
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => CostsScreen()),
+            ),
+            icon: Icon(Icons.attach_money),
+          ),
           IconButton(
             onPressed: _showAddBedDialog,
             icon: Icon(Icons.add),
@@ -228,7 +223,6 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
                           title: Text(bed.name),
                           subtitle: Text(
                               "Code: ${bed.code} | Date: ${bed.creationDate}"),
-                          onTap: () => _viewBedDetails(bed),
                         ),
                       ),
                     );
@@ -245,5 +239,61 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
     _detailsController.dispose();
     _searchController.dispose();
     super.dispose();
+  }
+}
+
+class HistoryBedScreen extends StatefulWidget {
+  const HistoryBedScreen({Key? key}) : super(key: key);
+
+  @override
+  _HistoryScreenState createState() => _HistoryScreenState();
+}
+
+class _HistoryScreenState extends State<HistoryBedScreen> {
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("History"),
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(60),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: "Search in History",
+                prefixIcon: Icon(Icons.search),
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              onChanged: (value) {
+                // Implement search functionality later
+                print("Search query: $value");
+              },
+            ),
+          ),
+        ),
+      ),
+      body: Center(
+        child: Text(
+          "This is the History Screen",
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 16),
+        ),
+      ),
+    );
   }
 }

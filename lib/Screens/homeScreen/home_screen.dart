@@ -81,7 +81,7 @@ class MyApp extends StatelessWidget {
               accountingBox: accountingBox,
               customerRepo: customerRepo,
             ),
-        '/invoice': (context) => InvoiceScreen(invoiceBox: invoiceBox),
+        '/invoice': (context) => InvoiceScreen(),
         '/project': (context) =>
             HydroponicBedsScreen(projectBox: projectBox), // Use projectBox here
         '/goals': (context) => GoalsScreen(
@@ -89,7 +89,9 @@ class MyApp extends StatelessWidget {
               customerRepo: customerRepo,
             ),
         '/user': (context) => UserScreen(),
-        '/add_client_invoice': (context) => InvoiceClientScreen(),
+        '/add_client_invoice': (context) => InvoiceClientScreen(
+              onInvoiceSaved: (InvoiceModel) {},
+            ),
         '/add_tool': (context) => AddToolScreen(),
       },
     );
