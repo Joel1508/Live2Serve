@@ -8,7 +8,7 @@ part of 'other_model.dart';
 
 class BankAdapter extends TypeAdapter<Bank> {
   @override
-  final int typeId = 3;
+  final int typeId = 2;
 
   @override
   Bank read(BinaryReader reader) {

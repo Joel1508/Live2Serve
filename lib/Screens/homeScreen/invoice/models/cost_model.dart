@@ -3,7 +3,7 @@ import 'package:hive/hive.dart';
 
 part 'cost_model.g.dart';
 
-@HiveType(typeId: 1)
+@HiveType(typeId: 9)
 class CostTemplate extends HiveObject {
   @HiveField(0)
   String name;

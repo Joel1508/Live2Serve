@@ -3,7 +3,7 @@ import 'package:hive/hive.dart';
 
 part 'goal.g.dart';
 
-@HiveType(typeId: 6)
+@HiveType(typeId: 4)
 class Goal extends HiveObject {
   @HiveField(0)
   final String title;

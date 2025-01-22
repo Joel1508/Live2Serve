@@ -3,7 +3,7 @@ import 'package:hive/hive.dart';
 
 part 'bed_model.g.dart';
 
-@HiveType(typeId: 1)
+@HiveType(typeId: 8)
 class BedModel extends HiveObject {
   @HiveField(0)
   String name;

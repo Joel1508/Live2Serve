@@ -2,7 +2,7 @@ import 'package:hive/hive.dart';
 
 part 'cost_model.g.dart';
 
-@HiveType(typeId: 5) // Make sure this ID is unique among your other models
+@HiveType(typeId: 7)
 class CostModel extends HiveObject {
   @HiveField(0)
   final String id;

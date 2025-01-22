@@ -3,7 +3,7 @@ import 'package:hive/hive.dart';
 
 part 'other_model.g.dart';
 
-@HiveType(typeId: 3)
+@HiveType(typeId: 2)
 class Bank extends HiveObject {
   @HiveField(0)
   final String name;

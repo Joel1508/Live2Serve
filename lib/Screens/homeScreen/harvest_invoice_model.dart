@@ -2,7 +2,7 @@
 import 'package:hive/hive.dart';
 part 'harvest_invoice_model.g.dart';
 
-@HiveType(typeId: 3)
+@HiveType(typeId: 5)
 class HarvestCost extends HiveObject {
   @HiveField(0)
   final String name;
