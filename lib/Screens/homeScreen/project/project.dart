@@ -1,4 +1,6 @@
+import 'package:app/Screens/homeScreen/harvest_invoice_model.dart';
 import 'package:app/Screens/homeScreen/project/cost.dart';
+import 'package:app/Screens/homeScreen/project/cost_model.dart';
 import 'package:flutter/material.dart';
 import 'package:random_string/random_string.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -175,7 +177,9 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
           IconButton(
             onPressed: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => CostsScreen()),
+              MaterialPageRoute(
+                  builder: (context) =>
+                      CostsScreen(costsBox: Hive.box<CostModel>('costs'))),
             ),
             icon: Icon(Icons.attach_money),
           ),
@@ -251,49 +255,177 @@ class HistoryBedScreen extends StatefulWidget {
 
 class _HistoryScreenState extends State<HistoryBedScreen> {
   final TextEditingController _searchController = TextEditingController();
+  late Box<HarvestInvoice> _harvestInvoicesBox;
+  List<HarvestInvoice> _filteredInvoices = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _harvestInvoicesBox = Hive.box<HarvestInvoice>('harvest_invoices');
+    _filteredInvoices = _harvestInvoicesBox.values.toList();
+    _searchController.addListener(_filterInvoices);
+  }
+
+  void _filterInvoices() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      _filteredInvoices = _harvestInvoicesBox.values
+          .where((invoice) =>
+              invoice.personName.toLowerCase().contains(query) ||
+              invoice.reference.toLowerCase().contains(query))
+          .toList();
+    });
+  }
+
+  void _showInvoiceDetails(HarvestInvoice invoice) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Harvest Invoice Details'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildDetailRow('Reference:', invoice.reference),
+              _buildDetailRow('Person:', invoice.personName),
+              _buildDetailRow('Date:', invoice.dateTime),
+              _buildDetailRow(
+                  'Plants Harvested:', invoice.plantsHarvested.toString()),
+              _buildDetailRow('Price per Plant:',
+                  '\$${invoice.pricePerPlant.toStringAsFixed(2)}'),
+              _buildDetailRow('Total Harvest Value:',
+                  '\$${invoice.totalHarvestValue.toStringAsFixed(2)}'),
+              Divider(),
+              Text('Costs:', style: TextStyle(fontWeight: FontWeight.bold)),
+              ...invoice.costs.map((cost) => _buildDetailRow(
+                  '${cost.name} (x${cost.quantity}):',
+                  '\$${cost.total.toStringAsFixed(2)}')),
+              Divider(),
+              _buildDetailRow(
+                  'Total Costs:', '\$${invoice.totalCosts.toStringAsFixed(2)}'),
+              _buildDetailRow('Final Amount:',
+                  '\$${invoice.finalAmount.toStringAsFixed(2)}'),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 4,
+            child: Text(
+              label,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Expanded(
+            flex: 6,
+            child: Text(value),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text("History"),
+          bottom: PreferredSize(
+            preferredSize: Size.fromHeight(110),
+            child: Column(
+              children: [
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: "Search in History",
+                      prefixIcon: Icon(Icons.search),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                ),
+                TabBar(
+                  tabs: [
+                    Tab(text: "Harvest Invoices"),
+                    Tab(text: "Bed History"),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        body: TabBarView(
+          children: [
+            // Harvest Invoices Tab
+            ValueListenableBuilder(
+              valueListenable: _harvestInvoicesBox.listenable(),
+              builder: (context, Box<HarvestInvoice> box, _) {
+                final invoices = _searchController.text.isEmpty
+                    ? box.values.toList()
+                    : _filteredInvoices;
+
+                return invoices.isEmpty
+                    ? Center(child: Text("No harvest invoices found"))
+                    : ListView.builder(
+                        itemCount: invoices.length,
+                        itemBuilder: (context, index) {
+                          final invoice = invoices[index];
+                          return Card(
+                            margin: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
+                            child: ListTile(
+                              title: Text(invoice.personName),
+                              subtitle: Text(
+                                  "${invoice.reference} | ${invoice.dateTime}"),
+                              trailing: Text(
+                                  "\$${invoice.finalAmount.toStringAsFixed(2)}"),
+                              onTap: () => _showInvoiceDetails(invoice),
+                            ),
+                          );
+                        },
+                      );
+              },
+            ),
+            // Bed History Tab
+            Center(
+              child: Text(
+                "Bed history implementation here",
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("History"),
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(60),
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: "Search in History",
-                prefixIcon: Icon(Icons.search),
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-              onChanged: (value) {
-                // Implement search functionality later
-                print("Search query: $value");
-              },
-            ),
-          ),
-        ),
-      ),
-      body: Center(
-        child: Text(
-          "This is the History Screen",
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 16),
-        ),
-      ),
-    );
   }
 }

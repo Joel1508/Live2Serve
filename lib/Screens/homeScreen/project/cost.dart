@@ -4,6 +4,13 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:uuid/uuid.dart';
 
 class CostsScreen extends StatefulWidget {
+  final Box<CostModel> costsBox;
+
+  const CostsScreen({
+    Key? key,
+    required this.costsBox,
+  }) : super(key: key);
+
   @override
   _CostsScreenState createState() => _CostsScreenState();
 }
@@ -18,7 +25,7 @@ class _CostsScreenState extends State<CostsScreen> {
   @override
   void initState() {
     super.initState();
-    _costsBox = Hive.box<CostModel>('costs');
+    _costsBox = widget.costsBox;
   }
 
   void _showAddCostDialog() {

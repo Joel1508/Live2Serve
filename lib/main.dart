@@ -15,10 +15,11 @@ import 'package:app/Screens/homeScreen/accounting/others/banks.dart';
 import 'package:app/Screens/homeScreen/accounting/others/credits.dart';
 import 'package:app/Screens/homeScreen/accounting/others/savings.dart';
 import 'package:app/Screens/homeScreen/add_client_invoice.dart';
-import 'package:app/Screens/homeScreen/add_tool.dart';
+import 'package:app/Screens/homeScreen/harvest_invoice.dart';
 import 'package:app/Screens/homeScreen/customers/models/customer_model.dart';
 import 'package:app/Screens/homeScreen/goals/goal.dart';
 import 'package:app/Screens/homeScreen/goals/goals.dart';
+import 'package:app/Screens/homeScreen/harvest_invoice_model.dart';
 import 'package:app/Screens/homeScreen/home_screen.dart';
 import 'package:app/Screens/homeScreen/invoice/invoice.dart';
 import 'package:app/Screens/homeScreen/invoice/models/invoice_model.dart';
@@ -41,21 +42,27 @@ Future<void> main() async {
 
   // Initialize Hive and open required boxes
   final directory = await getApplicationDocumentsDirectory();
+  await Hive.initFlutter(); // Added from second snippet
   Hive.init(directory.path);
 
-  // Register your adapters (make sure these are registered before opening boxes)
+  // Register all adapters
   Hive.registerAdapter(CustomerModelAdapter());
   Hive.registerAdapter(BedModelAdapter());
   Hive.registerAdapter(GoalAdapter());
   Hive.registerAdapter(InvoiceAdapter());
   Hive.registerAdapter(CostModelAdapter());
+  Hive.registerAdapter(HarvestCostAdapter());
+  Hive.registerAdapter(HarvestInvoiceAdapter());
 
   // Open boxes with checks
   if (!Hive.isBoxOpen('customerBox')) {
     await Hive.openBox<CustomerModel>('customerBox');
   }
+  if (!Hive.isBoxOpen('costs')) {
+    await Hive.openBox<CostModel>('costs');
+  }
   if (!Hive.isBoxOpen('costsBox')) {
-    await Hive.openBox<CostModel>('costsBox');
+    await Hive.openBox<HarvestCost>('costsBox');
   }
   if (!Hive.isBoxOpen('partnerBox')) {
     await Hive.openBox('partnerBox');
@@ -79,7 +86,6 @@ Future<void> main() async {
   if (!Hive.isBoxOpen('balance')) {
     await Hive.openBox<Balance>('balance');
   }
-  // Add consistent check for invoiceBox
   if (!Hive.isBoxOpen('invoiceBox')) {
     try {
       await Hive.openBox<Invoice>('invoiceBox');
@@ -87,15 +93,21 @@ Future<void> main() async {
       print('Error opening invoiceBox: $e');
     }
   }
+  // Added check for harvest_invoices box
+  if (!Hive.isBoxOpen('harvest_invoices')) {
+    try {
+      await Hive.openBox<HarvestInvoice>('harvest_invoices');
+    } catch (e) {
+      print('Error opening harvest_invoices: $e');
+    }
+  }
 
   // Get the opened boxes
   var customerBox = Hive.box<CustomerModel>('customerBox');
   var projectBox = Hive.box<BedModel>('projectBox');
-  var invoiceBox =
-      Hive.box<Invoice>('invoiceBox'); // Changed from openBox to box
-  var toolBox = await Hive.openBox('toolBox');
+  var invoiceBox = Hive.box<Invoice>('invoiceBox');
 
-  // Initialize your customerRepo, passing Hive's instance and customerBox
+  // Initialize your customerRepo
   final customerRepo = CustomerRepository(customerBox: customerBox);
 
   // Initialize Supabase
@@ -105,11 +117,11 @@ Future<void> main() async {
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxZHB3aXNrdnlpb3BxZ3h1YW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM1MDM3MzYsImV4cCI6MjA0OTA3OTczNn0.dkxwbnUkKb2fcpzEFR2uoNCsY_f06wntVxWrZsuxt70',
   );
 
-  // Run the app, passing the repository and boxes to MyApp
+  // Run the app
   runApp(MyApp(
     customerRepo: customerRepo,
     projectBox: projectBox,
-    invoiceBox: invoiceBox, // Add invoiceBox to MyApp constructor
+    invoiceBox: invoiceBox,
   ));
 }
 
@@ -147,7 +159,12 @@ class MyApp extends StatelessWidget {
         '/banks': (context) => BanksScreen(),
         '/credits': (context) => CreditsScreen(),
         '/savings': (context) => SavingsScreen(),
-        '/add_tool': (context) => AddToolScreen(),
+        '/add_tool': (context) => HarvestInvoiceScreen(
+              onInvoiceSaved: (invoice) {
+                print('Invoice saved: $invoice');
+              },
+              costsBox: Hive.box<HarvestCost>('harvest_cost'),
+            ),
         '/invoice': (context) => InvoiceScreen(),
         '/date': (context) => DateTimePickerScreen(),
         '/partners': (context) =>

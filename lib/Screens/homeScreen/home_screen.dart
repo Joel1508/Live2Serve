@@ -1,8 +1,9 @@
 import 'package:app/Screens/homeScreen/add_client_invoice.dart';
-import 'package:app/Screens/homeScreen/add_tool.dart';
+import 'package:app/Screens/homeScreen/harvest_invoice.dart';
 import 'package:app/Screens/homeScreen/customers/models/customer_model.dart';
 import 'package:app/Screens/homeScreen/goals/goal.dart';
 import 'package:app/Screens/homeScreen/goals/goals.dart';
+import 'package:app/Screens/homeScreen/harvest_invoice_model.dart';
 import 'package:app/Screens/homeScreen/invoice/models/invoice_model.dart';
 import 'package:app/Screens/homeScreen/project/bed_model.dart';
 import 'package:app/Screens/homeScreen/user_settings/user.dart';
@@ -92,7 +93,12 @@ class MyApp extends StatelessWidget {
         '/add_client_invoice': (context) => InvoiceClientScreen(
               onInvoiceSaved: (InvoiceModel) {},
             ),
-        '/add_tool': (context) => AddToolScreen(),
+        '/add_tool': (context) => HarvestInvoiceScreen(
+              onInvoiceSaved: (invoice) {
+                print('Invoice saved: $invoice');
+              },
+              costsBox: Hive.box<HarvestCost>('harvest_cost'),
+            ),
       },
     );
   }
