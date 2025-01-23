@@ -3,7 +3,7 @@ import 'package:hive/hive.dart';
 
 part 'invoice_model.g.dart';
 
-@HiveType(typeId: 10)
+@HiveType(typeId: 13)
 class Invoice extends HiveObject {
   @HiveField(0)
   final String reference;

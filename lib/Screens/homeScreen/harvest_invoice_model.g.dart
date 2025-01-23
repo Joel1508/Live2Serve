@@ -8,7 +8,7 @@ part of 'harvest_invoice_model.dart';
 
 class HarvestCostAdapter extends TypeAdapter<HarvestCost> {
   @override
-  final int typeId = 5;
+  final int typeId = 17;
 
   @override
   HarvestCost read(BinaryReader reader) {
@@ -48,7 +48,7 @@ class HarvestCostAdapter extends TypeAdapter<HarvestCost> {
 
 class HarvestInvoiceAdapter extends TypeAdapter<HarvestInvoice> {
   @override
-  final int typeId = 4;
+  final int typeId = 18;
 
   @override
   HarvestInvoice read(BinaryReader reader) {

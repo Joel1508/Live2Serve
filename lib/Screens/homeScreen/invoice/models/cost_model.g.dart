@@ -8,7 +8,7 @@ part of 'cost_model.dart';
 
 class CostTemplateAdapter extends TypeAdapter<CostTemplate> {
   @override
-  final int typeId = 9;
+  final int typeId = 11;
 
   @override
   CostTemplate read(BinaryReader reader) {
@@ -51,7 +51,7 @@ class CostTemplateAdapter extends TypeAdapter<CostTemplate> {
 
 class ProductionCostAdapter extends TypeAdapter<ProductionCost> {
   @override
-  final int typeId = 2;
+  final int typeId = 12;
 
   @override
   ProductionCost read(BinaryReader reader) {

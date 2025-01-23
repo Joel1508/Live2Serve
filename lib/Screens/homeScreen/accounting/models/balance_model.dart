@@ -3,7 +3,7 @@ import 'package:hive/hive.dart';
 
 part 'balance_model.g.dart';
 
-@HiveType(typeId: 1)
+@HiveType(typeId: 0)
 class Balance extends HiveObject {
   @HiveField(0)
   double currentBalance;
@@ -17,7 +17,7 @@ class Balance extends HiveObject {
   }) : this.history = history ?? [];
 }
 
-@HiveType(typeId: 2)
+@HiveType(typeId: 1)
 class BalanceHistory extends HiveObject {
   @HiveField(0)
   final DateTime date;

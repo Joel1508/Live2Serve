@@ -2,7 +2,7 @@
 import 'package:hive/hive.dart';
 part 'harvest_invoice_model.g.dart';
 
-@HiveType(typeId: 5)
+@HiveType(typeId: 17)
 class HarvestCost extends HiveObject {
   @HiveField(0)
   final String name;
@@ -22,7 +22,7 @@ class HarvestCost extends HiveObject {
   double get total => amount * quantity;
 }
 
-@HiveType(typeId: 4)
+@HiveType(typeId: 18)
 class HarvestInvoice extends HiveObject {
   @HiveField(0)
   final String reference;

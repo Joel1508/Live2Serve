@@ -5,6 +5,7 @@ import 'package:app/Screens/homeScreen/goals/goal.dart';
 import 'package:app/Screens/homeScreen/goals/goals.dart';
 import 'package:app/Screens/homeScreen/harvest_invoice_model.dart';
 import 'package:app/Screens/homeScreen/invoice/models/invoice_model.dart';
+import 'package:app/Screens/homeScreen/invoice/services/invoice_service.dart';
 import 'package:app/Screens/homeScreen/project/bed_model.dart';
 import 'package:app/Screens/homeScreen/user_settings/user.dart';
 import 'package:app/repositories/customer_repository.dart';
@@ -163,9 +164,33 @@ class _HomeScreenState extends State<HomeScreen> {
               ListTile(
                 leading: Icon(Icons.receipt, color: Colors.blue),
                 title: Text('Client Invoice'),
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.pushNamed(context, '/add_client_invoice');
+                onTap: () async {
+                  Navigator.pop(context); // Close the bottom sheet
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => InvoiceClientScreen(
+                        onInvoiceSaved: (Invoice invoice) async {
+                          try {
+                            await InvoiceService.instance.addInvoice(invoice);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Invoice saved successfully'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Failed to save invoice: $e'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                  );
                 },
               ),
               ListTile(

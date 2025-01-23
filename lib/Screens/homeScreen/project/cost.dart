@@ -145,7 +145,7 @@ class _CostsScreenState extends State<CostsScreen> {
                   name: _nameController.text,
                   unitPrice: double.parse(_priceController.text),
                 );
-                _costsBox.put(cost.id, updatedCost);
+                _costsBox.put(cost.key, updatedCost);
                 _nameController.clear();
                 _priceController.clear();
                 Navigator.pop(context);
@@ -217,12 +217,12 @@ class _CostsScreenState extends State<CostsScreen> {
                                         ),
                                         ElevatedButton(
                                           onPressed: () {
-                                            box.delete(cost.id);
+                                            box.delete(cost.key);
                                             Navigator.pop(context);
                                           },
                                           child: Text('Delete'),
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.red,
+                                            backgroundColor: Color(0xFFFF69697),
                                           ),
                                         ),
                                       ],

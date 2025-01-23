@@ -8,7 +8,7 @@ part of 'bed_model.dart';
 
 class BedModelAdapter extends TypeAdapter<BedModel> {
   @override
-  final int typeId = 8;
+  final int typeId = 14;
 
   @override
   BedModel read(BinaryReader reader) {
@@ -51,7 +51,7 @@ class BedModelAdapter extends TypeAdapter<BedModel> {
 
 class GridStateModelAdapter extends TypeAdapter<GridStateModel> {
   @override
-  final int typeId = 2;
+  final int typeId = 15;
 
   @override
   GridStateModel read(BinaryReader reader) {

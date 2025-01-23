@@ -3,7 +3,7 @@ import 'package:hive/hive.dart';
 
 part 'transaction_model.g.dart';
 
-@HiveType(typeId: 0)
+@HiveType(typeId: 5)
 class Transaction extends HiveObject {
   @HiveField(0)
   final String id;

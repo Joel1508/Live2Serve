@@ -21,7 +21,7 @@ class Bank extends HiveObject {
   });
 }
 
-@HiveType(typeId: 4)
+@HiveType(typeId: 3)
 class Saving extends HiveObject {
   @HiveField(0)
   final String title;
@@ -47,7 +47,7 @@ class Saving extends HiveObject {
   });
 }
 
-@HiveType(typeId: 5)
+@HiveType(typeId: 4)
 class Credit extends HiveObject {
   @HiveField(0)
   final String name;

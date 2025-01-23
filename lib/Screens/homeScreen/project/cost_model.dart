@@ -2,16 +2,16 @@ import 'package:hive/hive.dart';
 
 part 'cost_model.g.dart';
 
-@HiveType(typeId: 7)
+@HiveType(typeId: 16)
 class CostModel extends HiveObject {
   @HiveField(0)
-  final String id;
+  String id;
 
   @HiveField(1)
-  final String name;
+  String name;
 
   @HiveField(2)
-  final double unitPrice;
+  double unitPrice;
 
   @HiveField(3)
   DateTime createdAt;

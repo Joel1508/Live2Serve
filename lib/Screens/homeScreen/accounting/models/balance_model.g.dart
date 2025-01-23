@@ -8,7 +8,7 @@ part of 'balance_model.dart';
 
 class BalanceAdapter extends TypeAdapter<Balance> {
   @override
-  final int typeId = 1;
+  final int typeId = 0;
 
   @override
   Balance read(BinaryReader reader) {
@@ -45,7 +45,7 @@ class BalanceAdapter extends TypeAdapter<Balance> {
 
 class BalanceHistoryAdapter extends TypeAdapter<BalanceHistory> {
   @override
-  final int typeId = 2;
+  final int typeId = 1;
 
   @override
   BalanceHistory read(BinaryReader reader) {

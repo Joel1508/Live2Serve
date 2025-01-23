@@ -3,7 +3,7 @@ import 'package:hive/hive.dart';
 
 part 'harvest_record_model.g.dart';
 
-@HiveType(typeId: 6)
+@HiveType(typeId: 9)
 class HarvestRecord extends HiveObject {
   @HiveField(0)
   final DateTime harvestDate;

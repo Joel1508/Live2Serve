@@ -8,7 +8,7 @@ part of 'cost_model.dart';
 
 class CostModelAdapter extends TypeAdapter<CostModel> {
   @override
-  final int typeId = 7;
+  final int typeId = 16;
 
   @override
   CostModel read(BinaryReader reader) {

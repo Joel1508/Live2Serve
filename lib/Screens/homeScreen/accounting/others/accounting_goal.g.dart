@@ -8,7 +8,7 @@ part of 'accounting_goal.dart';
 
 class AccountingGoalAdapter extends TypeAdapter<AccountingGoal> {
   @override
-  final int typeId = 0;
+  final int typeId = 6;
 
   @override
   AccountingGoal read(BinaryReader reader) {

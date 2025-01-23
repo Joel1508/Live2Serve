@@ -3,7 +3,7 @@ import 'package:hive/hive.dart';
 
 part 'cost_model.g.dart';
 
-@HiveType(typeId: 9)
+@HiveType(typeId: 11)
 class CostTemplate extends HiveObject {
   @HiveField(0)
   String name;
@@ -27,7 +27,7 @@ class CostTemplate extends HiveObject {
   double get totalCost => costs.fold(0, (sum, cost) => sum + cost.totalCost);
 }
 
-@HiveType(typeId: 2)
+@HiveType(typeId: 12)
 class ProductionCost extends HiveObject {
   @HiveField(0)
   String name; // User-defined cost name

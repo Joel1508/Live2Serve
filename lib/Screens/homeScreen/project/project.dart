@@ -31,6 +31,37 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
   bool _isDuplicate = false;
   BedModel? _existingBed;
 
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 3,
+            child: Text(
+              label,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Expanded(
+            flex: 7,
+            child: Text(value),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _navigateToHistoryScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HistoryBedScreen(),
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -116,6 +147,124 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
     );
   }
 
+  void _showBedDetailsDialog(BedModel bed, int index) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Bed Details"),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildDetailRow("Name:", bed.name),
+                _buildDetailRow("Code:", bed.code),
+                _buildDetailRow("Creation Date:", bed.creationDate),
+                _buildDetailRow("Details:", bed.details),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text("Close"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _showEditBedDialog(bed, index);
+              },
+              child: Text("Edit"),
+            ),
+            TextButton(
+              onPressed: () {
+                _deleteBed(index);
+                Navigator.of(context).pop();
+              },
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: Text("Delete"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showEditBedDialog(BedModel bed, int index) {
+    _nameController.text = bed.name;
+    _detailsController.text = bed.details;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text("Edit Bed"),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: _nameController,
+                      decoration: InputDecoration(labelText: "Bed Name"),
+                      onChanged: (value) {
+                        _checkForDuplicate(value);
+                        setState(() {});
+                      },
+                    ),
+                    SizedBox(height: 10),
+                    TextField(
+                      controller: _detailsController,
+                      decoration: InputDecoration(labelText: "Details"),
+                      maxLines: 3,
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text("Cancel"),
+                ),
+                ElevatedButton(
+                  onPressed: () => _updateBed(index),
+                  child: Text("Save"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _updateBed(int index) {
+    if (_nameController.text.isEmpty || _detailsController.text.isEmpty) return;
+
+    final updatedBed = BedModel(
+      name: _nameController.text,
+      code: _bedsBox.getAt(index)!.code,
+      creationDate: _bedsBox.getAt(index)!.creationDate,
+      details: _detailsController.text,
+    );
+
+    _bedsBox.putAt(index, updatedBed);
+    setState(() {
+      _filteredBeds = _bedsBox.values.toList();
+    });
+
+    Navigator.of(context).pop();
+  }
+
+  void _deleteBed(int index) {
+    _bedsBox.deleteAt(index);
+    setState(() {
+      _filteredBeds = _bedsBox.values.toList();
+    });
+  }
+
   void _checkForDuplicate(String name) {
     final beds = _bedsBox.values;
     final duplicate = beds.firstWhere(
@@ -153,15 +302,6 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
     });
 
     Navigator.of(context).pop();
-  }
-
-  void _navigateToHistoryScreen() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => HistoryBedScreen(),
-      ),
-    );
   }
 
   @override
@@ -227,6 +367,7 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
                           title: Text(bed.name),
                           subtitle: Text(
                               "Code: ${bed.code} | Date: ${bed.creationDate}"),
+                          onTap: () => _showBedDetailsDialog(bed, index),
                         ),
                       ),
                     );
@@ -257,6 +398,10 @@ class _HistoryScreenState extends State<HistoryBedScreen> {
   final TextEditingController _searchController = TextEditingController();
   late Box<HarvestInvoice> _harvestInvoicesBox;
   List<HarvestInvoice> _filteredInvoices = [];
+
+  // Add these if they're needed for invoice details (optional)
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _detailsController = TextEditingController();
 
   @override
   void initState() {
@@ -326,14 +471,14 @@ class _HistoryScreenState extends State<HistoryBedScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            flex: 4,
+            flex: 3,
             child: Text(
               label,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
           Expanded(
-            flex: 6,
+            flex: 7,
             child: Text(value),
           ),
         ],
@@ -344,7 +489,7 @@ class _HistoryScreenState extends State<HistoryBedScreen> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2,
+      length: 1,
       child: Scaffold(
         appBar: AppBar(
           title: Text("History"),
@@ -371,7 +516,6 @@ class _HistoryScreenState extends State<HistoryBedScreen> {
                 TabBar(
                   tabs: [
                     Tab(text: "Harvest Invoices"),
-                    Tab(text: "Bed History"),
                   ],
                 ),
               ],
@@ -410,13 +554,6 @@ class _HistoryScreenState extends State<HistoryBedScreen> {
                       );
               },
             ),
-            // Bed History Tab
-            Center(
-              child: Text(
-                "Bed history implementation here",
-                style: TextStyle(fontSize: 16),
-              ),
-            ),
           ],
         ),
       ),
@@ -425,6 +562,8 @@ class _HistoryScreenState extends State<HistoryBedScreen> {
 
   @override
   void dispose() {
+    _nameController.dispose();
+    _detailsController.dispose();
     _searchController.dispose();
     super.dispose();
   }

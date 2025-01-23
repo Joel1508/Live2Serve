@@ -1,32 +1,5 @@
-import 'package:app/Screens/acces/intro1.dart';
-import 'package:app/Screens/acces/intro2.dart';
-import 'package:app/Screens/acces/intro3.dart';
-import 'package:app/Screens/acces/log_in.dart';
-import 'package:app/Screens/acces/recover_password.dart';
-import 'package:app/Screens/acces/sign_up.dart';
-import 'package:app/Screens/acces/welcome.dart';
-import 'package:app/Screens/homeScreen/accounting/accounting.dart';
-import 'package:app/Screens/homeScreen/accounting/add_transaction.dart';
-import 'package:app/Screens/homeScreen/accounting/date.dart';
-import 'package:app/Screens/homeScreen/accounting/history.dart';
-import 'package:app/Screens/homeScreen/accounting/models/balance_model.dart';
-import 'package:app/Screens/homeScreen/accounting/models/transaction_model.dart';
-import 'package:app/Screens/homeScreen/accounting/others/banks.dart';
-import 'package:app/Screens/homeScreen/accounting/others/credits.dart';
-import 'package:app/Screens/homeScreen/accounting/others/savings.dart';
-import 'package:app/Screens/homeScreen/add_client_invoice.dart';
-import 'package:app/Screens/homeScreen/harvest_invoice.dart';
-import 'package:app/Screens/homeScreen/customers/models/customer_model.dart';
-import 'package:app/Screens/homeScreen/goals/goal.dart';
-import 'package:app/Screens/homeScreen/goals/goals.dart';
-import 'package:app/Screens/homeScreen/harvest_invoice_model.dart';
+import 'package:app/index.dart';
 import 'package:app/Screens/homeScreen/home_screen.dart';
-import 'package:app/Screens/homeScreen/invoice/invoice.dart';
-import 'package:app/Screens/homeScreen/invoice/models/invoice_model.dart';
-import 'package:app/Screens/homeScreen/project/bed_model.dart';
-import 'package:app/Screens/homeScreen/project/cost_model.dart';
-import 'package:app/Screens/homeScreen/project/project.dart';
-import 'package:app/Screens/homeScreen/user_settings/user.dart';
 import 'package:app/repositories/customer_repository.dart'
     show CustomerRepository;
 import 'package:flutter/material.dart';
@@ -37,15 +10,36 @@ import 'Screens/homeScreen/customers/customers.dart' as customers_screen;
 import 'Screens/homeScreen/partners/partners.dart';
 
 Future<void> main() async {
-  // Ensure WidgetsFlutterBinding is initialized
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Hive and open required boxes
   final directory = await getApplicationDocumentsDirectory();
-  await Hive.initFlutter(); // Added from second snippet
+  await Hive.initFlutter();
   Hive.init(directory.path);
 
-  // Register all adapters
+  // Register adapters first
+  _registerAdapters();
+
+  // Initialize boxes with error handling
+  final boxes = await _initializeBoxes();
+
+  // Initialize repositories
+  final customerRepo = CustomerRepository(
+      customerBox: boxes['customerBox'] as Box<CustomerModel>);
+
+  await Supabase.initialize(
+    url: 'https://fqdpwiskvyiopqgxuaml.supabase.co',
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxZHB3aXNrdnlpb3BxZ3h1YW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM1MDM3MzYsImV4cCI6MjA0OTA3OTczNn0.dkxwbnUkKb2fcpzEFR2uoNCsY_f06wntVxWrZsuxt70',
+  );
+
+  runApp(MyApp(
+    customerRepo: customerRepo,
+    projectBox: boxes['projectBox'] as Box<BedModel>,
+    invoiceBox: boxes['invoiceBox'] as Box<Invoice>,
+  ));
+}
+
+void _registerAdapters() {
   Hive.registerAdapter(CustomerModelAdapter());
   Hive.registerAdapter(BedModelAdapter());
   Hive.registerAdapter(GoalAdapter());
@@ -53,76 +47,40 @@ Future<void> main() async {
   Hive.registerAdapter(CostModelAdapter());
   Hive.registerAdapter(HarvestCostAdapter());
   Hive.registerAdapter(HarvestInvoiceAdapter());
+}
 
-  // Open boxes with checks
-  if (!Hive.isBoxOpen('customerBox')) {
-    await Hive.openBox<CustomerModel>('customerBox');
-  }
-  if (!Hive.isBoxOpen('costs')) {
-    await Hive.openBox<CostModel>('costs');
-  }
-  if (!Hive.isBoxOpen('costsBox')) {
-    await Hive.openBox<HarvestCost>('costsBox');
-  }
-  if (!Hive.isBoxOpen('partnerBox')) {
-    await Hive.openBox('partnerBox');
-  }
-  if (!Hive.isBoxOpen('accountingBox')) {
-    await Hive.openBox('accountingBox');
-  }
-  if (!Hive.isBoxOpen('projectBox')) {
-    await Hive.openBox<BedModel>('projectBox');
-  }
-  if (!Hive.isBoxOpen('goalsBox')) {
-    try {
-      await Hive.openBox<Goal>('goalsBox');
-    } catch (e) {
-      print('Error opening goalBox: $e');
-    }
-  }
-  if (!Hive.isBoxOpen('transactions')) {
-    await Hive.openBox<Transaction>('transactions');
-  }
-  if (!Hive.isBoxOpen('balance')) {
-    await Hive.openBox<Balance>('balance');
-  }
-  if (!Hive.isBoxOpen('invoiceBox')) {
-    try {
-      await Hive.openBox<Invoice>('invoiceBox');
-    } catch (e) {
-      print('Error opening invoiceBox: $e');
-    }
-  }
-  // Added check for harvest_invoices box
-  if (!Hive.isBoxOpen('harvest_invoices')) {
-    try {
-      await Hive.openBox<HarvestInvoice>('harvest_invoices');
-    } catch (e) {
-      print('Error opening harvest_invoices: $e');
-    }
+Future<Map<String, Box>> _initializeBoxes() async {
+  final boxes = <String, Box>{};
+
+  try {
+    boxes['customerBox'] = await Hive.openBox<CustomerModel>('customerBox');
+    boxes['costs'] = await Hive.openBox<CostModel>('costs');
+    boxes['costsBox'] = await Hive.openBox<HarvestCost>('costsBox');
+    boxes['projectBox'] = await Hive.openBox<BedModel>('projectBox');
+    boxes['goalsBox'] = await Hive.openBox<Goal>('goalsBox');
+    boxes['transactions'] = await Hive.openBox<Transaction>('transactions');
+    boxes['balance'] = await Hive.openBox<Balance>('balance');
+    boxes['invoiceBox'] = await Hive.openBox<Invoice>('invoiceBox');
+    boxes['harvest_invoices'] =
+        await Hive.openBox<HarvestInvoice>('harvest_invoices');
+    boxes['partnerBox'] = await Hive.openBox('partnerBox');
+    boxes['accountingBox'] = await Hive.openBox('accountingBox');
+  } catch (e) {
+    print('Error opening box: $e');
+    // Recovery attempt
+    await Hive.deleteBoxFromDisk(e.toString().split("'")[1]);
+    // Retry opening
+    return _initializeBoxes();
   }
 
-  // Get the opened boxes
-  var customerBox = Hive.box<CustomerModel>('customerBox');
-  var projectBox = Hive.box<BedModel>('projectBox');
-  var invoiceBox = Hive.box<Invoice>('invoiceBox');
+  return boxes;
+}
 
-  // Initialize your customerRepo
-  final customerRepo = CustomerRepository(customerBox: customerBox);
-
-  // Initialize Supabase
-  await Supabase.initialize(
-    url: 'https://fqdpwiskvyiopqgxuaml.supabase.co',
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxZHB3aXNrdnlpb3BxZ3h1YW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM1MDM3MzYsImV4cCI6MjA0OTA3OTczNn0.dkxwbnUkKb2fcpzEFR2uoNCsY_f06wntVxWrZsuxt70',
-  );
-
-  // Run the app
-  runApp(MyApp(
-    customerRepo: customerRepo,
-    projectBox: projectBox,
-    invoiceBox: invoiceBox,
-  ));
+Future<Box> _openBox(String boxName, Type type) async {
+  if (type == dynamic) {
+    return await Hive.openBox(boxName);
+  }
+  return await Hive.openBox<dynamic>(boxName);
 }
 
 class MyApp extends StatelessWidget {
@@ -163,7 +121,7 @@ class MyApp extends StatelessWidget {
               onInvoiceSaved: (invoice) {
                 print('Invoice saved: $invoice');
               },
-              costsBox: Hive.box<HarvestCost>('harvest_cost'),
+              costsBox: Hive.box<HarvestCost>('costsBox'),
             ),
         '/invoice': (context) => InvoiceScreen(),
         '/date': (context) => DateTimePickerScreen(),

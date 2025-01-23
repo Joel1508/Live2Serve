@@ -48,7 +48,7 @@ class BankAdapter extends TypeAdapter<Bank> {
 
 class SavingAdapter extends TypeAdapter<Saving> {
   @override
-  final int typeId = 4;
+  final int typeId = 3;
 
   @override
   Saving read(BinaryReader reader) {
@@ -94,7 +94,7 @@ class SavingAdapter extends TypeAdapter<Saving> {
 
 class CreditAdapter extends TypeAdapter<Credit> {
   @override
-  final int typeId = 5;
+  final int typeId = 4;
 
   @override
   Credit read(BinaryReader reader) {

@@ -3,7 +3,7 @@ import 'package:hive/hive.dart';
 
 part 'bed_model.g.dart';
 
-@HiveType(typeId: 8)
+@HiveType(typeId: 14)
 class BedModel extends HiveObject {
   @HiveField(0)
   String name;
@@ -35,7 +35,7 @@ class BedModel extends HiveObject {
 }
 
 // grid_state_model.dart
-@HiveType(typeId: 2)
+@HiveType(typeId: 15)
 class GridStateModel extends HiveObject {
   @HiveField(0)
   int gridIndex;

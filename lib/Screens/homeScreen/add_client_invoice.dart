@@ -171,7 +171,7 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
                                 style: TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).primaryColor,
+                                  color: Color(0xFFF5EBA7D),
                                 ),
                               ),
                               SizedBox(height: 4),
@@ -199,14 +199,14 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
                                 Text(
                                   "Invoice No.",
                                   style: TextStyle(
-                                    color: Theme.of(context).primaryColor,
+                                    color: Colors.black87,
                                   ),
                                 ),
                                 Text(
                                   _currentInvoice.reference,
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).primaryColor,
+                                    color: Colors.black45,
                                   ),
                                 ),
                               ],
@@ -253,7 +253,7 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
                       Container(
                         padding: EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
+                          color: Color(0xFFF38BB64),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(
@@ -263,6 +263,7 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
                               "Total Amount",
                               style: TextStyle(
                                 color: Colors.white,
+                                fontWeight: FontWeight.bold,
                                 fontSize: 18,
                               ),
                             ),

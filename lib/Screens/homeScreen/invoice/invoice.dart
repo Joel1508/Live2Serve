@@ -1,8 +1,10 @@
 // invoice.dart
 import 'package:app/Screens/homeScreen/add_client_invoice.dart';
 import 'package:app/Screens/homeScreen/invoice/models/invoice_model.dart';
+import 'package:app/Screens/homeScreen/invoice/services/invoice_service.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:intl/intl.dart';
 
 class InvoiceScreen extends StatefulWidget {
   @override
@@ -11,24 +13,63 @@ class InvoiceScreen extends StatefulWidget {
 
 class _InvoiceScreenState extends State<InvoiceScreen> {
   final List<Map<String, dynamic>> _invoices = [];
+  final InvoiceService _invoiceService = InvoiceService.instance;
   late Box<Invoice> invoiceBox;
+  bool _isLoading = true;
+  String? _error;
 
   @override
   void initState() {
     super.initState();
-    // Open the Hive box for invoices
-    invoiceBox = Hive.box<Invoice>('invoiceBox');
-    _loadInvoices();
+    _initializeService();
   }
 
-  /// Load invoices from the Hive box
-  void _loadInvoices() {
-    final invoices =
-        invoiceBox.values.map((invoice) => invoice.toMap()).toList();
-    setState(() {
-      _invoices.clear();
-      _invoices.addAll(invoices);
-    });
+  Future<void> _initializeService() async {
+    try {
+      await _invoiceService.init();
+      invoiceBox = await Hive.openBox<Invoice>('invoices');
+      await _loadInvoices();
+    } catch (e) {
+      setState(() {
+        _error = 'Failed to initialize storage: $e';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _loadInvoices() async {
+    try {
+      final invoices = _invoiceService.getAllInvoices();
+      setState(() {
+        _invoices.clear();
+        _invoices.addAll(invoices.map((invoice) => invoice.toMap()).toList());
+        _error = null;
+      });
+    } catch (e) {
+      setState(() {
+        _error = 'Failed to load invoices: $e';
+      });
+    }
+  }
+
+  Future<void> _addInvoice(Invoice invoice) async {
+    try {
+      await _invoiceService.addInvoice(invoice);
+      await _loadInvoices();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Invoice saved successfully')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to save invoice: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _addNewInvoice() {
@@ -36,12 +77,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => InvoiceClientScreen(
-          onInvoiceSaved: (Invoice invoice) {
-            setState(() {
-              invoiceBox.add(invoice);
-              _loadInvoices();
-            });
-          },
+          onInvoiceSaved: _addInvoice,
         ),
       ),
     );
@@ -138,85 +174,216 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Invoice History"),
-        centerTitle: true,
-        backgroundColor: Color(0xFFFCFCFCF),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+    if (_isLoading) {
+      return Scaffold(
+        appBar: _buildAppBar(),
+        body: Container(
+          decoration: _buildGradientDecoration(),
+          child: Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.purple),
+            ),
+          ),
         ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.receipt),
-            onPressed: () {},
+      );
+    }
+
+    if (_error != null) {
+      return Scaffold(
+        appBar: _buildAppBar(),
+        body: Container(
+          decoration: _buildGradientDecoration(),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error_outline, size: 48, color: Colors.red),
+                SizedBox(height: 16),
+                Text(
+                  _error!,
+                  style: TextStyle(color: Colors.red, fontSize: 16),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 16),
+                ElevatedButton.icon(
+                  onPressed: _initializeService,
+                  icon: Icon(Icons.refresh),
+                  label: Text('Retry'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.purple,
+                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Scaffold(
+      appBar: _buildAppBar(),
+      body: Container(
+        decoration: _buildGradientDecoration(),
+        child: RefreshIndicator(
+          onRefresh: _loadInvoices,
+          child: _invoices.isEmpty ? _buildEmptyState() : _buildInvoicesList(),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _addNewInvoice,
+        child: Icon(Icons.add),
+        backgroundColor: Color(0xFFF8ABC8B),
+      ),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      title: Text("Invoice History"),
+      centerTitle: true,
+      backgroundColor: Color(0xFFFCFCFCF),
+      leading: IconButton(
+        icon: Icon(Icons.arrow_back),
+        onPressed: () => Navigator.pop(context),
+      ),
+    );
+  }
+
+  BoxDecoration _buildGradientDecoration() {
+    return BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Color(0xFFFCFCFCF),
+          Color(0xFFFF9FAFB),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.receipt_long,
+            size: 64,
+            color: Colors.grey,
+          ),
+          SizedBox(height: 16),
+          Text(
+            "No invoices available.",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            "Tap the + button to create a new invoice",
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
           ),
         ],
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFFCFCFCF),
-              Color(0xFFFF9FAFB),
+    );
+  }
+
+  Widget _buildInvoicesList() {
+    return ListView.builder(
+      padding: EdgeInsets.all(16.0),
+      itemCount: _invoices.length,
+      itemBuilder: (context, index) {
+        final invoice = _invoices[index];
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (index == 0 || _invoices[index - 1]['month'] != invoice['month'])
+              _buildMonthHeader(invoice['month']),
+            _buildInvoiceCard(invoice),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildMonthHeader(String month) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Text(
+        month,
+        style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInvoiceCard(Map<String, dynamic> invoice) {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      elevation: 3,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => _showInvoiceDetails(invoice),
+        child: ListTile(
+          leading: Container(
+            padding: EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.purple.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(Icons.receipt, color: Color(0xFFF5EBA7D)),
+          ),
+          title: Text(
+            invoice['title'],
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          subtitle: Text(
+            invoice['description'],
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          trailing: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                "\$${invoice['amount']}",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              Text(
+                _formatDate(invoice['dateTime']),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                ),
+              ),
             ],
           ),
         ),
-        child: _invoices.isEmpty
-            ? Center(
-                child: Text(
-                  "No invoices available.",
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.grey),
-                ),
-              )
-            : ListView.builder(
-                padding: EdgeInsets.all(16.0),
-                itemCount: _invoices.length,
-                itemBuilder: (context, index) {
-                  final invoice = _invoices[index];
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (index == 0 ||
-                          _invoices[index - 1]['month'] != invoice['month'])
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: Text(
-                            invoice['month'],
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 3,
-                        child: ListTile(
-                          leading: Icon(Icons.receipt, color: Colors.purple),
-                          title: Text(
-                            invoice['title'],
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Text(invoice['description']),
-                          trailing: Text(
-                            "\$${invoice['amount']}",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          onTap: () => _showInvoiceDetails(invoice),
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
       ),
     );
+  }
+
+  String _formatDate(String dateTime) {
+    try {
+      final date = DateTime.parse(dateTime);
+      return DateFormat('MMM d, y').format(date);
+    } catch (e) {
+      return dateTime;
+    }
   }
 }

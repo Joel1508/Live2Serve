@@ -3,7 +3,7 @@ import 'package:hive/hive.dart';
 
 part 'accounting_goal.g.dart'; // Required for Hive type adapter
 
-@HiveType(typeId: 0) // Assign a unique typeId
+@HiveType(typeId: 6) // Assign a unique typeId
 class AccountingGoal extends HiveObject {
   @HiveField(0)
   final String title;

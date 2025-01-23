@@ -8,7 +8,7 @@ part of 'harvest_record_model.dart';
 
 class HarvestRecordAdapter extends TypeAdapter<HarvestRecord> {
   @override
-  final int typeId = 6;
+  final int typeId = 9;
 
   @override
   HarvestRecord read(BinaryReader reader) {

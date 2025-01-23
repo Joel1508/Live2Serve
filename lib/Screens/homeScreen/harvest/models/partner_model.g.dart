@@ -8,7 +8,7 @@ part of 'partner_model.dart';
 
 class PartnerAdapter extends TypeAdapter<Partner> {
   @override
-  final int typeId = 11;
+  final int typeId = 10;
 
   @override
   Partner read(BinaryReader reader) {
