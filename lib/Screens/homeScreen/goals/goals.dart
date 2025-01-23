@@ -1,5 +1,5 @@
 import 'package:app/Screens/homeScreen/customers/models/customer_model.dart';
-import 'package:app/Screens/homeScreen/project/bed_model.dart';
+import 'package:app/Screens/homeScreen/project/models/bed_model.dart';
 import 'package:app/repositories/customer_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:app/Screens/homeScreen/home_screen.dart' as home_screen;

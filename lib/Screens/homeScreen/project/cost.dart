@@ -1,4 +1,4 @@
-import 'package:app/Screens/homeScreen/project/cost_model.dart';
+import 'package:app/Screens/homeScreen/project/models/cost_model.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:uuid/uuid.dart';

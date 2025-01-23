@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:app/Screens/homeScreen/customers/models/customer_model.dart';
-import 'package:app/Screens/homeScreen/project/bed_model.dart';
+import 'package:app/Screens/homeScreen/project/models/bed_model.dart';
 
 class CustomerRepository {
   final Box<CustomerModel> customerBox;
@@ -44,7 +44,7 @@ Future<void> main() async {
   //   Hive.registerAdapter(BedModelAdapter());
   // }
 
-  // Open typed boxes
+  // Open typed boxess
   final customerBox = await Hive.openBox<CustomerModel>('customerBox');
   final projectBox = await Hive.openBox<BedModel>('projectBox');
 

@@ -1,11 +1,11 @@
 import 'package:app/Screens/homeScreen/harvest_invoice_model.dart';
 import 'package:app/Screens/homeScreen/project/cost.dart';
-import 'package:app/Screens/homeScreen/project/cost_model.dart';
+import 'package:app/Screens/homeScreen/project/models/cost_model.dart';
 import 'package:flutter/material.dart';
 import 'package:random_string/random_string.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-import 'bed_model.dart';
+import 'models/bed_model.dart';
 
 class HydroponicBedsScreen extends StatefulWidget {
   final Box<BedModel> projectBox;

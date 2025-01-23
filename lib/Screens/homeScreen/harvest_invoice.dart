@@ -1,4 +1,5 @@
 import 'package:app/Screens/homeScreen/harvest_invoice_model.dart';
+import 'package:app/Screens/homeScreen/project/models/cost_model.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
@@ -76,6 +77,9 @@ class _HarvestInvoiceScreenState extends State<HarvestInvoiceScreen> {
   }
 
   void _selectExistingCost() {
+    // Open the costs box
+    final costsBox = Hive.box<CostModel>('costs');
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -84,16 +88,15 @@ class _HarvestInvoiceScreenState extends State<HarvestInvoiceScreen> {
           width: double.maxFinite,
           child: ListView.builder(
             shrinkWrap: true,
-            itemCount: widget.costsBox.length,
+            itemCount: costsBox.length,
             itemBuilder: (context, index) {
-              final cost = widget.costsBox.getAt(index);
+              final cost = costsBox.getAt(index);
               if (cost == null) {
                 return SizedBox.shrink();
               }
               return ListTile(
                 title: Text(cost.name),
-                subtitle:
-                    Text('\$${cost.amount?.toStringAsFixed(2) ?? '0.00'}'),
+                subtitle: Text('\$${cost.unitPrice.toStringAsFixed(2)}'),
                 onTap: () {
                   final quantityController = TextEditingController(text: '1');
                   showDialog(
@@ -115,7 +118,7 @@ class _HarvestInvoiceScreenState extends State<HarvestInvoiceScreen> {
                             setState(() {
                               _selectedCosts.add(HarvestCost(
                                 name: cost.name,
-                                amount: cost.amount,
+                                amount: cost.unitPrice,
                                 quantity: int.parse(quantityController.text),
                               ));
                             });
@@ -143,6 +146,9 @@ class _HarvestInvoiceScreenState extends State<HarvestInvoiceScreen> {
     final totalCosts =
         _selectedCosts.fold(0.0, (sum, cost) => sum + cost.total);
 
+    // Open the Hive box for harvest invoices
+    final harvestInvoicesBox = Hive.box<HarvestInvoice>('harvest_invoices');
+
     _currentInvoice = HarvestInvoice(
       reference: 'HARV-${now.millisecondsSinceEpoch}',
       personName: _personNameController.text,
@@ -155,9 +161,17 @@ class _HarvestInvoiceScreenState extends State<HarvestInvoiceScreen> {
       finalAmount: totalHarvestValue - totalCosts,
     );
 
+    // Save the invoice directly to the Hive box
+    harvestInvoicesBox.add(_currentInvoice);
+
     setState(() {
       showPreview = true;
     });
+
+    // Optional: Show a success snackbar
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Harvest invoice saved successfully!')),
+    );
   }
 
   Widget _buildPreview() {

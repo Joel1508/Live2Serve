@@ -6,7 +6,7 @@ import 'package:app/Screens/homeScreen/goals/goals.dart';
 import 'package:app/Screens/homeScreen/harvest_invoice_model.dart';
 import 'package:app/Screens/homeScreen/invoice/models/invoice_model.dart';
 import 'package:app/Screens/homeScreen/invoice/services/invoice_service.dart';
-import 'package:app/Screens/homeScreen/project/bed_model.dart';
+import 'package:app/Screens/homeScreen/project/models/bed_model.dart';
 import 'package:app/Screens/homeScreen/user_settings/user.dart';
 import 'package:app/repositories/customer_repository.dart';
 import 'package:flutter/material.dart';
@@ -132,10 +132,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _onItemTapped(int index) {
     if (index == 1) {
-      // Show add options bottom sheet
       _showAddOptions();
     } else if (index == 2) {
-      // Navigate to user profile
       Navigator.pushNamed(context, '/user');
     } else {
       setState(() {
@@ -165,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 leading: Icon(Icons.receipt, color: Colors.blue),
                 title: Text('Client Invoice'),
                 onTap: () async {
-                  Navigator.pop(context); // Close the bottom sheet
+                  Navigator.pop(context);
                   final result = await Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -212,7 +210,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xFFFF9FAFB),
+        backgroundColor: Color(0xFFFECEDEA),
         leadingWidth: 150,
         elevation: 0,
         leading: Padding(
@@ -265,9 +263,10 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         centerTitle: true,
-        title: const Text(
-          'Home',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        title: Image.asset(
+          'assets/images/fresco.png',
+          height: 30,
+          fit: BoxFit.contain,
         ),
         actions: [
           IconButton(
@@ -276,58 +275,57 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Key Metrics Section
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              'Key Metrics',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-            ),
-          ),
-          // Horizontal containers for Key Metrics
-          Container(
-            height: 200,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                _buildContainer('Container 1'),
-                _buildContainer('Container 2'),
-                _buildContainer('Container 3'),
-              ],
-            ),
-          ),
-          // Features Section
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              'Features',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-            ),
-          ),
-          // 3x2 grid of feature cards
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: GridView.count(
-                crossAxisCount: 3,
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
-                children: [
-                  _buildFeatureCard('Customers', Icons.person),
-                  _buildFeatureCard('Partners', Icons.group),
-                  _buildFeatureCard('Project', Icons.business),
-                  _buildFeatureCard('Accounting', Icons.account_balance_wallet),
-                  _buildFeatureCard('Bill History', Icons.history),
-                  _buildFeatureCard('Goals', Icons.flag),
-                ],
+      body: Container(
+        color: Color(0xFFFECEDEA),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Quick Actions',
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    color: Colors.black54),
               ),
-            ),
-          )
-        ],
+              SizedBox(height: 32),
+              Expanded(
+                child: GridView.count(
+                  crossAxisCount: 3,
+                  mainAxisSpacing: 15,
+                  crossAxisSpacing: 15,
+                  children: [
+                    _buildFeatureCard(
+                        'Customers', Icons.person, Colors.green[50]!),
+                    _buildFeatureCard(
+                        'Partners', Icons.group, Colors.blue[50]!),
+                    _buildFeatureCard(
+                        'Project', Icons.business, Colors.purple[50]!),
+                    _buildFeatureCard('Accounting',
+                        Icons.account_balance_wallet, Colors.orange[50]!),
+                    _buildFeatureCard(
+                        'Bill History', Icons.history, Colors.red[50]!),
+                    _buildFeatureCard('Goals', Icons.flag, Colors.teal[50]!),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 350,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(15),
+                  child: Image.asset(
+                    'assets/images/model1.png',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Color(0xFFFECEDEA),
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
@@ -348,22 +346,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildContainer(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 15),
-      child: Container(
-        width: 360,
-        margin: const EdgeInsets.all(4.0),
-        decoration: BoxDecoration(
-          color: Colors.grey[300],
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        child: Center(child: Text(title)),
-      ),
-    );
-  }
-
-  Widget _buildFeatureCard(String title, IconData icon) {
+  Widget _buildFeatureCard(String title, IconData icon, Color backgroundColor) {
     return InkWell(
       onTap: () {
         switch (title) {
@@ -388,19 +371,23 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       },
       child: Card(
-        color: Colors.blue[50],
+        color: backgroundColor,
+        elevation: 2,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.0),
+          borderRadius: BorderRadius.circular(12.0),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 30, color: Colors.blue),
+            Icon(icon, size: 30, color: Colors.lightBlue),
             const SizedBox(height: 8),
             Text(
               title,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black54),
             ),
           ],
         ),
