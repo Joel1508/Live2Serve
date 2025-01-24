@@ -4,6 +4,8 @@ import 'package:app/repositories/customer_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:app/Screens/homeScreen/home_screen.dart' as home_screen;
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:intl/intl.dart';
+import 'package:table_calendar/table_calendar.dart';
 import 'goal.dart';
 
 class GoalsApp extends StatelessWidget {
@@ -36,267 +38,282 @@ class GoalsScreen extends StatefulWidget {
 }
 
 class _GoalsScreenState extends State<GoalsScreen> {
-  final int startYear = 2024;
-  final int endYear = 2030;
-
-  void _addGoal(String year, String month, Goal goal) {
-    widget.goalsBox.add(goal);
-  }
-
-  Widget _buildMonthWidget(String year, String month) {
-    final goals = widget.goalsBox.values
-        .where((goal) => goal.date.startsWith('$year-$month'))
-        .toList();
-
-    return GestureDetector(
-      onTap: () {
-        showModalBottomSheet(
-          context: context,
-          builder: (_) => _buildGoalsModal(goals),
-        );
-      },
-      child: Column(
-        children: [
-          Text(
-            month,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-              fontSize: 16,
-            ),
-          ),
-          Text(
-            goals.isNotEmpty ? "${goals.length} goals" : "Empty",
-            style: TextStyle(color: Colors.grey),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGoalsModal(List<Goal> goals) {
-    return Container(
-      padding: EdgeInsets.all(16),
-      child: goals.isNotEmpty
-          ? ListView.builder(
-              itemCount: goals.length,
-              itemBuilder: (context, index) {
-                final goal = goals[index];
-                return Card(
-                  child: ListTile(
-                    title: Text(goal.title),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (goal.description.isNotEmpty) Text(goal.description),
-                        SizedBox(height: 4),
-                        LinearProgressIndicator(
-                          value: goal.progressPercentage / 100,
-                          backgroundColor: Colors.grey[200],
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          '\$${goal.currentAmount.toStringAsFixed(2)} / \$${goal.targetAmount.toStringAsFixed(2)}',
-                          style: TextStyle(
-                            color:
-                                goal.isOverdue ? Colors.red : Colors.grey[600],
-                          ),
-                        ),
-                        Text(
-                          'Deadline: ${goal.formattedDate}',
-                          style: TextStyle(
-                            color:
-                                goal.isOverdue ? Colors.red : Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            )
-          : Center(
-              child: Text("No goals for this month."),
-            ),
-    );
-  }
+  final CalendarFormat _calendarFormat = CalendarFormat.month;
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFFF9FAFB),
       appBar: AppBar(
-        title: Text("Goals & Reminders"),
+        title: Text('Goal Tracker'),
+        backgroundColor: Colors.white,
+        elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => home_screen.HomeScreen(
-                  customerRepo: CustomerRepository(
-                    customerBox: Hive.box<CustomerModel>('customerBox'),
-                  ),
-                  projectBox: Hive.box<BedModel>('projectBox'),
-                ),
-              ),
-            );
-          },
+          onPressed: () => _navigateBack(context),
         ),
       ),
-      body: ValueListenableBuilder(
-        valueListenable: widget.goalsBox.listenable(),
-        builder: (context, Box<Goal> box, _) {
-          return ListView.builder(
-            itemCount: endYear - startYear + 1,
-            itemBuilder: (context, index) {
-              String year = (startYear + index).toString();
-              return Column(
-                children: [
-                  Text(
-                    year,
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  GridView.count(
-                    crossAxisCount: 3,
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    children: [
-                      for (String month in [
-                        "JAN",
-                        "FEB",
-                        "MAR",
-                        "APR",
-                        "MAY",
-                        "JUN",
-                        "JUL",
-                        "AGO",
-                        "SEP",
-                        "OCT",
-                        "NOV",
-                        "DEC"
-                      ])
-                        _buildMonthWidget(year, month)
-                    ],
-                  ),
-                ],
-              );
-            },
-          );
-        },
+      body: Column(
+        children: [
+          _buildCalendarView(),
+          _buildGoalsList(),
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _showAddGoalForm();
-        },
-        child: Icon(Icons.add),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _showEnhancedGoalModal(),
+        label: Text('New Goal'),
+        icon: Icon(Icons.add),
+        backgroundColor: Color(0xFFFB5DAB9),
       ),
     );
   }
 
-  void _showAddGoalForm() {
-    String title = '', description = '', date = '';
-    double targetAmount = 0.0;
-    DateTime? deadline;
+  Widget _buildCalendarView() {
+    return TableCalendar(
+      firstDay: DateTime.utc(2020, 1, 1),
+      lastDay: DateTime.utc(2030, 12, 31),
+      focusedDay: _focusedDay,
+      calendarFormat: _calendarFormat,
+      selectedDayPredicate: (day) {
+        // Check if the day has any goals
+        final goalsOnDay = widget.goalsBox.values
+            .where((goal) => isSameDay(DateTime.parse(goal.date), day))
+            .toList();
+        return isSameDay(_selectedDay, day) || goalsOnDay.isNotEmpty;
+      },
+      onDaySelected: (selectedDay, focusedDay) {
+        setState(() {
+          _selectedDay = selectedDay;
+          _focusedDay = focusedDay;
+        });
+      },
+      calendarStyle: CalendarStyle(
+        todayDecoration: BoxDecoration(
+          color: Color(0xFFF5EBA7D),
+          shape: BoxShape.circle,
+        ),
+        selectedDecoration: BoxDecoration(
+          color: Color(0xFFFCEDDCA),
+          shape: BoxShape.circle,
+        ),
+        markerDecoration: BoxDecoration(
+          color: Color(0xFFFB5DAB9),
+          shape: BoxShape.circle,
+        ),
+      ),
+      eventLoader: (day) {
+        return widget.goalsBox.values
+            .where((goal) => isSameDay(DateTime.parse(goal.date), day))
+            .toList();
+      },
+    );
+  }
+
+  Widget _buildGoalsList() {
+    final goals = widget.goalsBox.values
+        .where((goal) => isSameDay(DateTime.parse(goal.date), _selectedDay))
+        .toList();
+
+    return Expanded(
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 16),
+        child: goals.isEmpty
+            ? Center(
+                child: Text(
+                  'No goals for this day',
+                  style: TextStyle(color: Colors.white54),
+                ),
+              )
+            : ListView.builder(
+                itemCount: goals.length,
+                itemBuilder: (context, index) {
+                  final goal = goals[index];
+                  return _buildGoalCard(goal);
+                },
+              ),
+      ),
+    );
+  }
+
+  Widget _buildGoalCard(Goal goal) {
+    return Card(
+      child: ListTile(
+        title: Text(goal.title),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(goal.description),
+            LinearProgressIndicator(
+              value: goal.progressPercentage / 100,
+            ),
+            Text(
+              '\$${goal.currentAmount.toStringAsFixed(2)} / \$${goal.targetAmount.toStringAsFixed(2)}',
+            ),
+            ElevatedButton(
+              onPressed: () => _showUpdateGoalModal(goal),
+              child: Text('Update Progress'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showUpdateGoalModal(Goal goal) {
+    double additionalAmount = 0.0;
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Update Goal Progress for ${goal.title}'),
+            TextField(
+              decoration: InputDecoration(
+                labelText: 'Additional Amount',
+                prefixText: '\$',
+              ),
+              keyboardType: TextInputType.number,
+              onChanged: (value) {
+                additionalAmount = double.tryParse(value) ?? 0.0;
+              },
+            ),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  goal.currentAmount += additionalAmount;
+                  goal.save(); // Hive method to persist changes
+                });
+                Navigator.pop(context);
+              },
+              child: Text('Save Progress'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showEnhancedGoalModal() {
     final formKey = GlobalKey<FormState>();
+    String title = '', description = '';
+    double targetAmount = 0.0;
+    DateTime? selectedDate = _selectedDay ?? DateTime.now();
 
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true, // Makes the modal expandable
-      builder: (_) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-          left: 16,
-          right: 16,
-          top: 16,
+      isScrollControlled: true,
+      backgroundColor: Color(0xFFFF9FAFB),
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Color(0xFFFF9FAFB),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
         ),
+        padding: EdgeInsets.all(16),
         child: Form(
           key: formKey,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextFormField(
-                decoration: InputDecoration(labelText: 'Title'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a title';
-                  }
-                  return null;
-                },
+                decoration: InputDecoration(
+                  labelText: 'Goal Title',
+                  labelStyle: TextStyle(color: Colors.black87),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black45),
+                  ),
+                ),
+                style: TextStyle(color: Colors.black87),
+                validator: (value) =>
+                    value!.isEmpty ? 'Please enter a title' : null,
                 onChanged: (value) => title = value,
               ),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Description'),
+                decoration: InputDecoration(
+                  labelText: 'Description',
+                  labelStyle: TextStyle(color: Colors.black87),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black45),
+                  ),
+                ),
+                style: TextStyle(color: Colors.black87),
                 onChanged: (value) => description = value,
               ),
               TextFormField(
                 decoration: InputDecoration(
                   labelText: 'Target Amount',
                   prefixText: '\$',
+                  labelStyle: TextStyle(color: Colors.black87),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black45),
+                  ),
                 ),
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                keyboardType: TextInputType.number,
+                style: TextStyle(color: Colors.black87),
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a target amount';
-                  }
+                  if (value!.isEmpty) return 'Please enter a target amount';
                   if (double.tryParse(value) == null ||
                       double.parse(value) <= 0) {
                     return 'Please enter a valid amount';
                   }
                   return null;
                 },
-                onChanged: (value) {
-                  if (value.isNotEmpty) {
-                    targetAmount = double.tryParse(value) ?? 0.0;
-                  }
-                },
+                onChanged: (value) =>
+                    targetAmount = double.tryParse(value) ?? 0.0,
               ),
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'Date (YYYY-MM-DD)',
-                  hintText: '2024-01-31',
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a date';
-                  }
-                  try {
-                    deadline = DateTime.parse(value);
-                    if (deadline!.isBefore(DateTime.now())) {
-                      return 'Date cannot be in the past';
-                    }
-                    date = value;
-                    return null;
-                  } catch (e) {
-                    return 'Please enter a valid date in YYYY-MM-DD format';
-                  }
-                },
-                onChanged: (value) => date = value,
+              SizedBox(height: 16),
+              Row(
+                children: [
+                  Text(
+                    'Selected Date: ${DateFormat('MMM dd, yyyy').format(selectedDate)}',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ],
               ),
               SizedBox(height: 16),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFFFB5DAB9),
+                ),
                 onPressed: () {
                   if (formKey.currentState!.validate()) {
-                    final selectedYear = date.split('-')[0];
-                    final selectedMonth = date.split('-')[1].toUpperCase();
-
                     Goal newGoal = Goal(
                       title: title,
                       description: description,
-                      date: date,
+                      date: selectedDate.toString().split(' ')[0],
                       targetAmount: targetAmount,
-                      deadline: deadline!,
-                      currentAmount: 0.0, // Starting with zero progress
+                      deadline: selectedDate,
+                      currentAmount: 0.0,
                     );
 
-                    _addGoal(selectedYear, selectedMonth, newGoal);
+                    widget.goalsBox.add(newGoal);
                     Navigator.pop(context);
                   }
                 },
-                child: Text('Save Goal'),
+                child: Text(
+                  'Create Goal',
+                  style: TextStyle(color: Colors.black87),
+                ),
               ),
-              SizedBox(height: 16), // Bottom padding
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  void _navigateBack(BuildContext context) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => home_screen.HomeScreen(
+          customerRepo: CustomerRepository(
+            customerBox: Hive.box<CustomerModel>('customerBox'),
+          ),
+          projectBox: Hive.box<BedModel>('projectBox'),
         ),
       ),
     );

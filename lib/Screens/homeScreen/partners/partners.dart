@@ -192,7 +192,7 @@ class _PartnersScreenState extends State<PartnersScreen> {
               },
               child: Text("Delete"),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
+                backgroundColor: Color(0xFFFF69697),
               ),
             ),
           ],
@@ -248,7 +248,7 @@ class _PartnersScreenState extends State<PartnersScreen> {
               child: TextField(
                 controller: _searchController,
                 decoration: InputDecoration(
-                  hintText: "Search by Name, Email, or Phone",
+                  hintText: "Search",
                   prefixIcon: Icon(Icons.search),
                   filled: true,
                   fillColor: Colors.white,
@@ -285,7 +285,8 @@ class _PartnersScreenState extends State<PartnersScreen> {
                             subtitle: Text(
                                 "Phone: ${partner.contactNumber} | Email: ${partner.email}"),
                             trailing: IconButton(
-                              icon: Icon(Icons.delete, color: Colors.red),
+                              icon:
+                                  Icon(Icons.delete, color: Color(0xFFFF69697)),
                               onPressed: () => _showDeleteConfirmation(index),
                             ),
                             onTap: () => _viewPartnerDetails(partner),

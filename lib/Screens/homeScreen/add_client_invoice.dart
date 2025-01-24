@@ -1,7 +1,9 @@
 import 'dart:io';
+import 'package:app/Screens/homeScreen/customers/models/customer_model.dart';
 import 'package:app/Screens/homeScreen/invoice/models/invoice_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -35,6 +37,10 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
   void initState() {
     super.initState();
     _amountController.addListener(_formatNumber);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadCustomers();
+    });
   }
 
   @override
@@ -46,7 +52,33 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
     _detailsController.dispose();
     _emailController.dispose();
     _senderController.dispose();
+    _loadCustomers();
     super.dispose();
+  }
+
+  void _loadCustomers() {
+    try {
+      // Assuming you're using a CustomerRepository or similar
+      final customerBox = Hive.box<CustomerModel>('customerBox');
+
+      print('Total customers in box: ${customerBox.length}');
+
+      setState(() {
+        _customerList.clear();
+        _customerList
+            .addAll(customerBox.values.map((customer) => customer.name));
+
+        print('Loaded customer names: $_customerList');
+      });
+
+      // If no customers, this will help debug
+      if (_customerList.isEmpty) {
+        print(
+            'No customers found. Check Hive box initialization and customer creation.');
+      }
+    } catch (e) {
+      print('Error loading customers: $e');
+    }
   }
 
   void _formatNumber() {

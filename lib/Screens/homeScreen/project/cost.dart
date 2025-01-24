@@ -163,7 +163,7 @@ class _CostsScreenState extends State<CostsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Manage Costs'),
-        backgroundColor: Color(0xFFFDEDCDD),
+        backgroundColor: Color(0xFFFF9FAFB),
       ),
       body: ValueListenableBuilder(
         valueListenable: _costsBox.listenable(),
@@ -176,7 +176,7 @@ class _CostsScreenState extends State<CostsScreen> {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Color(0xFFFCFCFCF),
+                  Color(0xFFFF9FAFB),
                   Color(0xFFFDEDCDD),
                 ],
               ),
@@ -242,7 +242,7 @@ class _CostsScreenState extends State<CostsScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddCostDialog,
         child: Icon(Icons.add),
-        backgroundColor: Color(0xFFF979DAB),
+        backgroundColor: Color(0xFFFB5DAB9),
       ),
     );
   }

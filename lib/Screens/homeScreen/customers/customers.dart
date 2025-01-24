@@ -141,7 +141,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
               Navigator.of(context).pop();
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: Color(0xFFFF69697),
             ),
             child: const Text("Delete"),
           ),
@@ -235,7 +235,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: "Search by Name, Email, Phone, or ID/NIT",
+                hintText: "Search",
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: Colors.white,
@@ -268,7 +268,8 @@ class _CustomersScreenState extends State<CustomersScreen> {
                           subtitle: Text(
                               "Phone: ${customer.contactNumber} | ID/NIT: ${customer.idNit}"),
                           trailing: IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
+                            icon: const Icon(Icons.delete,
+                                color: Color(0xFFFF69697)),
                             onPressed: () => _showDeleteConfirmation(index),
                           ),
                           onTap: () => _viewCustomerDetails(customer),

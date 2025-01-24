@@ -47,6 +47,10 @@ dependencies:
   connectivity_plus: ^5.0.0
   shared_preferences: ^2.3.3
   json_annotation: ^4.9.0
+
+  # calendar
+  table_calendar: ^3.0.9
+  flutter_animate: ^4.2.0
   
   # Hive for local storage
   hive: ^2.2.3
