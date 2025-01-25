@@ -37,7 +37,13 @@ class OthersScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                    IconButton(
+                      icon:
+                          Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                    ),
                     Column(
                       children: [
                         Text(

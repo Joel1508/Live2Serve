@@ -1,5 +1,6 @@
+import 'package:app/Screens/homeScreen/accounting/models/transaction_model.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:hive/hive.dart';
 
 class HistoryScreen extends StatefulWidget {
   @override
@@ -7,89 +8,87 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
-  List<Map<String, dynamic>> transactions = [];
-  List<Map<String, dynamic>> filteredTransactions = [];
-  String selectedFilter = 'Day';
-  bool _isLoading = true;
+  List<Transaction> transactions = [];
+  List<Transaction> filteredTransactions = [];
+  String selectedFilter = 'All';
+  bool isIncomeFilter = false;
 
   @override
   void initState() {
     super.initState();
-    _fetchTransactions();
+    _loadTransactions();
   }
 
-  Future<void> _fetchTransactions() async {
-    try {
-      final supabase = Supabase.instance.client;
-      final response = await supabase
-          .from('transactions')
-          .select('*')
-          .order('date', ascending: false);
-
-      setState(() {
-        transactions = List<Map<String, dynamic>>.from(response);
-        filteredTransactions = transactions;
-        _isLoading = false;
-      });
-    } catch (e) {
-      print('Error fetching transactions: $e');
-      setState(() {
-        _isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading transactions')),
-      );
-    }
-  }
-
-  void applyFilter(String filter) {
+  void _loadTransactions() {
+    final transactionBox = Hive.box<Transaction>('transactions');
     setState(() {
-      selectedFilter = filter;
-      // Add more sophisticated filtering logic here
-      switch (filter) {
-        case 'Day':
-          filteredTransactions = transactions;
-          break;
-        case 'Weekly':
-          filteredTransactions = _filterByWeekly(transactions);
-          break;
-        case 'Monthly':
-          filteredTransactions = _filterByMonthly(transactions);
-          break;
-        case 'Yearly':
-          filteredTransactions = _filterByYearly(transactions);
-          break;
-        default:
-          filteredTransactions = transactions;
-      }
+      transactions = transactionBox.values.toList()
+        ..sort((a, b) => b.date.compareTo(a.date));
+      filteredTransactions = transactions;
     });
   }
 
-  List<Map<String, dynamic>> _filterByWeekly(
-      List<Map<String, dynamic>> allTransactions) {
-    final now = DateTime.now();
-    return allTransactions.where((tx) {
-      final txDate = DateTime.parse(tx['date']);
-      return txDate.isAfter(now.subtract(Duration(days: 7)));
+  void _applyFilter(String filter) {
+    setState(() {
+      selectedFilter = filter;
+      _filterTransactions();
+    });
+  }
+
+  void _toggleIncomeFilter() {
+    setState(() {
+      isIncomeFilter = !isIncomeFilter;
+      _filterTransactions();
+    });
+  }
+
+  void _filterTransactions() {
+    filteredTransactions = transactions.where((transaction) {
+      // Income/Expense filter
+      bool passesIncomeFilter =
+          !isIncomeFilter || transaction.isIncome == isIncomeFilter;
+
+      // Time-based filter
+      bool passesTimeFilter = true;
+      switch (selectedFilter) {
+        case 'Today':
+          passesTimeFilter = _isToday(transaction.date);
+          break;
+        case 'This Week':
+          passesTimeFilter = _isThisWeek(transaction.date);
+          break;
+        case 'This Month':
+          passesTimeFilter = _isThisMonth(transaction.date);
+          break;
+        case 'This Year':
+          passesTimeFilter = _isThisYear(transaction.date);
+          break;
+      }
+
+      return passesIncomeFilter && passesTimeFilter;
     }).toList();
   }
 
-  List<Map<String, dynamic>> _filterByMonthly(
-      List<Map<String, dynamic>> allTransactions) {
+  bool _isToday(DateTime date) {
     final now = DateTime.now();
-    return allTransactions.where((tx) {
-      final txDate = DateTime.parse(tx['date']);
-      return txDate.month == now.month && txDate.year == now.year;
-    }).toList();
+    return date.year == now.year &&
+        date.month == now.month &&
+        date.day == now.day;
   }
 
-  List<Map<String, dynamic>> _filterByYearly(
-      List<Map<String, dynamic>> allTransactions) {
+  bool _isThisWeek(DateTime date) {
     final now = DateTime.now();
-    return allTransactions.where((tx) {
-      final txDate = DateTime.parse(tx['date']);
-      return txDate.year == now.year;
-    }).toList();
+    return date.isAfter(now.subtract(Duration(days: 7)));
+  }
+
+  bool _isThisMonth(DateTime date) {
+    final now = DateTime.now();
+    return date.year == now.year && date.month == now.month;
+  }
+
+  bool _isThisYear(DateTime date) {
+    final now = DateTime.now();
+    return date.year == now.year;
   }
 
   @override
@@ -97,86 +96,106 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Transaction History'),
-        backgroundColor: Color(0xFFFDEDCDD),
+        actions: [
+          IconButton(
+            icon: Icon(isIncomeFilter ? Icons.attach_money : Icons.money_off),
+            onPressed: _toggleIncomeFilter,
+          )
+        ],
       ),
       body: Column(
         children: [
-          // Filter buttons
+          // Time Filter Buttons
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: ['All', 'Today', 'This Week', 'This Month', 'This Year']
+                  .map((filter) => Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: ChoiceChip(
+                          label: Text(filter),
+                          selected: selectedFilter == filter,
+                          onSelected: (_) => _applyFilter(filter),
+                        ),
+                      ))
+                  .toList(),
+            ),
+          ),
+
+          // Transaction List
+          Expanded(
+            child: filteredTransactions.isEmpty
+                ? Center(child: Text('No transactions found'))
+                : ListView.builder(
+                    itemCount: filteredTransactions.length,
+                    itemBuilder: (context, index) {
+                      final transaction = filteredTransactions[index];
+                      return ListTile(
+                        leading: Icon(
+                          transaction.isIncome
+                              ? Icons.arrow_upward
+                              : Icons.arrow_downward,
+                          color:
+                              transaction.isIncome ? Colors.green : Colors.red,
+                        ),
+                        title: Text(transaction.title),
+                        subtitle: Text(
+                          '${transaction.category} - ${transaction.date.toLocal()}',
+                        ),
+                        trailing: Text(
+                          '\$${transaction.amount.toStringAsFixed(2)}',
+                          style: TextStyle(
+                            color: transaction.isIncome
+                                ? Colors.green
+                                : Colors.red,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+          ),
+
+          // Summary Section
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildFilterButton('Day'),
-                _buildFilterButton('Weekly'),
-                _buildFilterButton('Monthly'),
-                _buildFilterButton('Yearly'),
+                _buildSummaryCard(
+                    'Total Income',
+                    filteredTransactions
+                        .where((t) => t.isIncome)
+                        .map((t) => t.amount)
+                        .fold(0, (a, b) => a + b)),
+                _buildSummaryCard(
+                    'Total Expense',
+                    filteredTransactions
+                        .where((t) => !t.isIncome)
+                        .map((t) => t.amount)
+                        .fold(0, (a, b) => a + b)),
               ],
             ),
           ),
-
-          // Loading or Transaction list
-          _isLoading
-              ? Center(child: CircularProgressIndicator())
-              : Expanded(
-                  child: filteredTransactions.isEmpty
-                      ? Center(
-                          child: Text(
-                            'No transactions available.',
-                            style: TextStyle(fontSize: 18, color: Colors.grey),
-                          ),
-                        )
-                      : ListView.builder(
-                          itemCount: filteredTransactions.length,
-                          itemBuilder: (context, index) {
-                            final transaction = filteredTransactions[index];
-                            final isIncome = transaction['amount'] > 0;
-
-                            return Card(
-                              margin: EdgeInsets.symmetric(
-                                  vertical: 5, horizontal: 10),
-                              color: Colors.white,
-                              elevation: 5,
-                              child: ListTile(
-                                leading: Icon(
-                                  isIncome
-                                      ? Icons.arrow_upward
-                                      : Icons.arrow_downward,
-                                  color: isIncome ? Colors.green : Colors.red,
-                                ),
-                                title: Text(
-                                  '${transaction['category']}',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                subtitle: Text('${transaction['title']}'),
-                                trailing: Text(
-                                  '\$${transaction['amount'].toStringAsFixed(2)}',
-                                  style: TextStyle(
-                                    color: isIncome ? Colors.green : Colors.red,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                ),
         ],
       ),
     );
   }
 
-  Widget _buildFilterButton(String label) {
-    return ElevatedButton(
-      onPressed: () => applyFilter(label),
-      style: ElevatedButton.styleFrom(
-        foregroundColor: Colors.white,
-        backgroundColor:
-            selectedFilter == label ? Color(0xFF79DAB6) : Color(0xFFF979DAB),
-        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+  Widget _buildSummaryCard(String title, double amount) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              '\$${amount.toStringAsFixed(2)}',
+              style: TextStyle(
+                  color: title.contains('Income') ? Colors.green : Colors.red),
+            ),
+          ],
+        ),
       ),
-      child: Text(label),
     );
   }
 }

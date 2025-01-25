@@ -14,6 +14,8 @@ Future<void> main() async {
 
   final directory = await getApplicationDocumentsDirectory();
   await Hive.initFlutter();
+  Hive.registerAdapter(TransactionAdapter());
+  await Hive.openBox<Transaction>('transactions');
   Hive.init(directory.path);
 
   // Register adapters first
