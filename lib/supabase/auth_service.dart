@@ -1,3 +1,4 @@
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthService {
@@ -29,10 +30,25 @@ class AuthService {
         throw Exception(
             'Authentication failed. Please check your credentials.');
       }
+
+      // Save email after successful login
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('saved_email', email);
     } catch (e) {
-      // Forward the error message for debugging
       throw Exception('Log in failed: $e');
     }
+  }
+
+  // Retrieve saved email
+  Future<String?> getSavedEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('saved_email');
+  }
+
+  // Clear saved email
+  Future<void> clearSavedEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('saved_email');
   }
 
   // Log In with Google
@@ -50,6 +66,8 @@ class AuthService {
   Future<void> logOut() async {
     try {
       await supabase.auth.signOut();
+      // Clear saved email on logout
+      await clearSavedEmail();
     } catch (e) {
       throw Exception('Error during logout: ${e.toString()}');
     }

@@ -68,11 +68,19 @@ class _CostsScreenState extends State<CostsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: Colors.black54),
+            ),
           ),
           ElevatedButton(
             onPressed: _saveCost,
-            child: Text('Save'),
+            style:
+                ElevatedButton.styleFrom(backgroundColor: Color(0xFFFB5DAB9)),
+            child: Text(
+              'Save',
+              style: TextStyle(color: Colors.black54),
+            ),
           ),
         ],
       ),
@@ -136,9 +144,14 @@ class _CostsScreenState extends State<CostsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: Colors.black54),
+            ),
           ),
           ElevatedButton(
+            style:
+                ElevatedButton.styleFrom(backgroundColor: Color(0xFFFB5DAB9)),
             onPressed: () {
               if (_formKey.currentState?.validate() ?? false) {
                 final updatedCost = cost.copyWith(
@@ -151,7 +164,10 @@ class _CostsScreenState extends State<CostsScreen> {
                 Navigator.pop(context);
               }
             },
-            child: Text('Update'),
+            child: Text(
+              'Update',
+              style: TextStyle(color: Colors.black54),
+            ),
           ),
         ],
       ),
@@ -213,14 +229,22 @@ class _CostsScreenState extends State<CostsScreen> {
                                         TextButton(
                                           onPressed: () =>
                                               Navigator.pop(context),
-                                          child: Text('Cancel'),
+                                          child: Text(
+                                            'Cancel',
+                                            style: TextStyle(
+                                                color: Colors.black54),
+                                          ),
                                         ),
                                         ElevatedButton(
                                           onPressed: () {
                                             box.delete(cost.key);
                                             Navigator.pop(context);
                                           },
-                                          child: Text('Delete'),
+                                          child: Text(
+                                            'Delete',
+                                            style: TextStyle(
+                                                color: Colors.black54),
+                                          ),
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: Color(0xFFFF69697),
                                           ),

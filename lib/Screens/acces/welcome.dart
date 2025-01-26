@@ -78,7 +78,7 @@ class _WelcomeState extends State<Welcome> {
                     // Skip button
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/home_screen');
+                        Navigator.pushNamed(context, '/log_in');
                       },
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(

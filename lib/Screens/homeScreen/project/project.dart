@@ -133,11 +133,19 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text("Cancel"),
+                  child: Text(
+                    "Cancel",
+                    style: TextStyle(color: Colors.black54),
+                  ),
                 ),
                 ElevatedButton(
                   onPressed: _addBed,
-                  child: Text("Save"),
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFFFB5DAB9)),
+                  child: Text(
+                    "Save",
+                    style: TextStyle(color: Colors.black54),
+                  ),
                 ),
               ],
             );
@@ -168,14 +176,22 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text("Close"),
+              child: Text(
+                "Close",
+                style: TextStyle(color: Colors.black54),
+              ),
             ),
             ElevatedButton(
+              style:
+                  ElevatedButton.styleFrom(backgroundColor: Color(0xFFFB5DAB9)),
               onPressed: () {
                 Navigator.of(context).pop();
                 _showEditBedDialog(bed, index);
               },
-              child: Text("Edit"),
+              child: Text(
+                "Edit",
+                style: TextStyle(color: Colors.black54),
+              ),
             ),
             TextButton(
               onPressed: () {
@@ -226,11 +242,17 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text("Cancel"),
+                  child: Text(
+                    "Cancel",
+                    style: TextStyle(color: Colors.black54),
+                  ),
                 ),
                 ElevatedButton(
                   onPressed: () => _updateBed(index),
-                  child: Text("Save"),
+                  child: Text(
+                    "Save",
+                    style: TextStyle(color: Colors.black54),
+                  ),
                 ),
               ],
             );
@@ -457,7 +479,10 @@ class _HistoryScreenState extends State<HistoryBedScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Close'),
+            child: Text(
+              'Close',
+              style: TextStyle(color: Colors.black54),
+            ),
           ),
         ],
       ),

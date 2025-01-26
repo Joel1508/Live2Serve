@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:app/supabase/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SignUpScreen extends StatelessWidget {
   SignUpScreen({super.key});
@@ -9,6 +10,37 @@ class SignUpScreen extends StatelessWidget {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController usernameController = TextEditingController();
   final AuthService authService = AuthService();
+
+  Future<void> signUp(BuildContext context) async {
+    try {
+      // Sign up with Supabase
+      final authResponse = await authService.signUp(
+        emailController.text,
+        passwordController.text,
+      );
+
+      // Save additional user profile information
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user != null) {
+        await Supabase.instance.client.from('profiles').upsert({
+          'id': user.id,
+          'username': usernameController.text,
+          'email': emailController.text,
+          'notifications_enabled': true,
+        });
+      }
+
+      // Show success and navigate
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Sign up successful! Please log in.')),
+      );
+      Navigator.pushNamed(context, '/log_in');
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $error')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -138,25 +170,7 @@ class SignUpScreen extends StatelessWidget {
                               const SizedBox(height: 20),
                               // Sign-Up Button
                               ElevatedButton(
-                                onPressed: () async {
-                                  try {
-                                    await authService.signUp(
-                                      emailController.text,
-                                      passwordController.text,
-                                    );
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                            'Sign up successful! Please log in.'),
-                                      ),
-                                    );
-                                    Navigator.pushNamed(context, '/log_in');
-                                  } catch (error) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Error: $error')),
-                                    );
-                                  }
-                                },
+                                onPressed: () => signUp(context),
                                 child: const Text('Sign up'),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Color(0xFFF9EC9B2),

@@ -3,14 +3,34 @@ import 'package:local_auth/local_auth.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui';
 
-class LogInScreen extends StatelessWidget {
-  LogInScreen({Key? key}) : super(key: key);
+class LogInScreen extends StatefulWidget {
+  const LogInScreen({Key? key}) : super(key: key);
 
+  @override
+  _LogInScreenState createState() => _LogInScreenState();
+}
+
+class _LogInScreenState extends State<LogInScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
   final AuthService authService = AuthService();
   final LocalAuthentication auth = LocalAuthentication();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedEmail();
+  }
+
+  Future<void> _loadSavedEmail() async {
+    final savedEmail = await authService.getSavedEmail();
+    if (savedEmail != null) {
+      setState(() {
+        emailController.text = savedEmail;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

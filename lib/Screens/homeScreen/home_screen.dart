@@ -327,9 +327,11 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Color(0xFFFECEDEA),
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
+              icon: Icon(
+                Icons.home,
+                color: Colors.black54,
+              ),
+              label: 'Home'),
           BottomNavigationBarItem(
             icon: Icon(Icons.add),
             label: 'Add',
@@ -340,6 +342,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
         currentIndex: _selectedIndex,
+        selectedItemColor: Colors.black54,
+        unselectedItemColor: Colors.black54,
         onTap: _onItemTapped,
       ),
     );

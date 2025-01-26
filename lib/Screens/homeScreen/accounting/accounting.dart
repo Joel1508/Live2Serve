@@ -3,6 +3,7 @@ import 'package:app/Screens/homeScreen/accounting/others/others.dart';
 import 'package:app/repositories/customer_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:intl/intl.dart';
 import 'add_transaction.dart';
 import 'history.dart';
 import 'models/balance_model.dart';
@@ -92,8 +93,9 @@ class AccountingScreen extends StatelessWidget {
                             final balance = box.get('current',
                                 defaultValue:
                                     Balance(currentBalance: 0.0, history: []));
+                            final formatter = NumberFormat('#,##0.00', 'en_US');
                             return Text(
-                              '\$${balance?.currentBalance.toStringAsFixed(2)}',
+                              '\$${formatter.format(balance?.currentBalance)}',
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,

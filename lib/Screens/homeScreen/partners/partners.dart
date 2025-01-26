@@ -137,11 +137,19 @@ class _PartnersScreenState extends State<PartnersScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text("Cancel"),
+              child: Text(
+                "Cancel",
+                style: TextStyle(color: Colors.black54),
+              ),
             ),
             ElevatedButton(
               onPressed: _addPartner,
-              child: Text("Save"),
+              style:
+                  ElevatedButton.styleFrom(backgroundColor: Color(0xFFFB5DAB9)),
+              child: Text(
+                "Save",
+                style: TextStyle(color: Colors.black54),
+              ),
             ),
           ],
         );
@@ -221,7 +229,10 @@ class _PartnersScreenState extends State<PartnersScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text("Close"),
+              child: Text(
+                "Close",
+                style: TextStyle(color: Colors.black54),
+              ),
             ),
           ],
         );

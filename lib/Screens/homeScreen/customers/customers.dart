@@ -110,11 +110,19 @@ class _CustomersScreenState extends State<CustomersScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text("Cancel"),
+            child: const Text(
+              "Cancel",
+              style: TextStyle(color: Colors.black54),
+            ),
           ),
           ElevatedButton(
             onPressed: _addCustomer,
-            child: const Text("Save"),
+            style:
+                ElevatedButton.styleFrom(backgroundColor: Color(0xFFFB5DAB9)),
+            child: const Text(
+              "Save",
+              style: TextStyle(color: Colors.black54),
+            ),
           ),
         ],
       ),
@@ -170,7 +178,10 @@ class _CustomersScreenState extends State<CustomersScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text("Close"),
+            child: const Text(
+              "Close",
+              style: TextStyle(color: Colors.black54),
+            ),
           ),
         ],
       ),

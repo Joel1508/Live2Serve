@@ -1,6 +1,7 @@
 import 'package:app/Screens/homeScreen/accounting/models/transaction.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:intl/intl.dart';
 
 class HistoryScreen extends StatefulWidget {
   @override
@@ -176,12 +177,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ],
             ),
           ),
+          SizedBox(height: 30),
         ],
       ),
     );
   }
 
   Widget _buildSummaryCard(String title, double amount) {
+    final formatter = NumberFormat('#,##0.00', 'en_US');
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -189,7 +192,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           children: [
             Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
             Text(
-              '\$${amount.toStringAsFixed(2)}',
+              '\$${formatter.format(amount)}',
               style: TextStyle(
                   color: title.contains('Income') ? Colors.green : Colors.red),
             ),

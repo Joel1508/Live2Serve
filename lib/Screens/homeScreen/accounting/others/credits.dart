@@ -201,12 +201,22 @@ class _CreditsScreenState extends State<CreditsScreen> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                        backgroundColor: Color(0xFFF4A5A5)),
                                     onPressed: _addCreditRecord,
-                                    child: Text("Add"),
+                                    child: Text(
+                                      "Add",
+                                      style: TextStyle(color: Colors.black54),
+                                    ),
                                   ),
                                   ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                        backgroundColor: Color(0xFFF4A5A5)),
                                     onPressed: _toggleAddContainer,
-                                    child: Text("Cancel"),
+                                    child: Text(
+                                      "Cancel",
+                                      style: TextStyle(color: Colors.black54),
+                                    ),
                                   ),
                                 ],
                               ),

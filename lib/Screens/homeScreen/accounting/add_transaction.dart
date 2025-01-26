@@ -267,7 +267,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                       style: TextStyle(color: Colors.black87),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFFF5EBA7D),
+                      backgroundColor: Color(0xFFFB5DAB9),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),

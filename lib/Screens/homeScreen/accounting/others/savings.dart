@@ -201,12 +201,22 @@ class _SavingsScreenState extends State<SavingsScreen> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                        backgroundColor: Color(0xFFFB5DAB9)),
                                     onPressed: _addSavingsRecord,
-                                    child: Text("Add"),
+                                    child: Text(
+                                      "Add",
+                                      style: TextStyle(color: Colors.black54),
+                                    ),
                                   ),
                                   ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                        backgroundColor: Color(0xFFFB5DAB9)),
                                     onPressed: _toggleAddContainer,
-                                    child: Text("Cancel"),
+                                    child: Text(
+                                      "Cancel",
+                                      style: TextStyle(color: Colors.black54),
+                                    ),
                                   ),
                                 ],
                               ),

@@ -56,9 +56,14 @@ class _HarvestInvoiceScreenState extends State<HarvestInvoiceScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: Colors.black54),
+            ),
           ),
           ElevatedButton(
+            style:
+                ElevatedButton.styleFrom(backgroundColor: Color(0xFFFB5DAB9)),
             onPressed: () {
               setState(() {
                 _selectedCosts.add(HarvestCost(
@@ -69,7 +74,10 @@ class _HarvestInvoiceScreenState extends State<HarvestInvoiceScreen> {
               });
               Navigator.pop(context);
             },
-            child: Text('Add'),
+            child: Text(
+              'Add',
+              style: TextStyle(color: Colors.black54),
+            ),
           ),
         ],
       ),
@@ -111,9 +119,14 @@ class _HarvestInvoiceScreenState extends State<HarvestInvoiceScreen> {
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context),
-                          child: Text('Cancel'),
+                          child: Text(
+                            'Cancel',
+                            style: TextStyle(color: Colors.black54),
+                          ),
                         ),
                         ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Color(0xFFFB5DAB9)),
                           onPressed: () {
                             setState(() {
                               _selectedCosts.add(HarvestCost(
@@ -125,7 +138,10 @@ class _HarvestInvoiceScreenState extends State<HarvestInvoiceScreen> {
                             Navigator.pop(context);
                             Navigator.pop(context);
                           },
-                          child: Text('Add'),
+                          child: Text(
+                            'Add',
+                            style: TextStyle(color: Colors.black54),
+                          ),
                         ),
                       ],
                     ),
@@ -290,15 +306,36 @@ class _HarvestInvoiceScreenState extends State<HarvestInvoiceScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      ElevatedButton.icon(
-                        onPressed: _selectExistingCost,
-                        icon: Icon(Icons.add_circle),
-                        label: Text('Select Existing Cost'),
+                      Flexible(
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFFFB5DAB9),
+                          ),
+                          onPressed: _selectExistingCost,
+                          icon: Icon(
+                            Icons.add_circle,
+                            color: Colors.black54,
+                          ),
+                          label: Text(
+                            'Select Existing Cost',
+                            style: TextStyle(color: Colors.black54),
+                          ),
+                        ),
                       ),
-                      ElevatedButton.icon(
-                        onPressed: _addNewCost,
-                        icon: Icon(Icons.add),
-                        label: Text('Add New Cost'),
+                      SizedBox(
+                          width: 8), // Add some spacing between the buttons
+                      Flexible(
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFFFB5DAB9),
+                          ),
+                          onPressed: _addNewCost,
+                          icon: Icon(Icons.add),
+                          label: Text(
+                            'Add New Cost',
+                            style: TextStyle(color: Colors.black54),
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -329,8 +366,14 @@ class _HarvestInvoiceScreenState extends State<HarvestInvoiceScreen> {
                   SizedBox(height: 16.0),
                   Center(
                     child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFFFB5DAB9),
+                      ),
                       onPressed: _generateInvoice,
-                      child: Text('Preview Invoice'),
+                      child: Text(
+                        'Preview Invoice',
+                        style: TextStyle(color: Colors.black54),
+                      ),
                     ),
                   ),
                 ],
