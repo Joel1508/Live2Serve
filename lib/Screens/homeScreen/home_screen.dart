@@ -75,7 +75,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/home_screen': (context) => HomeScreen(
               customerRepo: customerRepo,
-              projectBox: projectBox, // Pass projectBox here
+              projectBox: projectBox,
             ),
         '/partners': (context) => PartnersScreen(partnerBox: partnerBox),
         '/customers': (context) => CustomersScreen(customerRepo: customerRepo),
@@ -84,8 +84,7 @@ class MyApp extends StatelessWidget {
               customerRepo: customerRepo,
             ),
         '/invoice': (context) => InvoiceScreen(),
-        '/project': (context) =>
-            HydroponicBedsScreen(projectBox: projectBox), // Use projectBox here
+        '/project': (context) => HydroponicBedsScreen(projectBox: projectBox),
         '/goals': (context) => GoalsScreen(
               goalsBox: goalsBox,
               customerRepo: customerRepo,
@@ -311,7 +310,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               SizedBox(
-                height: 350,
+                height: 300,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(15),
                   child: Image.asset(

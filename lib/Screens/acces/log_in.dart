@@ -174,7 +174,7 @@ class LogInScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 50),
+                        const SizedBox(width: 40),
                         GestureDetector(
                           onTap: () =>
                               Navigator.pushNamed(context, '/recover_password'),
@@ -191,7 +191,6 @@ class LogInScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 40),
               // Bottom Image
               SizedBox(
                 width: 300,

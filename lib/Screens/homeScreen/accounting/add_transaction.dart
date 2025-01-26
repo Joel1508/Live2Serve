@@ -1,11 +1,37 @@
+import 'package:app/Screens/homeScreen/accounting/models/balance_model.dart';
 import 'package:app/Screens/homeScreen/accounting/models/transaction.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'dart:io';
 import 'package:uuid/uuid.dart';
 
 var uuid = Uuid();
+
+class _NumberFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    // Handle empty input
+    if (newValue.text.isEmpty) {
+      return newValue.copyWith(text: '');
+    }
+
+    // Remove any non-digit characters
+    String newText = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
+
+    // Convert to double and format with commas and two decimal places
+    double value = double.parse(newText) / 100;
+    String formattedValue = NumberFormat('#,##0.00', 'en_US').format(value);
+
+    return newValue.copyWith(
+      text: formattedValue,
+      selection: TextSelection.collapsed(offset: formattedValue.length),
+    );
+  }
+}
 
 class AddTransactionScreen extends StatefulWidget {
   final Function(Map<String, dynamic>)? onTransactionAdded;
@@ -55,44 +81,72 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     }
   }
 
-  void _saveTransaction() {
-    if (_validateInputs()) {
-      try {
-        final transactionBox = Hive.box<Transaction>('transactions');
+  Future<void> _saveTransaction() async {
+    if (!_validateInputs()) return;
 
-        final transaction = Transaction()
-          ..amount = double.parse(amountController.text)
-          ..title = titleController.text
-          ..category = selectedCategory
-          ..date = selectedDate ?? DateTime.now()
-          ..paymentMethod = selectedPaymentMethod ?? 'Digital'
-          ..isIncome = isIncome
-          ..imageUrl = selectedImage?.path;
-
-        transactionBox.add(transaction);
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Transaction saved successfully')),
-        );
-
-        // Optional callback
-        widget.onTransactionAdded?.call({
-          'amount': transaction.amount,
-          'title': transaction.title,
-          'category': transaction.category,
-          'date': transaction.date,
-          'paymentMethod': transaction.paymentMethod,
-          'isIncome': transaction.isIncome,
-          'imageUrl': transaction.imageUrl,
-        });
-
-        _resetForm();
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving transaction: $e')),
-        );
+    try {
+      // Ensure boxes are open
+      if (!Hive.isBoxOpen('transactions')) {
+        await Hive.openBox<Transaction>('transactions');
       }
+
+      if (!Hive.isBoxOpen('balance')) {
+        await Hive.openBox<Balance>('balance');
+      }
+
+      final transactionBox = Hive.box<Transaction>('transactions');
+      final balanceBox = Hive.box<Balance>('balance');
+
+      // Get or create balance
+      Balance balance =
+          balanceBox.get('current') ?? Balance(currentBalance: 0.0);
+
+      final transactionAmount =
+          double.parse(amountController.text.replaceAll(',', ''));
+
+      // Update balance
+      balance.currentBalance +=
+          isIncome ? transactionAmount : -transactionAmount;
+
+      // Add to balance history
+      balance.history.add(BalanceHistory(
+        date: DateTime.now(),
+        amount: isIncome ? transactionAmount : -transactionAmount,
+      ));
+
+      final transaction = Transaction(
+        amount: transactionAmount,
+        title: titleController.text,
+        category: selectedCategory,
+        date: selectedDate ?? DateTime.now(),
+        paymentMethod: selectedPaymentMethod ?? 'Digital',
+        isIncome: isIncome,
+        imageUrl: selectedImage?.path,
+        note: noteController.text,
+      );
+
+      // Save updated balance and transaction
+      await balanceBox.put('current', balance);
+      await transactionBox.add(transaction);
+
+      _showSuccessMessage('Transaction saved successfully');
+      _resetForm();
+    } catch (e) {
+      print('Transaction save error: $e');
+      _showErrorMessage('Error saving transaction: $e');
     }
+  }
+
+  void _showSuccessMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  void _showErrorMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   bool _validateInputs() {
@@ -188,8 +242,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 // Title Imput
                 _buildTitleInput(),
 
-                SizedBox(height: 20),
-
                 // Category Dropdown
                 _buildCategoryDropdown(),
 
@@ -210,7 +262,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   alignment: Alignment.bottomRight,
                   child: ElevatedButton(
                     onPressed: _saveTransaction,
-                    child: Text('Add Transaction'),
+                    child: Text(
+                      'Add Transaction',
+                      style: TextStyle(color: Colors.black87),
+                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFFF5EBA7D),
                       shape: RoundedRectangleBorder(
@@ -291,6 +346,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         child: TextField(
           controller: amountController,
           keyboardType: TextInputType.number,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            _NumberFormatter(),
+          ],
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 28,
@@ -439,7 +498,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       child: ListTile(
         leading: Icon(Icons.image, color: Colors.black54),
         title: Text(
-          selectedImage == null ? "Add Image" : "Image Selected",
+          selectedImage == null ? "Add Image (optional)" : "Image Selected",
         ),
         trailing: selectedImage != null
             ? Image.file(selectedImage!, width: 50, height: 50)

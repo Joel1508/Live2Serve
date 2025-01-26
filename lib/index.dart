@@ -25,4 +25,4 @@ export 'Screens/homeScreen/project/models/cost_model.dart';
 export 'Screens/homeScreen/project/project.dart';
 export 'Screens/homeScreen/user_settings/user.dart';
 export 'Screens/homeScreen/accounting/models/balance_model.dart';
-export 'Screens/homeScreen/accounting/models/transaction_model.dart';
+export 'Screens/homeScreen/accounting/models/transaction.dart';

@@ -1,4 +1,4 @@
-import 'package:app/Screens/homeScreen/accounting/models/transaction_model.dart';
+import 'package:app/Screens/homeScreen/accounting/models/transaction.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 

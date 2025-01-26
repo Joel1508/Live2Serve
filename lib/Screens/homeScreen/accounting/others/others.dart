@@ -55,7 +55,7 @@ class OthersScreen extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          "Which other activities do you need to do?",
+                          "Activities",
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.normal,

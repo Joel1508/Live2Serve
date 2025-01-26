@@ -24,6 +24,9 @@ class Transaction extends HiveObject {
   @HiveField(6)
   String? imageUrl;
 
+  @HiveField(7)
+  String? note;
+
   Transaction({
     double? amount,
     String? title,
@@ -32,6 +35,7 @@ class Transaction extends HiveObject {
     String? paymentMethod,
     bool? isIncome,
     this.imageUrl,
+    this.note,
   }) {
     this.amount = amount ?? 0.0;
     this.title = title ?? '';

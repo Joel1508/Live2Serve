@@ -13,10 +13,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final directory = await getApplicationDocumentsDirectory();
-  await Hive.initFlutter();
-  Hive.registerAdapter(TransactionAdapter());
-  await Hive.openBox<Transaction>('transactions');
-  Hive.init(directory.path);
+  await Hive.initFlutter(directory.path);
 
   // Register adapters first
   _registerAdapters();
@@ -49,6 +46,9 @@ void _registerAdapters() {
   Hive.registerAdapter(CostModelAdapter());
   Hive.registerAdapter(HarvestCostAdapter());
   Hive.registerAdapter(HarvestInvoiceAdapter());
+  Hive.registerAdapter(TransactionAdapter());
+  Hive.registerAdapter(BalanceAdapter());
+  Hive.registerAdapter(BalanceHistoryAdapter());
 }
 
 Future<Map<String, Box>> _initializeBoxes() async {
@@ -56,17 +56,31 @@ Future<Map<String, Box>> _initializeBoxes() async {
 
   try {
     boxes['customerBox'] = await Hive.openBox<CustomerModel>('customerBox');
+    boxes['balance'] = await Hive.openBox<Balance>('balance');
+
     boxes['costs'] = await Hive.openBox<CostModel>('costs');
     boxes['costsBox'] = await Hive.openBox<HarvestCost>('costsBox');
     boxes['projectBox'] = await Hive.openBox<BedModel>('projectBox');
     boxes['goalsBox'] = await Hive.openBox<Goal>('goalsBox');
-    boxes['transactions'] = await Hive.openBox<Transaction>('transactions');
+    boxes['transactions'] = Hive.isBoxOpen('transactions')
+        ? Hive.box<Transaction>('transactions')
+        : await Hive.openBox<Transaction>('transactions');
     boxes['balance'] = await Hive.openBox<Balance>('balance');
     boxes['invoiceBox'] = await Hive.openBox<Invoice>('invoiceBox');
     boxes['harvest_invoices'] =
         await Hive.openBox<HarvestInvoice>('harvest_invoices');
     boxes['partnerBox'] = await Hive.openBox('partnerBox');
     boxes['accountingBox'] = await Hive.openBox('accountingBox');
+
+    final balanceBox = boxes['balance'] as Box<Balance>;
+    if (balanceBox.get('current') == null) {
+      await balanceBox.put(
+          'current',
+          Balance(
+            currentBalance: 0.0,
+            history: [],
+          ));
+    }
   } catch (e) {
     print('Error opening box: $e');
     // Recovery attempt

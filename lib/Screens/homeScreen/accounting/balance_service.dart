@@ -1,6 +1,6 @@
 // balance_service.dart
+import 'package:app/Screens/homeScreen/accounting/models/transaction.dart';
 import 'package:hive/hive.dart';
-import 'models/transaction_model.dart';
 import 'models/balance_model.dart';
 
 class BalanceService {

@@ -6,7 +6,7 @@
     android:targetSdkVersion="30" />
 
     <application
-        android:label="app"
+        android:label="FRES.CO"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
