@@ -1,7 +1,7 @@
 // invoice.dart
-import 'package:app/Screens/homeScreen/add_client_invoice.dart';
-import 'package:app/Screens/homeScreen/invoice/models/invoice_model.dart';
-import 'package:app/Screens/homeScreen/invoice/services/invoice_service.dart';
+import 'package:FRES.CO/Screens/homeScreen/add_client_invoice.dart';
+import 'package:FRES.CO/Screens/homeScreen/invoice/models/invoice_model.dart';
+import 'package:FRES.CO/Screens/homeScreen/invoice/services/invoice_service.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';

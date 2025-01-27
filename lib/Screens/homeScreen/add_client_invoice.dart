@@ -1,6 +1,6 @@
 import 'dart:io';
-import 'package:app/Screens/homeScreen/customers/models/customer_model.dart';
-import 'package:app/Screens/homeScreen/invoice/models/invoice_model.dart';
+import 'package:FRES.CO/Screens/homeScreen/customers/models/customer_model.dart';
+import 'package:FRES.CO/Screens/homeScreen/invoice/models/invoice_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';

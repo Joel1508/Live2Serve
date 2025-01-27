@@ -1,8 +1,8 @@
-import 'package:app/Screens/homeScreen/customers/models/customer_model.dart';
-import 'package:app/Screens/homeScreen/project/models/bed_model.dart';
-import 'package:app/repositories/customer_repository.dart';
+import 'package:FRES.CO/Screens/homeScreen/customers/models/customer_model.dart';
+import 'package:FRES.CO/Screens/homeScreen/project/models/bed_model.dart';
+import 'package:FRES.CO/repositories/customer_repository.dart';
 import 'package:flutter/material.dart';
-import 'package:app/Screens/homeScreen/home_screen.dart' as home_screen;
+import 'package:FRES.CO/Screens/homeScreen/home_screen.dart' as home_screen;
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';

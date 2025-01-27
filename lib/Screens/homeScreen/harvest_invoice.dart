@@ -1,5 +1,5 @@
-import 'package:app/Screens/homeScreen/harvest_invoice_model.dart';
-import 'package:app/Screens/homeScreen/project/models/cost_model.dart';
+import 'package:FRES.CO/Screens/homeScreen/harvest_invoice_model.dart';
+import 'package:FRES.CO/Screens/homeScreen/project/models/cost_model.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';

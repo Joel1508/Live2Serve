@@ -1,9 +1,9 @@
-import 'package:app/Screens/homeScreen/home_screen.dart';
+import 'package:FRES.CO/Screens/homeScreen/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:app/Screens/homeScreen/customers/models/customer_model.dart';
-import 'package:app/Screens/homeScreen/project/models/bed_model.dart';
+import 'package:FRES.CO/Screens/homeScreen/customers/models/customer_model.dart';
+import 'package:FRES.CO/Screens/homeScreen/project/models/bed_model.dart';
 
 class CustomerRepository {
   final Box<CustomerModel> customerBox;

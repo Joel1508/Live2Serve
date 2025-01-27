@@ -1,5 +1,5 @@
 // balance_service.dart
-import 'package:app/Screens/homeScreen/accounting/models/transaction.dart';
+import 'package:FRES.CO/Screens/homeScreen/accounting/models/transaction.dart';
 import 'package:hive/hive.dart';
 import 'models/balance_model.dart';
 

@@ -1,7 +1,7 @@
-import 'package:app/Screens/homeScreen/customers/models/customer_model.dart';
+import 'package:FRES.CO/Screens/homeScreen/customers/models/customer_model.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:app/repositories/customer_repository.dart';
+import 'package:FRES.CO/repositories/customer_repository.dart';
 
 class CustomersScreen extends StatefulWidget {
   final CustomerRepository customerRepo;

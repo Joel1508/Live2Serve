@@ -1,6 +1,6 @@
-import 'package:app/Screens/homeScreen/harvest_invoice_model.dart';
-import 'package:app/Screens/homeScreen/project/cost.dart';
-import 'package:app/Screens/homeScreen/project/models/cost_model.dart';
+import 'package:FRES.CO/Screens/homeScreen/harvest_invoice_model.dart';
+import 'package:FRES.CO/Screens/homeScreen/project/cost.dart';
+import 'package:FRES.CO/Screens/homeScreen/project/models/cost_model.dart';
 import 'package:flutter/material.dart';
 import 'package:random_string/random_string.dart';
 import 'package:hive_flutter/hive_flutter.dart';

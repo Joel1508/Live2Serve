@@ -1,9 +1,9 @@
-import 'package:app/Screens/homeScreen/accounting/others/banks.dart';
-import 'package:app/Screens/homeScreen/accounting/others/credits.dart';
-import 'package:app/Screens/homeScreen/accounting/others/savings.dart';
-import 'package:app/Screens/homeScreen/goals/goal.dart';
-import 'package:app/Screens/homeScreen/goals/goals.dart';
-import 'package:app/repositories/customer_repository.dart';
+import 'package:FRES.CO/Screens/homeScreen/accounting/others/banks.dart';
+import 'package:FRES.CO/Screens/homeScreen/accounting/others/credits.dart';
+import 'package:FRES.CO/Screens/homeScreen/accounting/others/savings.dart';
+import 'package:FRES.CO/Screens/homeScreen/goals/goal.dart';
+import 'package:FRES.CO/Screens/homeScreen/goals/goals.dart';
+import 'package:FRES.CO/repositories/customer_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';

@@ -1,4 +1,4 @@
-import 'package:app/supabase/auth_service.dart';
+import 'package:FRES.CO/supabase/auth_service.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui';

@@ -1,4 +1,4 @@
-import 'package:app/Screens/homeScreen/accounting/others/accounting_goal.dart';
+import 'package:FRES.CO/Screens/homeScreen/accounting/others/accounting_goal.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';

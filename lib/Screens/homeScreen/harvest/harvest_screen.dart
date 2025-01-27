@@ -3,7 +3,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'models/partner_model.dart';
 import 'models/harvest_record_model.dart';
-import 'package:app/Screens/homeScreen/invoice/models/cost_model.dart';
+import 'package:FRES.CO/Screens/homeScreen/invoice/models/cost_model.dart';
 
 class HarvestInvoiceScreen extends StatefulWidget {
   @override

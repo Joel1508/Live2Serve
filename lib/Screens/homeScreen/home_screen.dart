@@ -1,22 +1,22 @@
-import 'package:app/Screens/homeScreen/add_client_invoice.dart';
-import 'package:app/Screens/homeScreen/harvest_invoice.dart';
-import 'package:app/Screens/homeScreen/customers/models/customer_model.dart';
-import 'package:app/Screens/homeScreen/goals/goal.dart';
-import 'package:app/Screens/homeScreen/goals/goals.dart';
-import 'package:app/Screens/homeScreen/harvest_invoice_model.dart';
-import 'package:app/Screens/homeScreen/invoice/models/invoice_model.dart';
-import 'package:app/Screens/homeScreen/invoice/services/invoice_service.dart';
-import 'package:app/Screens/homeScreen/project/models/bed_model.dart';
-import 'package:app/Screens/homeScreen/user_settings/user.dart';
-import 'package:app/repositories/customer_repository.dart';
+import 'package:FRES.CO/Screens/homeScreen/add_client_invoice.dart';
+import 'package:FRES.CO/Screens/homeScreen/harvest_invoice.dart';
+import 'package:FRES.CO/Screens/homeScreen/customers/models/customer_model.dart';
+import 'package:FRES.CO/Screens/homeScreen/goals/goal.dart';
+import 'package:FRES.CO/Screens/homeScreen/goals/goals.dart';
+import 'package:FRES.CO/Screens/homeScreen/harvest_invoice_model.dart';
+import 'package:FRES.CO/Screens/homeScreen/invoice/models/invoice_model.dart';
+import 'package:FRES.CO/Screens/homeScreen/invoice/services/invoice_service.dart';
+import 'package:FRES.CO/Screens/homeScreen/project/models/bed_model.dart';
+import 'package:FRES.CO/Screens/homeScreen/user_settings/user.dart';
+import 'package:FRES.CO/repositories/customer_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:app/Screens/homeScreen/accounting/accounting.dart';
-import 'package:app/Screens/homeScreen/customers/customers.dart';
-import 'package:app/Screens/homeScreen/invoice/invoice.dart';
-import 'package:app/Screens/homeScreen/partners/partners.dart';
-import 'package:app/Screens/homeScreen/project/project.dart';
+import 'package:FRES.CO/Screens/homeScreen/accounting/accounting.dart';
+import 'package:FRES.CO/Screens/homeScreen/customers/customers.dart';
+import 'package:FRES.CO/Screens/homeScreen/invoice/invoice.dart';
+import 'package:FRES.CO/Screens/homeScreen/partners/partners.dart';
+import 'package:FRES.CO/Screens/homeScreen/project/project.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -73,6 +73,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       routes: {
+        '/': (context) => HomeScreen(
+              customerRepo: customerRepo,
+              projectBox: projectBox,
+            ),
         '/home_screen': (context) => HomeScreen(
               customerRepo: customerRepo,
               projectBox: projectBox,
@@ -99,6 +103,75 @@ class MyApp extends StatelessWidget {
               },
               costsBox: Hive.box<HarvestCost>('harvest_cost'),
             ),
+      },
+      onGenerateRoute: (settings) {
+        switch (settings.name) {
+          case '/':
+          case '/home_screen':
+            return MaterialPageRoute(
+              builder: (context) => HomeScreen(
+                customerRepo: customerRepo,
+                projectBox: projectBox,
+              ),
+            );
+          case '/partners':
+            return MaterialPageRoute(
+              builder: (context) => PartnersScreen(partnerBox: partnerBox),
+            );
+          case '/customers':
+            return MaterialPageRoute(
+              builder: (context) => CustomersScreen(customerRepo: customerRepo),
+            );
+          case '/accounting':
+            return MaterialPageRoute(
+              builder: (context) => AccountingScreen(
+                accountingBox: accountingBox,
+                customerRepo: customerRepo,
+              ),
+            );
+          case '/invoice':
+            return MaterialPageRoute(
+              builder: (context) => InvoiceScreen(),
+            );
+          case '/project':
+            return MaterialPageRoute(
+              builder: (context) =>
+                  HydroponicBedsScreen(projectBox: projectBox),
+            );
+          case '/goals':
+            return MaterialPageRoute(
+              builder: (context) => GoalsScreen(
+                goalsBox: goalsBox,
+                customerRepo: customerRepo,
+              ),
+            );
+          case '/user':
+            return MaterialPageRoute(
+              builder: (context) => UserScreen(),
+            );
+          case '/add_client_invoice':
+            return MaterialPageRoute(
+              builder: (context) => InvoiceClientScreen(
+                onInvoiceSaved: (invoice) {},
+              ),
+            );
+          case '/add_tool':
+            return MaterialPageRoute(
+              builder: (context) => HarvestInvoiceScreen(
+                onInvoiceSaved: (invoice) {
+                  print('Invoice saved: $invoice');
+                },
+                costsBox: Hive.box<HarvestCost>('harvest_cost'),
+              ),
+            );
+          default:
+            return MaterialPageRoute(
+              builder: (context) => HomeScreen(
+                customerRepo: customerRepo,
+                projectBox: projectBox,
+              ),
+            );
+        }
       },
     );
   }

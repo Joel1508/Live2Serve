@@ -1,10 +1,10 @@
-import 'package:app/Screens/homeScreen/customers/models/customer_model.dart';
-import 'package:app/Screens/homeScreen/invoice/models/invoice_model.dart';
-import 'package:app/Screens/homeScreen/project/models/bed_model.dart';
+import 'package:FRES.CO/Screens/homeScreen/customers/models/customer_model.dart';
+import 'package:FRES.CO/Screens/homeScreen/invoice/models/invoice_model.dart';
+import 'package:FRES.CO/Screens/homeScreen/project/models/bed_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:app/main.dart';
-import 'package:app/repositories/customer_repository.dart' as model;
+import 'package:FRES.CO/main.dart';
+import 'package:FRES.CO/repositories/customer_repository.dart' as model;
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'dart:io';

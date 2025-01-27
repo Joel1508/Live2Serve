@@ -1,5 +1,5 @@
 import 'dart:ui';
-import 'package:app/supabase/auth_service.dart';
+import 'package:FRES.CO/supabase/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 

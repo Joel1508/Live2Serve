@@ -1,6 +1,6 @@
-import 'package:app/index.dart';
-import 'package:app/Screens/homeScreen/home_screen.dart';
-import 'package:app/repositories/customer_repository.dart'
+import 'package:FRES.CO/index.dart';
+import 'package:FRES.CO/Screens/homeScreen/home_screen.dart';
+import 'package:FRES.CO/repositories/customer_repository.dart'
     show CustomerRepository;
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';

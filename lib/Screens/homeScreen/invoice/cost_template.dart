@@ -1,4 +1,4 @@
-import 'package:app/Screens/homeScreen/invoice/models/cost_model.dart';
+import 'package:FRES.CO/Screens/homeScreen/invoice/models/cost_model.dart';
 import 'package:flutter/material.dart';
 
 class CostManagementScreen extends StatefulWidget {
