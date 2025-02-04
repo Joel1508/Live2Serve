@@ -29,8 +29,11 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
   late Invoice _currentInvoice;
   final ImagePicker _picker = ImagePicker();
 
-  String _issuedToOption = "Select Customer";
-  final List<String> _issuedToOptions = ["Select Customer", "New Customer"];
+  String _issuedToOption = "Seleccionar cliente";
+  final List<String> _issuedToOptions = [
+    "Seleccionar cliente",
+    "Nuevo cliente"
+  ];
   final List<String> _customerList = [];
 
   @override
@@ -52,7 +55,6 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
     _detailsController.dispose();
     _emailController.dispose();
     _senderController.dispose();
-    _loadCustomers();
     super.dispose();
   }
 
@@ -112,12 +114,12 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
 
     // Create invoice using the Invoice model
     final invoice = Invoice(
-      reference: 'INV-${now.millisecondsSinceEpoch}',
+      reference: 'FAC-${now.millisecondsSinceEpoch}',
       sender: _senderController.text,
       receiver: _issuedToController.text,
       nit: _nitCcController.text,
       dateTime: DateFormat('yyyy-MM-dd HH:mm').format(now),
-      operation: 'Products',
+      operation: 'Productos',
       amount: _amountController.text,
       details: _detailsController.text,
       email: _emailController.text,
@@ -149,7 +151,7 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
   Widget _buildPreview() {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Invoice Preview'),
+        title: Text('Factura clientes'),
         actions: [
           IconButton(
             icon: Icon(Icons.check),
@@ -158,7 +160,7 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
               widget.onInvoiceSaved(_currentInvoice);
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Invoice saved successfully!")),
+                SnackBar(content: Text("Factura guardada existosamente!")),
               );
             },
           ),
@@ -208,7 +210,7 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
                               ),
                               SizedBox(height: 4),
                               Text(
-                                "INVOICE",
+                                "FACTURA",
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Colors.grey[600],
@@ -229,7 +231,7 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Text(
-                                  "Invoice No.",
+                                  "Factura No.",
                                   style: TextStyle(
                                     color: Colors.black87,
                                   ),
@@ -259,7 +261,7 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "BILL TO",
+                              "Dirigido a:",
                               style: TextStyle(
                                 color: Colors.grey[600],
                                 fontWeight: FontWeight.bold,
@@ -292,18 +294,18 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "Total Amount",
+                              "Monto total:",
                               style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 18,
+                                fontSize: 16,
                               ),
                             ),
                             Text(
                               "\$${_currentInvoice.amount}",
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 24,
+                                fontSize: 20,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -315,7 +317,7 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
                       // Details Section
                       if (_currentInvoice.details.isNotEmpty) ...[
                         Text(
-                          "DETAILS",
+                          "DETALLES",
                           style: TextStyle(
                             color: Colors.grey[600],
                             fontWeight: FontWeight.bold,
@@ -335,7 +337,7 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
                       if (_selectedImage != null) ...[
                         SizedBox(height: 24),
                         Text(
-                          "ATTACHMENT",
+                          "ADJUNTO",
                           style: TextStyle(
                             color: Colors.grey[600],
                             fontWeight: FontWeight.bold,
@@ -372,6 +374,86 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
     );
   }
 
+  // Update the _buildIssuedToSection method in InvoiceClientScreen
+  Widget _buildIssuedToSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        DropdownButtonFormField<String>(
+          decoration: _customInputDecoration("Seleccionar cliente"),
+          value: _issuedToOption,
+          items: _issuedToOptions.map((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(value),
+            );
+          }).toList(),
+          onChanged: (String? newValue) {
+            setState(() {
+              _issuedToOption = newValue!;
+              if (_issuedToOption == "Seleccionar cliente") {
+                // Set to first customer by default if available
+                if (_customerList.isNotEmpty) {
+                  _issuedToController.text = _customerList.first;
+                }
+              } else if (_issuedToOption == "Nuevo cliente") {
+                _issuedToController.clear();
+              }
+            });
+          },
+        ),
+        SizedBox(height: 16),
+        if (_issuedToOption == "Seleccionar cliente")
+          DropdownButtonFormField<String>(
+            decoration: _customInputDecoration("Clientes registrados"),
+            value: _issuedToController.text.isEmpty && _customerList.isNotEmpty
+                ? _customerList.first
+                : _issuedToController.text,
+            items: _customerList.map((String customer) {
+              return DropdownMenuItem<String>(
+                value: customer,
+                child: Text(customer),
+              );
+            }).toList(),
+            onChanged: (String? selectedCustomer) {
+              if (selectedCustomer != null) {
+                setState(() {
+                  _issuedToController.text = selectedCustomer;
+                  // Find the corresponding customer to get additional details if needed
+                  final customerBox = Hive.box<CustomerModel>('customerBox');
+                  final customer = customerBox.values.firstWhere(
+                    (c) => c.name == selectedCustomer,
+                    orElse: () => CustomerModel(
+                        id: '',
+                        name: '',
+                        contactNumber: '',
+                        email: '',
+                        address: '',
+                        idNit: '',
+                        uniqueCode: '',
+                        contact: '',
+                        isSynced: false),
+                  );
+
+                  // Auto-fill other fields with customer data
+                  _emailController.text = customer.email;
+                  _nitCcController.text = customer.idNit;
+                });
+              }
+            },
+            hint: Text("Sin clientes disponibles"),
+          ),
+        if (_issuedToOption == "Nuevo cliente") ...[
+          SizedBox(height: 16.0),
+          TextField(
+            controller: _issuedToController,
+            decoration: _customInputDecoration("Nombre del nuevo cliente"),
+          ),
+        ]
+      ],
+    );
+  }
+
   Widget _buildPreviewRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -401,7 +483,7 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
           ? _buildPreview()
           : Scaffold(
               appBar: AppBar(
-                title: Text("Client Invoice"),
+                title: Text("Factura de cliente"),
                 centerTitle: true,
                 backgroundColor: Color(0xFFFF9FAFB),
                 leading: IconButton(
@@ -426,7 +508,7 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
                             Expanded(
                               child: TextField(
                                 controller: _senderController,
-                                decoration: _customInputDecoration("Sender"),
+                                decoration: _customInputDecoration("Remitente"),
                               ),
                             ),
                             IconButton(
@@ -439,56 +521,12 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 16.0),
                     Text(
-                      "Issued To:",
+                      "Dirigido a:",
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     SizedBox(height: 8.0),
-                    DropdownButtonFormField<String>(
-                      decoration: _customInputDecoration("Select Customer"),
-                      value: _issuedToOption,
-                      items: _issuedToOptions.map((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          _issuedToOption = newValue!;
-                        });
-                      },
-                    ),
-                    if (_issuedToOption == "New Customer") ...[
-                      SizedBox(height: 16.0),
-                      TextField(
-                        controller: _issuedToController,
-                        decoration: _customInputDecoration("New Customer Name"),
-                      ),
-                    ],
-                    if (_issuedToOption == "Select Customer") ...[
-                      SizedBox(height: 16.0),
-                      DropdownButtonFormField<String>(
-                        decoration:
-                            _customInputDecoration("Registered Customers"),
-                        value: _customerList.isNotEmpty
-                            ? _customerList.first
-                            : null,
-                        items: _customerList.map((String customer) {
-                          return DropdownMenuItem<String>(
-                            value: customer,
-                            child: Text(customer),
-                          );
-                        }).toList(),
-                        onChanged: (String? selectedCustomer) {
-                          setState(() {
-                            _issuedToController.text = selectedCustomer ?? "";
-                          });
-                        },
-                        hint: Text("No customers available"),
-                      ),
-                    ],
+                    _buildIssuedToSection(),
                     SizedBox(height: 16.0),
                     TextField(
                       controller: _nitCcController,
@@ -497,17 +535,17 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
                     ),
                     SizedBox(height: 16.0),
                     Text(
-                      "Operation:",
+                      "Operacion:",
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      "Products", // Default operation
+                      "Productos", // Default operation
                       style: TextStyle(fontSize: 16.0),
                     ),
                     SizedBox(height: 16.0),
                     TextField(
                       controller: _amountController,
-                      decoration: _customInputDecoration("Amount"),
+                      decoration: _customInputDecoration("Monto"),
                       keyboardType: TextInputType.number,
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly,
@@ -516,7 +554,7 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
                     SizedBox(height: 16.0),
                     TextField(
                       controller: _detailsController,
-                      decoration: _customInputDecoration("Details"),
+                      decoration: _customInputDecoration("Detalles"),
                       maxLines: 3,
                     ),
                     SizedBox(height: 16.0),
@@ -527,7 +565,7 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
                     ),
                     SizedBox(height: 16.0),
                     Text(
-                      "Image:",
+                      "Imagen:",
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     SizedBox(height: 8.0),
@@ -570,7 +608,7 @@ class _InvoiceClientScreenState extends State<InvoiceClientScreen> {
                           ),
                         ),
                         child: Text(
-                          "Preview Invoice",
+                          "Factura previa",
                           style: TextStyle(
                               fontSize: 18.0,
                               color: Colors.white,

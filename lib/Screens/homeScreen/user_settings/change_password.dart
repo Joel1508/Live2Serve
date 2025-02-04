@@ -44,7 +44,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Password changed successfully')),
+          const SnackBar(
+              content: Text('Contrasen1a actualizada correctamente')),
         );
         Navigator.pop(context);
       }
@@ -63,7 +64,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Change Password'),
+        title: const Text('Cambiar contraseña'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -74,7 +75,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               TextFormField(
                 controller: _currentPasswordController,
                 decoration: const InputDecoration(
-                  labelText: 'Current Password',
+                  labelText: 'Contraseña actual',
                   border: OutlineInputBorder(),
                 ),
                 obscureText: true,
@@ -89,7 +90,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               TextFormField(
                 controller: _newPasswordController,
                 decoration: const InputDecoration(
-                  labelText: 'New Password',
+                  labelText: 'Nueva contraseña',
                   border: OutlineInputBorder(),
                 ),
                 obscureText: true,
@@ -107,7 +108,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               TextFormField(
                 controller: _confirmPasswordController,
                 decoration: const InputDecoration(
-                  labelText: 'Confirm New Password',
+                  labelText: 'Confirmar nueva contraseña',
                   border: OutlineInputBorder(),
                 ),
                 obscureText: true,
@@ -123,7 +124,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 onPressed: _isLoading ? null : _changePassword,
                 child: _isLoading
                     ? const CircularProgressIndicator()
-                    : const Text('Change Password'),
+                    : const Text('Cambiar contraseña'),
               ),
             ],
           ),

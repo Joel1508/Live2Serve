@@ -11,7 +11,7 @@ class HistoryScreen extends StatefulWidget {
 class _HistoryScreenState extends State<HistoryScreen> {
   List<Transaction> transactions = [];
   List<Transaction> filteredTransactions = [];
-  String selectedFilter = 'All';
+  String selectedFilter = 'Todo';
   bool isIncomeFilter = false;
 
   @override
@@ -45,23 +45,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   void _filterTransactions() {
     filteredTransactions = transactions.where((transaction) {
-      // Income/Expense filter
       bool passesIncomeFilter =
           !isIncomeFilter || transaction.isIncome == isIncomeFilter;
 
-      // Time-based filter
       bool passesTimeFilter = true;
       switch (selectedFilter) {
-        case 'Today':
+        case 'Hoy':
           passesTimeFilter = _isToday(transaction.date);
           break;
-        case 'This Week':
+        case 'Semana':
           passesTimeFilter = _isThisWeek(transaction.date);
           break;
-        case 'This Month':
+        case 'Mes':
           passesTimeFilter = _isThisMonth(transaction.date);
           break;
-        case 'This Year':
+        case 'Año':
           passesTimeFilter = _isThisYear(transaction.date);
           break;
       }
@@ -96,21 +94,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Transaction History'),
+        title: Text('Historial de Transacciones'),
         actions: [
           IconButton(
             icon: Icon(isIncomeFilter ? Icons.attach_money : Icons.money_off),
             onPressed: _toggleIncomeFilter,
+            tooltip: isIncomeFilter ? 'Mostrar todos' : 'Mostrar solo ingresos',
           )
         ],
       ),
       body: Column(
         children: [
-          // Time Filter Buttons
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: ['All', 'Today', 'This Week', 'This Month', 'This Year']
+              children: ['Todo', 'Hoy', 'Semana', 'Mes', 'Año']
                   .map((filter) => Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 4),
                         child: ChoiceChip(
@@ -122,11 +120,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   .toList(),
             ),
           ),
-
-          // Transaction List
           Expanded(
             child: filteredTransactions.isEmpty
-                ? Center(child: Text('No transactions found'))
+                ? Center(child: Text('No hay transacciones disponibles'))
                 : ListView.builder(
                     itemCount: filteredTransactions.length,
                     itemBuilder: (context, index) {
@@ -141,10 +137,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         ),
                         title: Text(transaction.title),
                         subtitle: Text(
-                          '${transaction.category} - ${transaction.date.toLocal()}',
+                          '${transaction.category} - ${DateFormat('dd/MM/yyyy HH:mm', 'es').format(transaction.date)}',
                         ),
                         trailing: Text(
-                          '\$${transaction.amount.toStringAsFixed(2)}',
+                          '\$${NumberFormat('#,##0', 'es').format(transaction.amount * 1000)}',
                           style: TextStyle(
                             color: transaction.isIncome
                                 ? Colors.green
@@ -155,24 +151,22 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     },
                   ),
           ),
-
-          // Summary Section
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildSummaryCard(
-                    'Total Income',
+                    'Ingresos Totales',
                     filteredTransactions
                         .where((t) => t.isIncome)
                         .map((t) => t.amount)
                         .fold(0, (a, b) => a + b)),
                 _buildSummaryCard(
-                    'Total Expense',
+                    'Gastos Totales',
                     filteredTransactions
                         .where((t) => !t.isIncome)
-                        .map((t) => t.amount)
+                        .map((t) => t.amount * 1000)
                         .fold(0, (a, b) => a + b)),
               ],
             ),
@@ -184,7 +178,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Widget _buildSummaryCard(String title, double amount) {
-    final formatter = NumberFormat('#,##0.00', 'en_US');
+    final formatter = NumberFormat('#,##0', 'es');
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -194,7 +188,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
             Text(
               '\$${formatter.format(amount)}',
               style: TextStyle(
-                  color: title.contains('Income') ? Colors.green : Colors.red),
+                  color:
+                      title.contains('Ingresos') ? Colors.green : Colors.red),
             ),
           ],
         ),

@@ -47,7 +47,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
     return Scaffold(
       backgroundColor: Color(0xFFFF9FAFB),
       appBar: AppBar(
-        title: Text('Goal Tracker'),
+        title: Text('Seguimiento de metas'),
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
@@ -63,7 +63,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showEnhancedGoalModal(),
-        label: Text('New Goal'),
+        label: Text('Nueva meta'),
         icon: Icon(Icons.add),
         backgroundColor: Color(0xFFFB5DAB9),
       ),
@@ -122,7 +122,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
         child: goals.isEmpty
             ? Center(
                 child: Text(
-                  'No goals for this day',
+                  'sin metas para este día',
                   style: TextStyle(color: Colors.white54),
                 ),
               )
@@ -153,7 +153,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
             ),
             ElevatedButton(
               onPressed: () => _showUpdateGoalModal(goal),
-              child: Text('Update Progress'),
+              child: Text('Actualizar progreso'),
             ),
           ],
         ),
@@ -170,10 +170,10 @@ class _GoalsScreenState extends State<GoalsScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Update Goal Progress for ${goal.title}'),
+            Text('Actualizar progeso para ${goal.title}'),
             TextField(
               decoration: InputDecoration(
-                labelText: 'Additional Amount',
+                labelText: 'Monto adicional',
                 prefixText: '\$',
               ),
               keyboardType: TextInputType.number,
@@ -189,7 +189,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                 });
                 Navigator.pop(context);
               },
-              child: Text('Save Progress'),
+              child: Text('Guardar progreso'),
             ),
           ],
         ),
@@ -220,7 +220,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
             children: [
               TextFormField(
                 decoration: InputDecoration(
-                  labelText: 'Goal Title',
+                  labelText: 'Titulo',
                   labelStyle: TextStyle(color: Colors.black87),
                   enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.black45),
@@ -228,12 +228,12 @@ class _GoalsScreenState extends State<GoalsScreen> {
                 ),
                 style: TextStyle(color: Colors.black87),
                 validator: (value) =>
-                    value!.isEmpty ? 'Please enter a title' : null,
+                    value!.isEmpty ? 'Por favor, ingrese un título' : null,
                 onChanged: (value) => title = value,
               ),
               TextFormField(
                 decoration: InputDecoration(
-                  labelText: 'Description',
+                  labelText: 'Descripción',
                   labelStyle: TextStyle(color: Colors.black87),
                   enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.black45),
@@ -244,7 +244,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
               ),
               TextFormField(
                 decoration: InputDecoration(
-                  labelText: 'Target Amount',
+                  labelText: 'Monto objetivo',
                   prefixText: '\$',
                   labelStyle: TextStyle(color: Colors.black87),
                   enabledBorder: UnderlineInputBorder(
@@ -254,10 +254,11 @@ class _GoalsScreenState extends State<GoalsScreen> {
                 keyboardType: TextInputType.number,
                 style: TextStyle(color: Colors.black87),
                 validator: (value) {
-                  if (value!.isEmpty) return 'Please enter a target amount';
+                  if (value!.isEmpty)
+                    return 'Por favor, ingrese un monto objetivo';
                   if (double.tryParse(value) == null ||
                       double.parse(value) <= 0) {
-                    return 'Please enter a valid amount';
+                    return 'Por favor, ingrese un monto válido';
                   }
                   return null;
                 },
@@ -268,7 +269,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
               Row(
                 children: [
                   Text(
-                    'Selected Date: ${DateFormat('MMM dd, yyyy').format(selectedDate)}',
+                    'Fecha seleccionada: ${DateFormat('MMM dd, yyyy').format(selectedDate)}',
                     style: TextStyle(color: Colors.white),
                   ),
                 ],
@@ -294,7 +295,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                   }
                 },
                 child: Text(
-                  'Create Goal',
+                  'Crear meta',
                   style: TextStyle(color: Colors.black87),
                 ),
               ),

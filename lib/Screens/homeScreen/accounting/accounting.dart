@@ -32,9 +32,16 @@ class AccountingScreen extends StatelessWidget {
 
   // Existing methods for getting balance remain the same
   double getCurrentBalance() {
-    final balance = balanceBox.get('current',
+    final balance = balanceBox.get('actual',
         defaultValue: Balance(currentBalance: 0.0, history: []));
     return balance?.currentBalance ?? 0.0;
+  }
+
+  double getCorrectedBalance() {
+    final balance = balanceBox.get('actual',
+        defaultValue: Balance(currentBalance: 0.0, history: []));
+    // Multiplicamos por 1000 para corregir el valor
+    return (balance?.currentBalance ?? 0.0) * 1000;
   }
 
   @override
@@ -56,7 +63,7 @@ class AccountingScreen extends StatelessWidget {
                     onPressed: () => Navigator.pop(context),
                   ),
                   Text(
-                    'ACCOUNTING',
+                    'CONTABILIDAD',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -80,7 +87,7 @@ class AccountingScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Current Balance',
+                          'Balance actual',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
@@ -88,24 +95,26 @@ class AccountingScreen extends StatelessWidget {
                         ),
                         ValueListenableBuilder(
                           valueListenable:
-                              balanceBox.listenable(keys: ['current']),
+                              balanceBox.listenable(keys: ['actual']),
                           builder: (context, Box<Balance> box, _) {
-                            final balance = box.get('current',
+                            final balance = box.get('actual',
                                 defaultValue:
                                     Balance(currentBalance: 0.0, history: []));
-                            final formatter = NumberFormat('#,##0.00', 'en_US');
+                            final correctedBalance =
+                                getCorrectedBalance(); // Usamos el balance corregido
+                            final formatter = NumberFormat('#,##0', 'es');
                             return Text(
-                              '\$${formatter.format(balance?.currentBalance)}',
+                              '\$${formatter.format(correctedBalance)}', // Se muestra el balance corregido
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
-                                color: balance!.currentBalance >= 0
+                                color: correctedBalance >= 0
                                     ? Colors.green
                                     : Colors.red,
                               ),
                             );
                           },
-                        ),
+                        )
                       ],
                     ),
                   ),
@@ -117,13 +126,13 @@ class AccountingScreen extends StatelessWidget {
                 child: GridView.count(
                   crossAxisCount: 2,
                   childAspectRatio: 1.4,
-                  mainAxisSpacing: 16,
+                  mainAxisSpacing: 12,
                   crossAxisSpacing: 16,
                   children: [
                     _buildActionButton(
                       context,
                       icon: Icons.add,
-                      label: 'Add Transaction',
+                      label: 'Añadir',
                       onPressed: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -134,7 +143,7 @@ class AccountingScreen extends StatelessWidget {
                     _buildActionButton(
                       context,
                       icon: Icons.history,
-                      label: 'History',
+                      label: 'Historial',
                       onPressed: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -145,7 +154,7 @@ class AccountingScreen extends StatelessWidget {
                     _buildActionButton(
                       context,
                       icon: Icons.more_horiz,
-                      label: 'Others',
+                      label: 'Otros',
                       onPressed: () => Navigator.push(
                         context,
                         MaterialPageRoute(

@@ -14,17 +14,24 @@ class _NumberFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
       TextEditingValue oldValue, TextEditingValue newValue) {
-    // Handle empty input
+    // Manejar entrada vacía
     if (newValue.text.isEmpty) {
       return newValue.copyWith(text: '');
     }
 
-    // Remove any non-digit characters
+    // Eliminar caracteres no numéricos
     String newText = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
 
-    // Convert to double and format with commas and two decimal places
-    double value = double.parse(newText) / 100;
-    String formattedValue = NumberFormat('#,##0.00', 'en_US').format(value);
+    // Evitar errores al parsear valores vacíos
+    if (newText.isEmpty) {
+      return newValue.copyWith(text: '');
+    }
+
+    // Convertir a entero
+    int value = int.parse(newText);
+
+    // Formatear con separadores de miles (sin decimales)
+    String formattedValue = NumberFormat('#,##0', 'es_CO').format(value);
 
     return newValue.copyWith(
       text: formattedValue,
@@ -48,22 +55,22 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   TextEditingController titleController = TextEditingController();
   TextEditingController noteController = TextEditingController();
 
-  String selectedCategory = "Select Category";
+  String selectedCategory = "Seleccionar categoría";
   List<String> incomeCategories = [
-    "Select Category",
-    "Sales",
-    "Commissions",
-    "Investments",
+    "Seleccionar categoría",
+    "Ventas",
+    "Comisiones",
+    "Inversiones",
     "Freelance",
-    "Salaries and Bonuses"
+    "Salario y bonos"
   ];
   List<String> expenseCategories = [
-    "Select Category",
-    "Personal Expenses",
-    "Business Expenses",
-    "Transportation",
-    "Healthcare",
-    "Entertainment"
+    "Seleccionar categoría",
+    "Gastos personales",
+    "Gastos empresa",
+    "Transporte",
+    "Salud",
+    "Entretenimiento"
   ];
 
   DateTime? selectedDate;
@@ -99,22 +106,25 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
       // Get or create balance
       Balance balance =
-          balanceBox.get('current') ?? Balance(currentBalance: 0.0);
+          balanceBox.get('actual') ?? Balance(currentBalance: 0.0, history: []);
 
       final transactionAmount =
           double.parse(amountController.text.replaceAll(',', ''));
 
-      // Update balance
-      balance.currentBalance +=
-          isIncome ? transactionAmount : -transactionAmount;
+      // Crear un nuevo balance en lugar de modificar el existente
+      Balance updatedBalance = Balance(
+        currentBalance: balance.currentBalance +
+            (isIncome ? transactionAmount : -transactionAmount),
+        history: List.from(balance.history)
+          ..add(BalanceHistory(
+            date: DateTime.now(),
+            amount: isIncome ? transactionAmount : -transactionAmount,
+          )),
+      );
 
-      // Add to balance history
-      balance.history.add(BalanceHistory(
-        date: DateTime.now(),
-        amount: isIncome ? transactionAmount : -transactionAmount,
-      ));
-
-      final transaction = Transaction(
+      // Save updated balance and transaction
+      await balanceBox.put('actual', updatedBalance); // Guardar correctamente
+      await transactionBox.add(Transaction(
         amount: transactionAmount,
         title: titleController.text,
         category: selectedCategory,
@@ -123,11 +133,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         isIncome: isIncome,
         imageUrl: selectedImage?.path,
         note: noteController.text,
-      );
-
-      // Save updated balance and transaction
-      await balanceBox.put('current', balance);
-      await transactionBox.add(transaction);
+      ));
 
       _showSuccessMessage('Transaction saved successfully');
       _resetForm();
@@ -152,19 +158,19 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   bool _validateInputs() {
     if (amountController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter an amount')),
+        SnackBar(content: Text('Por favor, ingrese un monto')),
       );
       return false;
     }
     if (titleController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter a title')),
+        SnackBar(content: Text('Por favor, ingrese un título')),
       );
       return false;
     }
-    if (selectedCategory == "Select Category") {
+    if (selectedCategory == "Seleccionar categoría") {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please select a category')),
+        SnackBar(content: Text('Por favor, seleccione una categoría')),
       );
       return false;
     }
@@ -176,7 +182,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       amountController.clear();
       titleController.clear();
       noteController.clear();
-      selectedCategory = "Select Category";
+      selectedCategory = "Seleccionar categoría";
       selectedDate = null;
       selectedPaymentMethod = null;
       selectedImage = null;
@@ -203,7 +209,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -212,58 +217,38 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                       onPressed: () => Navigator.pop(context),
                     ),
                     Text(
-                      "Add Transaction",
+                      "Añadir transacción",
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(width: 50), // Spacer
+                    SizedBox(width: 50),
                   ],
                 ),
-
-                // Transaction Type Toggle
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _buildTypeToggleButton('INCOME', true),
+                    _buildTypeToggleButton('INGRESO', true),
                     SizedBox(width: 10),
-                    _buildTypeToggleButton('EXPENSE', false),
+                    _buildTypeToggleButton('GASTO', false),
                   ],
                 ),
-
                 SizedBox(height: 20),
-
-                // Amount Input
                 _buildAmountInput(),
-
                 SizedBox(height: 20),
-
-                // Title Imput
                 _buildTitleInput(),
-
-                // Category Dropdown
                 _buildCategoryDropdown(),
-
-                // Date Picker
                 _buildDatePicker(),
-
-                // Payment Method
                 _buildPaymentMethodPicker(),
-
-                // Note Input
                 _buildNoteInput(),
-
-                // Image Picker
                 _buildImagePicker(),
-
-                // Add Transaction Button
                 Align(
                   alignment: Alignment.bottomRight,
                   child: ElevatedButton(
                     onPressed: _saveTransaction,
                     child: Text(
-                      'Add Transaction',
+                      'Añadir transacción',
                       style: TextStyle(color: Colors.black87),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -293,7 +278,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       child: TextField(
         controller: titleController,
         decoration: InputDecoration(
-          hintText: 'Enter Transaction Title',
+          hintText: 'Título',
           prefixIcon: Icon(Icons.title, color: Colors.black54),
           border: InputBorder.none,
         ),
@@ -306,7 +291,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       onTap: () {
         setState(() {
           isIncome = type;
-          selectedCategory = "Select Category";
+          selectedCategory = "Seleccionar categoría";
         });
       },
       child: Container(
@@ -358,7 +343,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           ),
           decoration: InputDecoration(
             border: InputBorder.none,
-            hintText: "+ \$0.00",
+            hintText: "\$0.00",
             hintStyle: TextStyle(color: Colors.grey),
           ),
         ),
@@ -406,7 +391,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         leading: Icon(Icons.calendar_today, color: Colors.black54),
         title: Text(
           selectedDate == null
-              ? "Select Date"
+              ? "Seleccionar fecha"
               : "${selectedDate!.toLocal()}".split(' ')[0],
         ),
         onTap: () async {
@@ -416,9 +401,17 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             firstDate: DateTime(2000),
             lastDate: DateTime(2101),
           );
+
           if (pickedDate != null) {
             setState(() {
-              selectedDate = pickedDate;
+              selectedDate = DateTime(
+                pickedDate.year,
+                pickedDate.month,
+                pickedDate.day,
+                DateTime.now().hour,
+                DateTime.now().minute,
+                DateTime.now().second,
+              );
             });
           }
         },
@@ -436,22 +429,22 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       child: ListTile(
         leading: Icon(Icons.payment, color: Colors.black54),
         title: Text(
-          selectedPaymentMethod ?? "Select Payment Method",
+          selectedPaymentMethod ?? "Seleccionar método de pago",
         ),
         onTap: () {
           showDialog(
             context: context,
             builder: (context) => SimpleDialog(
-              title: Text('Select Payment Method'),
+              title: Text('Seleccionar método de pago'),
               children: [
                 SimpleDialogOption(
                   onPressed: () {
                     setState(() {
-                      selectedPaymentMethod = 'Cash';
+                      selectedPaymentMethod = 'Efectivo';
                     });
                     Navigator.pop(context);
                   },
-                  child: Text('Cash'),
+                  child: Text('Efectivo'),
                 ),
                 SimpleDialogOption(
                   onPressed: () {
@@ -480,7 +473,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       child: TextField(
         controller: noteController,
         decoration: InputDecoration(
-          hintText: 'Add a note (Optional)',
+          hintText: 'Añadir una nota (Opcional)',
           prefixIcon: Icon(Icons.note, color: Colors.black54),
           border: InputBorder.none,
         ),
@@ -498,7 +491,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       child: ListTile(
         leading: Icon(Icons.image, color: Colors.black54),
         title: Text(
-          selectedImage == null ? "Add Image (optional)" : "Image Selected",
+          selectedImage == null
+              ? "Añadir imagen (Opcional)"
+              : "Imagen seleccionada",
         ),
         trailing: selectedImage != null
             ? Image.file(selectedImage!, width: 50, height: 50)
@@ -511,7 +506,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               children: [
                 ListTile(
                   leading: Icon(Icons.camera),
-                  title: Text('Take a Photo'),
+                  title: Text('Tomar foto'),
                   onTap: () {
                     Navigator.pop(context);
                     _pickImage(ImageSource.camera);
@@ -519,7 +514,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 ),
                 ListTile(
                   leading: Icon(Icons.photo_library),
-                  title: Text('Choose from Gallery'),
+                  title: Text('Escoger de la galería'),
                   onTap: () {
                     Navigator.pop(context);
                     _pickImage(ImageSource.gallery);

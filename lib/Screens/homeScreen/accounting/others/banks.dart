@@ -25,8 +25,8 @@ class _BanksScreenState extends State<BanksScreen> {
     if (bankName.isNotEmpty && accountNumber.isNotEmpty) {
       setState(() {
         _bankAccounts.add({
-          'bankName': bankName,
-          'accountNumber': accountNumber,
+          'nombre': bankName,
+          'numeroCuenta': accountNumber,
         });
         _bankNameController.clear();
         _accountNumberController.clear();
@@ -70,7 +70,7 @@ class _BanksScreenState extends State<BanksScreen> {
                     Column(
                       children: [
                         Text(
-                          "Banks",
+                          "Bancos",
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
@@ -78,7 +78,7 @@ class _BanksScreenState extends State<BanksScreen> {
                           ),
                         ),
                         Text(
-                          "Manage your bank accounts",
+                          "Administra tus cuentas bancarias",
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.normal,
@@ -126,7 +126,7 @@ class _BanksScreenState extends State<BanksScreen> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        account['bankName']!,
+                                        account['nombre']!,
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 18,
@@ -134,7 +134,7 @@ class _BanksScreenState extends State<BanksScreen> {
                                         ),
                                       ),
                                       Text(
-                                        account['accountNumber']!,
+                                        account['numeroCuenta']!,
                                         style: TextStyle(
                                           fontSize: 16,
                                           color: Colors.grey[700],
@@ -144,14 +144,14 @@ class _BanksScreenState extends State<BanksScreen> {
                                   ),
                                   PopupMenuButton(
                                     onSelected: (value) {
-                                      if (value == 'delete') {
+                                      if (value == 'borrar') {
                                         _deleteBankAccount(index);
                                       }
                                     },
                                     itemBuilder: (context) => [
                                       PopupMenuItem(
-                                        value: 'delete',
-                                        child: Text("Delete"),
+                                        value: 'borrar',
+                                        child: Text("Borrar"),
                                       ),
                                     ],
                                   ),
@@ -180,12 +180,12 @@ class _BanksScreenState extends State<BanksScreen> {
                               TextField(
                                 controller: _bankNameController,
                                 decoration:
-                                    InputDecoration(labelText: "Bank Name"),
+                                    InputDecoration(labelText: "Nombre"),
                               ),
                               TextField(
                                 controller: _accountNumberController,
                                 decoration: InputDecoration(
-                                    labelText: "Account Number"),
+                                    labelText: "Numero de cuenta"),
                               ),
                               SizedBox(height: 16),
                               Row(
@@ -197,7 +197,7 @@ class _BanksScreenState extends State<BanksScreen> {
                                         backgroundColor: Color(0xFFFB5DAB9)),
                                     onPressed: _addBankAccount,
                                     child: Text(
-                                      "Add",
+                                      "Añadir",
                                       style: TextStyle(color: Colors.black54),
                                     ),
                                   ),
@@ -206,7 +206,7 @@ class _BanksScreenState extends State<BanksScreen> {
                                         backgroundColor: Color(0xFFFB5DAB9)),
                                     onPressed: _toggleAddContainer,
                                     child: Text(
-                                      "Cancel",
+                                      "Cancelar",
                                       style: TextStyle(color: Colors.black54),
                                     ),
                                   ),

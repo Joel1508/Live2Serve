@@ -29,7 +29,7 @@ class _UserScreenState extends State<UserScreen> {
           await _supabase.from('profiles').select().eq('id', user.id).single();
 
       setState(() {
-        _username = userData['username'] ?? 'User';
+        _username = userData['nombre usuario'] ?? 'Usuario';
         _email = user.email;
         _notificationsEnabled = userData['notifications_enabled'] ?? true;
       });
@@ -40,7 +40,7 @@ class _UserScreenState extends State<UserScreen> {
     final user = _supabase.auth.currentUser;
     if (user != null) {
       try {
-        await _supabase.from('profiles').update({
+        await _supabase.from('perfiles').update({
           'notifications_enabled': value,
         }).eq('id', user.id);
 
@@ -70,43 +70,48 @@ class _UserScreenState extends State<UserScreen> {
   }
 
   Future<void> _signOut() async {
+    // Guarda el contexto del diálogo
+    final dialogContext = context;
+
     showDialog(
-      context: context,
+      context: dialogContext,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Sign Out'),
-          content: const Text('Are you sure you want to sign out?'),
+          title: const Text('Cerrar sesión'),
+          content: const Text('¿Estás seguro de querer cerrar sesión?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: const Text('Cancelar'),
             ),
             TextButton(
               onPressed: () async {
-                Navigator.pop(context); // Close dialog
+                Navigator.pop(context); // Cierra el diálogo
+
                 try {
                   await _supabase.auth.signOut();
-                  if (mounted) {
-                    // Navigate to login screen or clear navigation stack
+
+                  // Asegúrate de que el widget sigue montado antes de navegar
+                  if (dialogContext.mounted) {
                     Navigator.pushNamedAndRemoveUntil(
-                      context,
-                      '/login', // Replace with your login route
+                      dialogContext,
+                      '/log_in',
                       (route) => false,
                     );
                   }
                 } catch (error) {
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
+                  if (dialogContext.mounted) {
+                    ScaffoldMessenger.of(dialogContext).showSnackBar(
                       SnackBar(
-                        content: Text('Error signing out: $error'),
+                        content: Text('Error cerrando sesión: $error'),
                         duration: const Duration(seconds: 2),
                       ),
                     );
                   }
                 }
               },
-              child:
-                  const Text('Sign Out', style: TextStyle(color: Colors.red)),
+              child: const Text('Cerrar sesión',
+                  style: TextStyle(color: Colors.red)),
             ),
           ],
         );
@@ -118,7 +123,7 @@ class _UserScreenState extends State<UserScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: const Text('Perfil'),
         centerTitle: true,
       ),
       body: Padding(
@@ -144,7 +149,7 @@ class _UserScreenState extends State<UserScreen> {
             // Profile Information
             ListTile(
               leading: const Icon(Icons.edit, color: Colors.blueAccent),
-              title: const Text('Profile Information'),
+              title: const Text('Información de perfil'),
               trailing: const Icon(Icons.arrow_forward_ios),
               onTap: () {
                 Navigator.push(
@@ -162,7 +167,7 @@ class _UserScreenState extends State<UserScreen> {
             // Change Password
             ListTile(
               leading: const Icon(Icons.security, color: Colors.blueAccent),
-              title: const Text('Change Password'),
+              title: const Text('Cambiar contraseña'),
               trailing: const Icon(Icons.arrow_forward_ios),
               onTap: () {
                 Navigator.push(
@@ -178,7 +183,7 @@ class _UserScreenState extends State<UserScreen> {
             ListTile(
               leading:
                   const Icon(Icons.notifications, color: Colors.blueAccent),
-              title: const Text('Notifications'),
+              title: const Text('Notificaciones'),
               trailing: Switch(
                 value: _notificationsEnabled,
                 onChanged: _toggleNotifications,
@@ -189,8 +194,8 @@ class _UserScreenState extends State<UserScreen> {
             // Sign Out
             ListTile(
               leading: const Icon(Icons.logout, color: Colors.red),
-              title:
-                  const Text('Sign Out', style: TextStyle(color: Colors.red)),
+              title: const Text('Cerrar sesión',
+                  style: TextStyle(color: Colors.red)),
               onTap: _signOut,
             ),
           ],

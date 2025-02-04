@@ -108,7 +108,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                 child: Column(
                   children: [
                     Text(
-                      "Reference Number",
+                      "Numero de referencia",
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
@@ -124,14 +124,14 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
               _buildDetailRow("Remitente *", invoice['sender']),
               _buildDetailRow("Emitida A: *", invoice['receiver']),
               _buildDetailRow("Nit / CC *", invoice['nit']),
-              _buildDetailRow("Date & Time *", invoice['dateTime']),
+              _buildDetailRow("Fecha & Hora *", invoice['dateTime']),
               _buildDetailRow("Operación *", invoice['operation']),
-              _buildDetailRow("Amount *", "\$ ${invoice['amount']}",
+              _buildDetailRow("Monto *", "\$ ${invoice['amount']}",
                   boldValue: true),
-              _buildDetailRow("Details", invoice['details']),
+              _buildDetailRow("Detalles", invoice['details']),
               _buildDetailRow("Mail", invoice['email']),
               SizedBox(height: 10),
-              Text("Picture", style: TextStyle(fontWeight: FontWeight.bold)),
+              Text("Imagen", style: TextStyle(fontWeight: FontWeight.bold)),
               Container(
                 height: 150,
                 width: double.infinity,
@@ -240,7 +240,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      title: Text("Invoice History"),
+      title: Text("Historial"),
       centerTitle: true,
       backgroundColor: Color(0xFFFCFCFCF),
       leading: IconButton(
@@ -275,7 +275,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
           ),
           SizedBox(height: 16),
           Text(
-            "No invoices available.",
+            "Sin facturas disponibles.",
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w500,
@@ -284,7 +284,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
           ),
           SizedBox(height: 8),
           Text(
-            "Tap the + button to create a new invoice",
+            "Toca el boton + para añadir nueva factura",
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey[600],
@@ -345,11 +345,12 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
             child: Icon(Icons.receipt, color: Color(0xFFF5EBA7D)),
           ),
           title: Text(
-            invoice['title'],
+            invoice['receiver'] ??
+                '', // Changed from 'Dirigido a' to 'receiver'
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           subtitle: Text(
-            invoice['description'],
+            invoice['details'] ?? '', // Changed from 'descripción' to 'details'
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
@@ -358,14 +359,15 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                "\$${invoice['amount']}",
+                "\$${invoice['amount'] ?? '0'}", // Added null check
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
                 ),
               ),
               Text(
-                _formatDate(invoice['dateTime']),
+                _formatDate(invoice['dateTime'] ??
+                    ''), // Changed from 'fecha & hora' to 'dateTime'
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.grey[600],

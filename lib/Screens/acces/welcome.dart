@@ -88,7 +88,7 @@ class _WelcomeState extends State<Welcome> {
                         backgroundColor: Color(0xFFFDEDCDC),
                       ),
                       child: const Text(
-                        'Skip',
+                        'Saltar',
                         style: TextStyle(
                             color: Color(0xFFF12372A),
                             fontWeight: FontWeight.bold,
@@ -108,7 +108,7 @@ class _WelcomeState extends State<Welcome> {
                         backgroundColor: Color(0xFFFDEDCDC),
                       ),
                       child: const Text(
-                        'Continue',
+                        'Continuar',
                         style: TextStyle(
                             color: Color(0xFFF12372A),
                             fontWeight: FontWeight.bold,

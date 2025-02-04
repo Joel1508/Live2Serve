@@ -103,7 +103,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Add New Customer"),
+        title: const Text("Añadir nuevo cliente"),
         content: SingleChildScrollView(
           child: _buildAddCustomerForm(),
         ),
@@ -111,7 +111,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: const Text(
-              "Cancel",
+              "Cancelar",
               style: TextStyle(color: Colors.black54),
             ),
           ),
@@ -120,7 +120,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
             style:
                 ElevatedButton.styleFrom(backgroundColor: Color(0xFFFB5DAB9)),
             child: const Text(
-              "Save",
+              "Guardar",
               style: TextStyle(color: Colors.black54),
             ),
           ),
@@ -133,12 +133,16 @@ class _CustomersScreenState extends State<CustomersScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Delete Customer"),
-        content: const Text("Are you sure you want to delete this customer?"),
+        title: const Text("Eliminar cliente"),
+        content:
+            const Text("Estas seguro de que quieres eliminar este cliente?"),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text("Cancel"),
+            child: const Text(
+              "Cancelar",
+              style: TextStyle(color: Colors.black54),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
@@ -151,7 +155,10 @@ class _CustomersScreenState extends State<CustomersScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Color(0xFFFF69697),
             ),
-            child: const Text("Delete"),
+            child: const Text(
+              "Eliminar",
+              style: TextStyle(color: Colors.black54),
+            ),
           ),
         ],
       ),
@@ -167,19 +174,19 @@ class _CustomersScreenState extends State<CustomersScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text("Phone: ${customer.contactNumber}"),
+            Text("Telefono: ${customer.contactNumber}"),
             Text("Email: ${customer.email}"),
-            Text("Address: ${customer.address}"),
+            Text("Dirección: ${customer.address}"),
             Text("ID/NIT: ${customer.idNit}"),
-            Text("Unique Code: ${customer.uniqueCode}"),
-            Text("Contact: ${customer.contact}"),
+            Text("Código unico: ${customer.uniqueCode}"),
+            Text("Contacto: ${customer.contact}"),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: const Text(
-              "Close",
+              "Cerrar",
               style: TextStyle(color: Colors.black54),
             ),
           ),
@@ -195,12 +202,12 @@ class _CustomersScreenState extends State<CustomersScreen> {
       children: [
         TextField(
           controller: _nameController,
-          decoration: const InputDecoration(labelText: "Name"),
+          decoration: const InputDecoration(labelText: "Nombre"),
         ),
         const SizedBox(height: 10),
         TextField(
           controller: _phoneController,
-          decoration: const InputDecoration(labelText: "Phone"),
+          decoration: const InputDecoration(labelText: "Telefono"),
         ),
         const SizedBox(height: 10),
         TextField(
@@ -210,7 +217,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
         const SizedBox(height: 10),
         TextField(
           controller: _addressController,
-          decoration: const InputDecoration(labelText: "Address"),
+          decoration: const InputDecoration(labelText: "Dirección"),
         ),
         const SizedBox(height: 10),
         TextField(
@@ -220,7 +227,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
         const SizedBox(height: 10),
         TextField(
           controller: _descriptionController,
-          decoration: const InputDecoration(labelText: "Description"),
+          decoration: const InputDecoration(labelText: "Descripción"),
           maxLines: 3,
         ),
       ],
@@ -232,7 +239,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFFF9FAFB),
       appBar: AppBar(
-        title: const Text("Customers"),
+        title: const Text("Clientes"),
         actions: [
           IconButton(
             onPressed: _showAddCustomerDialog,
@@ -246,7 +253,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: "Search",
+                hintText: "Buscar",
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: Colors.white,
@@ -266,7 +273,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
               _searchQuery.isEmpty ? box.values.toList() : _filteredCustomers;
 
           return customers.isEmpty
-              ? const Center(child: Text("No customers found"))
+              ? const Center(child: Text("No se encuentran clientes"))
               : ListView.builder(
                   itemCount: customers.length,
                   itemBuilder: (context, index) {
@@ -277,7 +284,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
                         child: ListTile(
                           title: Text(customer.name),
                           subtitle: Text(
-                              "Phone: ${customer.contactNumber} | ID/NIT: ${customer.idNit}"),
+                              "Telefono: ${customer.contactNumber} | ID/NIT: ${customer.idNit}"),
                           trailing: IconButton(
                             icon: const Icon(Icons.delete,
                                 color: Color(0xFFFF69697)),

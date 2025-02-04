@@ -22,7 +22,7 @@ class OthersScreen extends StatelessWidget {
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFFCFCFCF), Color(0xFFFF9FAFB)],
+            colors: [Color(0xFFFCFCFC), Color(0xFFF9FAFB)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -47,7 +47,7 @@ class OthersScreen extends StatelessWidget {
                     Column(
                       children: [
                         Text(
-                          "Others",
+                          "Otras",
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
@@ -55,7 +55,7 @@ class OthersScreen extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          "Activities",
+                          "Actividades",
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.normal,
@@ -78,16 +78,16 @@ class OthersScreen extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _buildButton(context, Icons.account_balance, "Banks",
+                      _buildButton(context, Icons.account_balance, "Bancos",
                           BanksScreen()),
                       SizedBox(height: 16),
                       _buildButton(
-                          context, Icons.savings, "Savings", SavingsScreen()),
+                          context, Icons.savings, "Ahorros", SavingsScreen()),
                       SizedBox(height: 16),
-                      _buildButton(context, Icons.credit_card, "Credits",
+                      _buildButton(context, Icons.credit_card, "Créditos",
                           CreditsScreen()),
                       SizedBox(height: 16),
-                      _buildGoalsButton(context),
+                      _construirBotonMetas(context),
                     ],
                   ),
                 ),
@@ -133,7 +133,7 @@ class OthersScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildGoalsButton(BuildContext context) {
+  Widget _construirBotonMetas(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -149,7 +149,7 @@ class OthersScreen extends StatelessWidget {
       child: ListTile(
         leading: Icon(Icons.my_location, size: 28, color: Colors.blue),
         title: Text(
-          "Goals",
+          "Metas",
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 18,

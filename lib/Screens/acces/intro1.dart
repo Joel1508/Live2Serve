@@ -54,7 +54,7 @@ class IntroductionScreen1 extends StatelessWidget {
                 ),
                 // Description Text
                 const Text(
-                  'We are passionate hydroponic producers, dedicated to growing top-quality lettuce with care and innovation.',
+                  'Somos productores apasionados de hidroponía, dedicados a cultivar lechugas de la mejor calidad con cuidado e innovación.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 18,

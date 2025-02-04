@@ -69,7 +69,7 @@ class _ProfileInformationScreenState extends State<ProfileInformationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile Information'),
+        title: const Text('Información de perfil'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -80,7 +80,7 @@ class _ProfileInformationScreenState extends State<ProfileInformationScreen> {
               TextFormField(
                 controller: _usernameController,
                 decoration: const InputDecoration(
-                  labelText: 'Username',
+                  labelText: 'Nombre usuario',
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
@@ -104,7 +104,7 @@ class _ProfileInformationScreenState extends State<ProfileInformationScreen> {
                 onPressed: _isLoading ? null : _updateProfile,
                 child: _isLoading
                     ? const CircularProgressIndicator()
-                    : const Text('Update Profile'),
+                    : const Text('Actualizar nombre perfil'),
               ),
             ],
           ),

@@ -48,7 +48,7 @@ class IntroductionScreen2 extends StatelessWidget {
               ),
               // Description Text
               const Text(
-                'Our missiong is to bring fresh, delicious produce straigh to your table-perfect for lunch, dinner and everything in between.',
+                'Nuestra misión es llevar productos frescos y deliciosos directamente a tu mesa, perfectos para el almuerzo, la cena y todo lo demás.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 18,

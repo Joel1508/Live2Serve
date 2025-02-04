@@ -96,14 +96,14 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text("Create New Bed"),
+              title: Text("Crear nueva cama"),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     TextField(
                       controller: _nameController,
-                      decoration: InputDecoration(labelText: "Bed Name"),
+                      decoration: InputDecoration(labelText: "Nombre"),
                       onChanged: (value) {
                         _checkForDuplicate(value);
                         setState(() {});
@@ -112,15 +112,15 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
                     SizedBox(height: 10),
                     TextField(
                       controller: _detailsController,
-                      decoration: InputDecoration(labelText: "Details"),
+                      decoration: InputDecoration(labelText: "Detalles"),
                       maxLines: 3,
                     ),
                     SizedBox(height: 10),
-                    Text("Creation Date: $_creationDate"),
+                    Text("Fecha creación: $_creationDate"),
                     if (_isDuplicate && _existingBed != null) ...[
                       SizedBox(height: 10),
                       Text(
-                        "Duplicate found: ${_existingBed!.name}\nCode: ${_existingBed!.code}",
+                        "Ya existe una cama con ese nombre: ${_existingBed!.name}\nCódigo: ${_existingBed!.code}",
                         style: TextStyle(
                           color: Colors.red,
                           fontWeight: FontWeight.bold,
@@ -134,7 +134,7 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
                   child: Text(
-                    "Cancel",
+                    "Cancelar",
                     style: TextStyle(color: Colors.black54),
                   ),
                 ),
@@ -143,7 +143,7 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
                   style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFFFB5DAB9)),
                   child: Text(
-                    "Save",
+                    "Guardar",
                     style: TextStyle(color: Colors.black54),
                   ),
                 ),
@@ -160,16 +160,16 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text("Bed Details"),
+          title: Text("Detalles"),
           content: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                _buildDetailRow("Name:", bed.name),
-                _buildDetailRow("Code:", bed.code),
-                _buildDetailRow("Creation Date:", bed.creationDate),
-                _buildDetailRow("Details:", bed.details),
+                _buildDetailRow("Nombre:", bed.name),
+                _buildDetailRow("Código:", bed.code),
+                _buildDetailRow("Fecha de creación:", bed.creationDate),
+                _buildDetailRow("Detalles:", bed.details),
               ],
             ),
           ),
@@ -177,7 +177,7 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: Text(
-                "Close",
+                "Cerrar",
                 style: TextStyle(color: Colors.black54),
               ),
             ),
@@ -189,7 +189,7 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
                 _showEditBedDialog(bed, index);
               },
               child: Text(
-                "Edit",
+                "Editar",
                 style: TextStyle(color: Colors.black54),
               ),
             ),
@@ -199,7 +199,7 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
                 Navigator.of(context).pop();
               },
               style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: Text("Delete"),
+              child: Text("Eliminar"),
             ),
           ],
         );
@@ -217,14 +217,14 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text("Edit Bed"),
+              title: Text("Editar"),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     TextField(
                       controller: _nameController,
-                      decoration: InputDecoration(labelText: "Bed Name"),
+                      decoration: InputDecoration(labelText: "Nombre"),
                       onChanged: (value) {
                         _checkForDuplicate(value);
                         setState(() {});
@@ -233,7 +233,7 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
                     SizedBox(height: 10),
                     TextField(
                       controller: _detailsController,
-                      decoration: InputDecoration(labelText: "Details"),
+                      decoration: InputDecoration(labelText: "Detalles"),
                       maxLines: 3,
                     ),
                   ],
@@ -243,14 +243,14 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
                   child: Text(
-                    "Cancel",
+                    "Cancelar",
                     style: TextStyle(color: Colors.black54),
                   ),
                 ),
                 ElevatedButton(
                   onPressed: () => _updateBed(index),
                   child: Text(
-                    "Save",
+                    "Guardar",
                     style: TextStyle(color: Colors.black54),
                   ),
                 ),
@@ -330,7 +330,7 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Hydroponic Beds"),
+        title: Text("Proyecto Hidropónico"),
         actions: [
           IconButton(
             onPressed: _navigateToHistoryScreen,
@@ -357,7 +357,7 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: "Search by Name or Code",
+                hintText: "Buscar",
                 prefixIcon: Icon(Icons.search),
                 filled: true,
                 fillColor: Colors.white,
@@ -377,7 +377,7 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
               _searchQuery.isEmpty ? box.values.toList() : _filteredBeds;
 
           return beds.isEmpty
-              ? Center(child: Text("No beds found"))
+              ? Center(child: Text("No se encontraron camas creadas"))
               : ListView.builder(
                   itemCount: beds.length,
                   itemBuilder: (context, index) {
@@ -388,7 +388,7 @@ class _HydroponicBedsScreenState extends State<HydroponicBedsScreen> {
                         child: ListTile(
                           title: Text(bed.name),
                           subtitle: Text(
-                              "Code: ${bed.code} | Date: ${bed.creationDate}"),
+                              "Código: ${bed.code} | Fecha: ${bed.creationDate}"),
                           onTap: () => _showBedDetailsDialog(bed, index),
                         ),
                       ),
@@ -448,30 +448,30 @@ class _HistoryScreenState extends State<HistoryBedScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Harvest Invoice Details'),
+        title: Text('Detalles de factura de cosecha'),
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildDetailRow('Reference:', invoice.reference),
-              _buildDetailRow('Person:', invoice.personName),
-              _buildDetailRow('Date:', invoice.dateTime),
+              _buildDetailRow('Referencia:', invoice.reference),
+              _buildDetailRow('Nombre:', invoice.personName),
+              _buildDetailRow('Fecha:', invoice.dateTime),
               _buildDetailRow(
-                  'Plants Harvested:', invoice.plantsHarvested.toString()),
-              _buildDetailRow('Price per Plant:',
+                  'Plantas cosechadas:', invoice.plantsHarvested.toString()),
+              _buildDetailRow('Precio por planta:',
                   '\$${invoice.pricePerPlant.toStringAsFixed(2)}'),
-              _buildDetailRow('Total Harvest Value:',
+              _buildDetailRow('Valor total cosecha:',
                   '\$${invoice.totalHarvestValue.toStringAsFixed(2)}'),
               Divider(),
-              Text('Costs:', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text('Costos:', style: TextStyle(fontWeight: FontWeight.bold)),
               ...invoice.costs.map((cost) => _buildDetailRow(
                   '${cost.name} (x${cost.quantity}):',
                   '\$${cost.total.toStringAsFixed(2)}')),
               Divider(),
-              _buildDetailRow(
-                  'Total Costs:', '\$${invoice.totalCosts.toStringAsFixed(2)}'),
-              _buildDetailRow('Final Amount:',
+              _buildDetailRow('Costos Totales:',
+                  '\$${invoice.totalCosts.toStringAsFixed(2)}'),
+              _buildDetailRow('Valor Final:',
                   '\$${invoice.finalAmount.toStringAsFixed(2)}'),
             ],
           ),
@@ -480,7 +480,7 @@ class _HistoryScreenState extends State<HistoryBedScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Close',
+              'Cerrar',
               style: TextStyle(color: Colors.black54),
             ),
           ),
@@ -517,7 +517,7 @@ class _HistoryScreenState extends State<HistoryBedScreen> {
       length: 1,
       child: Scaffold(
         appBar: AppBar(
-          title: Text("History"),
+          title: Text("Historial"),
           bottom: PreferredSize(
             preferredSize: Size.fromHeight(110),
             child: Column(
@@ -527,7 +527,7 @@ class _HistoryScreenState extends State<HistoryBedScreen> {
                   child: TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
-                      hintText: "Search in History",
+                      hintText: "Buscar",
                       prefixIcon: Icon(Icons.search),
                       filled: true,
                       fillColor: Colors.white,
@@ -540,7 +540,7 @@ class _HistoryScreenState extends State<HistoryBedScreen> {
                 ),
                 TabBar(
                   tabs: [
-                    Tab(text: "Harvest Invoices"),
+                    Tab(text: "Facturas de cosecha"),
                   ],
                 ),
               ],
@@ -558,7 +558,7 @@ class _HistoryScreenState extends State<HistoryBedScreen> {
                     : _filteredInvoices;
 
                 return invoices.isEmpty
-                    ? Center(child: Text("No harvest invoices found"))
+                    ? Center(child: Text("No se encontraron facturas"))
                     : ListView.builder(
                         itemCount: invoices.length,
                         itemBuilder: (context, index) {

@@ -33,22 +33,22 @@ class _HarvestInvoiceScreenState extends State<HarvestInvoiceScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Add New Cost'),
+        title: Text('Añadir nuevo costo'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: nameController,
-              decoration: InputDecoration(labelText: 'Cost Name'),
+              decoration: InputDecoration(labelText: 'Nombre de costo'),
             ),
             TextField(
               controller: amountController,
-              decoration: InputDecoration(labelText: 'Amount'),
+              decoration: InputDecoration(labelText: 'Valor'),
               keyboardType: TextInputType.number,
             ),
             TextField(
               controller: quantityController,
-              decoration: InputDecoration(labelText: 'Quantity'),
+              decoration: InputDecoration(labelText: 'Cantidad'),
               keyboardType: TextInputType.number,
             ),
           ],
@@ -57,7 +57,7 @@ class _HarvestInvoiceScreenState extends State<HarvestInvoiceScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Cancel',
+              'Cancelar',
               style: TextStyle(color: Colors.black54),
             ),
           ),
@@ -75,7 +75,7 @@ class _HarvestInvoiceScreenState extends State<HarvestInvoiceScreen> {
               Navigator.pop(context);
             },
             child: Text(
-              'Add',
+              'Añadir',
               style: TextStyle(color: Colors.black54),
             ),
           ),
@@ -91,7 +91,7 @@ class _HarvestInvoiceScreenState extends State<HarvestInvoiceScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Select Existing Cost'),
+        title: Text('Seleccionar costo'),
         content: Container(
           width: double.maxFinite,
           child: ListView.builder(
@@ -110,17 +110,17 @@ class _HarvestInvoiceScreenState extends State<HarvestInvoiceScreen> {
                   showDialog(
                     context: context,
                     builder: (context) => AlertDialog(
-                      title: Text('Enter Quantity'),
+                      title: Text('Ingresar cantidad'),
                       content: TextField(
                         controller: quantityController,
-                        decoration: InputDecoration(labelText: 'Quantity'),
+                        decoration: InputDecoration(labelText: 'Cantidad'),
                         keyboardType: TextInputType.number,
                       ),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context),
                           child: Text(
-                            'Cancel',
+                            'Cancelar',
                             style: TextStyle(color: Colors.black54),
                           ),
                         ),
@@ -139,7 +139,7 @@ class _HarvestInvoiceScreenState extends State<HarvestInvoiceScreen> {
                             Navigator.pop(context);
                           },
                           child: Text(
-                            'Add',
+                            'Añadir',
                             style: TextStyle(color: Colors.black54),
                           ),
                         ),
@@ -186,14 +186,14 @@ class _HarvestInvoiceScreenState extends State<HarvestInvoiceScreen> {
 
     // Optional: Show a success snackbar
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Harvest invoice saved successfully!')),
+      SnackBar(content: Text('Factura guardada exitosamente!')),
     );
   }
 
   Widget _buildPreview() {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Harvest Invoice Preview'),
+        title: Text('Factura de cosecha'),
         actions: [
           IconButton(
             icon: Icon(Icons.check),
@@ -201,7 +201,7 @@ class _HarvestInvoiceScreenState extends State<HarvestInvoiceScreen> {
               widget.onInvoiceSaved(_currentInvoice);
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Harvest invoice saved successfully!')),
+                SnackBar(content: Text('Factura guardada exitosamente!')),
               );
             },
           ),
@@ -224,29 +224,29 @@ class _HarvestInvoiceScreenState extends State<HarvestInvoiceScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Harvest Invoice',
+                  'Factura de cosecha',
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
                 Divider(),
-                _buildPreviewRow('Reference:', _currentInvoice.reference),
-                _buildPreviewRow('Person:', _currentInvoice.personName),
-                _buildPreviewRow('Date:', _currentInvoice.dateTime),
+                _buildPreviewRow('Referencia:', _currentInvoice.reference),
+                _buildPreviewRow('Persona:', _currentInvoice.personName),
+                _buildPreviewRow('Fecha:', _currentInvoice.dateTime),
                 Divider(),
-                _buildPreviewRow('Plants Harvested:',
+                _buildPreviewRow('Plantas cosechadas:',
                     _currentInvoice.plantsHarvested.toString()),
                 _buildPreviewRow(
-                    'Price per Plant:', '\$${_currentInvoice.pricePerPlant}'),
-                _buildPreviewRow('Total Harvest Value:',
+                    'Precio por planta:', '\$${_currentInvoice.pricePerPlant}'),
+                _buildPreviewRow('Valor total cosecha:',
                     '\$${_currentInvoice.totalHarvestValue}'),
                 Divider(),
-                Text('Costs:', style: Theme.of(context).textTheme.titleMedium),
+                Text('Costos:', style: Theme.of(context).textTheme.titleMedium),
                 ..._currentInvoice.costs.map((cost) => _buildPreviewRow(
                     '${cost.name} (x${cost.quantity}):', '\$${cost.total}')),
                 Divider(),
                 _buildPreviewRow(
-                    'Total Costs:', '\$${_currentInvoice.totalCosts}'),
+                    'Costos totales:', '\$${_currentInvoice.totalCosts}'),
                 _buildPreviewRow(
-                    'Final Amount:', '\$${_currentInvoice.finalAmount}'),
+                    'Valor Final:', '\$${_currentInvoice.finalAmount}'),
               ],
             ),
           ),
@@ -277,7 +277,7 @@ class _HarvestInvoiceScreenState extends State<HarvestInvoiceScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Create Harvest Invoice'),
+        title: Text('Crear factura de cosecha'),
       ),
       body: showPreview
           ? _buildPreview()
@@ -288,18 +288,18 @@ class _HarvestInvoiceScreenState extends State<HarvestInvoiceScreen> {
                 children: [
                   TextField(
                     controller: _personNameController,
-                    decoration: InputDecoration(labelText: 'Person Name'),
+                    decoration: InputDecoration(labelText: 'Nombre'),
                   ),
                   SizedBox(height: 16.0),
                   TextField(
                     controller: _plantsController,
-                    decoration: InputDecoration(labelText: 'Number of Plants'),
+                    decoration: InputDecoration(labelText: 'Numero de plantas'),
                     keyboardType: TextInputType.number,
                   ),
                   SizedBox(height: 16.0),
                   TextField(
                     controller: _priceController,
-                    decoration: InputDecoration(labelText: 'Price per Plant'),
+                    decoration: InputDecoration(labelText: 'Precio por planta'),
                     keyboardType: TextInputType.number,
                   ),
                   SizedBox(height: 16.0),
@@ -317,7 +317,7 @@ class _HarvestInvoiceScreenState extends State<HarvestInvoiceScreen> {
                             color: Colors.black54,
                           ),
                           label: Text(
-                            'Select Existing Cost',
+                            'seleccionar costo',
                             style: TextStyle(color: Colors.black54),
                           ),
                         ),
@@ -332,7 +332,7 @@ class _HarvestInvoiceScreenState extends State<HarvestInvoiceScreen> {
                           onPressed: _addNewCost,
                           icon: Icon(Icons.add),
                           label: Text(
-                            'Add New Cost',
+                            'Ańadir costo',
                             style: TextStyle(color: Colors.black54),
                           ),
                         ),
@@ -340,7 +340,7 @@ class _HarvestInvoiceScreenState extends State<HarvestInvoiceScreen> {
                     ],
                   ),
                   SizedBox(height: 16.0),
-                  Text('Selected Costs:',
+                  Text('Seleccionar costo:',
                       style: Theme.of(context).textTheme.titleMedium),
                   ListView.builder(
                     shrinkWrap: true,
@@ -351,7 +351,7 @@ class _HarvestInvoiceScreenState extends State<HarvestInvoiceScreen> {
                       return ListTile(
                         title: Text(cost.name),
                         subtitle: Text(
-                            'Amount: \$${cost.amount} x ${cost.quantity} = \$${cost.total}'),
+                            'Monto: \$${cost.amount} x ${cost.quantity} = \$${cost.total}'),
                         trailing: IconButton(
                           icon: Icon(Icons.delete),
                           onPressed: () {
@@ -371,7 +371,7 @@ class _HarvestInvoiceScreenState extends State<HarvestInvoiceScreen> {
                       ),
                       onPressed: _generateInvoice,
                       child: Text(
-                        'Preview Invoice',
+                        'Factura previa',
                         style: TextStyle(color: Colors.black54),
                       ),
                     ),

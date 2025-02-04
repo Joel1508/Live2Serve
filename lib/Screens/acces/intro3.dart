@@ -48,7 +48,7 @@ class IntroductionScreen3 extends StatelessWidget {
               ),
               // Description Text
               const Text(
-                'Plus, by using 90% less water than others traditional farming, we are proud to play our part in helping the planet.',
+                'Además, al utilizar un 90% menos de agua que la agricultura tradicional, estamos orgullosos de hacer nuestra parte para ayudar al planeta.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 18,
@@ -59,7 +59,7 @@ class IntroductionScreen3 extends StatelessWidget {
               // let's grow together
               const SizedBox(height: 20),
               const Text(
-                'Let’s grow together!',
+                'Crescamos Juntos!',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 22,

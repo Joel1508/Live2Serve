@@ -32,7 +32,7 @@ class _CostsScreenState extends State<CostsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Add New Cost'),
+        title: Text('Añadir nuevo costo'),
         content: Form(
           key: _formKey,
           child: Column(
@@ -40,24 +40,24 @@ class _CostsScreenState extends State<CostsScreen> {
             children: [
               TextFormField(
                 controller: _nameController,
-                decoration: InputDecoration(labelText: 'Cost Name'),
+                decoration: InputDecoration(labelText: 'Nombre'),
                 validator: (value) {
                   if (value?.isEmpty ?? true) {
-                    return 'Please enter a name';
+                    return 'Por favor, ingrese un nombre';
                   }
                   return null;
                 },
               ),
               TextFormField(
                 controller: _priceController,
-                decoration: InputDecoration(labelText: 'Unit Price'),
+                decoration: InputDecoration(labelText: 'Valor por unidad'),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value?.isEmpty ?? true) {
-                    return 'Please enter a price';
+                    return 'Por favor, ingrese un precio';
                   }
                   if (double.tryParse(value!) == null) {
-                    return 'Please enter a valid number';
+                    return 'Por favor, ingrese un número válido';
                   }
                   return null;
                 },
@@ -69,7 +69,7 @@ class _CostsScreenState extends State<CostsScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Cancel',
+              'Cancelar',
               style: TextStyle(color: Colors.black54),
             ),
           ),
@@ -78,7 +78,7 @@ class _CostsScreenState extends State<CostsScreen> {
             style:
                 ElevatedButton.styleFrom(backgroundColor: Color(0xFFFB5DAB9)),
             child: Text(
-              'Save',
+              'Guardar',
               style: TextStyle(color: Colors.black54),
             ),
           ),
@@ -108,7 +108,7 @@ class _CostsScreenState extends State<CostsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Edit Cost'),
+        title: Text('Editar costo'),
         content: Form(
           key: _formKey,
           child: Column(
@@ -116,24 +116,24 @@ class _CostsScreenState extends State<CostsScreen> {
             children: [
               TextFormField(
                 controller: _nameController,
-                decoration: InputDecoration(labelText: 'Cost Name'),
+                decoration: InputDecoration(labelText: 'Nombre'),
                 validator: (value) {
                   if (value?.isEmpty ?? true) {
-                    return 'Please enter a name';
+                    return 'Por favor, ingrese un nombre';
                   }
                   return null;
                 },
               ),
               TextFormField(
                 controller: _priceController,
-                decoration: InputDecoration(labelText: 'Unit Price'),
+                decoration: InputDecoration(labelText: 'Valor por unidad'),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value?.isEmpty ?? true) {
-                    return 'Please enter a price';
+                    return 'Por favor, ingrese un precio';
                   }
                   if (double.tryParse(value!) == null) {
-                    return 'Please enter a valid number';
+                    return 'Por favor, ingrese un número válido';
                   }
                   return null;
                 },
@@ -145,7 +145,7 @@ class _CostsScreenState extends State<CostsScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Cancel',
+              'Cancelar',
               style: TextStyle(color: Colors.black54),
             ),
           ),
@@ -165,7 +165,7 @@ class _CostsScreenState extends State<CostsScreen> {
               }
             },
             child: Text(
-              'Update',
+              'Actualizar',
               style: TextStyle(color: Colors.black54),
             ),
           ),
@@ -178,7 +178,7 @@ class _CostsScreenState extends State<CostsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Manage Costs'),
+        title: Text('Administrar Costos'),
         backgroundColor: Color(0xFFFF9FAFB),
       ),
       body: ValueListenableBuilder(
@@ -198,7 +198,7 @@ class _CostsScreenState extends State<CostsScreen> {
               ),
             ),
             child: costs.isEmpty
-                ? Center(child: Text('No costs added yet'))
+                ? Center(child: Text('No hay costos añadidos todavía'))
                 : ListView.builder(
                     itemCount: costs.length,
                     itemBuilder: (context, index) {
@@ -208,7 +208,8 @@ class _CostsScreenState extends State<CostsScreen> {
                             EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         child: ListTile(
                           title: Text(cost.name),
-                          subtitle: Text('Unit Price: \$${cost.unitPrice}'),
+                          subtitle:
+                              Text('Valor por unidad: \$${cost.unitPrice}'),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -222,15 +223,15 @@ class _CostsScreenState extends State<CostsScreen> {
                                   showDialog(
                                     context: context,
                                     builder: (context) => AlertDialog(
-                                      title: Text('Delete Cost'),
+                                      title: Text('Eliminar costo'),
                                       content: Text(
-                                          'Are you sure you want to delete this cost?'),
+                                          'Estas seguro de querer eliminar este costo?'),
                                       actions: [
                                         TextButton(
                                           onPressed: () =>
                                               Navigator.pop(context),
                                           child: Text(
-                                            'Cancel',
+                                            'Cancelar',
                                             style: TextStyle(
                                                 color: Colors.black54),
                                           ),
@@ -241,7 +242,7 @@ class _CostsScreenState extends State<CostsScreen> {
                                             Navigator.pop(context);
                                           },
                                           child: Text(
-                                            'Delete',
+                                            'Eliminar',
                                             style: TextStyle(
                                                 color: Colors.black54),
                                           ),

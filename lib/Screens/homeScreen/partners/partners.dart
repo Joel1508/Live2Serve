@@ -101,19 +101,19 @@ class _PartnersScreenState extends State<PartnersScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text("Add New Partner"),
+          title: Text("Añadir nuevo Asociado"),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
                   controller: _nameController,
-                  decoration: InputDecoration(labelText: "Name"),
+                  decoration: InputDecoration(labelText: "Nombre"),
                 ),
                 SizedBox(height: 10),
                 TextField(
                   controller: _phoneController,
-                  decoration: InputDecoration(labelText: "Phone"),
+                  decoration: InputDecoration(labelText: "Celular"),
                 ),
                 SizedBox(height: 10),
                 TextField(
@@ -123,12 +123,12 @@ class _PartnersScreenState extends State<PartnersScreen> {
                 SizedBox(height: 10),
                 TextField(
                   controller: _addressController,
-                  decoration: InputDecoration(labelText: "Address"),
+                  decoration: InputDecoration(labelText: "Dirección"),
                 ),
                 SizedBox(height: 10),
                 TextField(
                   controller: _descriptionController,
-                  decoration: InputDecoration(labelText: "Description"),
+                  decoration: InputDecoration(labelText: "Descripción"),
                   maxLines: 3,
                 ),
               ],
@@ -138,7 +138,7 @@ class _PartnersScreenState extends State<PartnersScreen> {
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: Text(
-                "Cancel",
+                "Cancelar",
                 style: TextStyle(color: Colors.black54),
               ),
             ),
@@ -147,7 +147,7 @@ class _PartnersScreenState extends State<PartnersScreen> {
               style:
                   ElevatedButton.styleFrom(backgroundColor: Color(0xFFFB5DAB9)),
               child: Text(
-                "Save",
+                "Guardar",
                 style: TextStyle(color: Colors.black54),
               ),
             ),
@@ -186,19 +186,25 @@ class _PartnersScreenState extends State<PartnersScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text("Delete Partner"),
-          content: Text("Are you sure you want to delete this partner?"),
+          title: Text("Eliminar Asociado"),
+          content: Text("Estas seguro de querer eliminar este asociado?"),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text("Cancel"),
+              child: Text(
+                "Cancelar",
+                style: TextStyle(color: Colors.black54),
+              ),
             ),
             ElevatedButton(
               onPressed: () {
                 _partnersBox.deleteAt(index);
                 Navigator.of(context).pop();
               },
-              child: Text("Delete"),
+              child: Text(
+                "Eliminar",
+                style: TextStyle(color: Colors.black54),
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFFFF69697),
               ),
@@ -214,23 +220,23 @@ class _PartnersScreenState extends State<PartnersScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text("Partner Details"),
+          title: Text("Detalles asociado"),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("Name: ${partner.name}"),
-              Text("Phone: ${partner.contactNumber}"),
+              Text("Nombre: ${partner.name}"),
+              Text("Celular: ${partner.contactNumber}"),
               Text("Email: ${partner.email}"),
-              Text("Address: ${partner.address}"),
-              Text("Description: ${partner.description}"),
+              Text("Dirección: ${partner.address}"),
+              Text("Descripción: ${partner.description}"),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: Text(
-                "Close",
+                "Cerrar",
                 style: TextStyle(color: Colors.black54),
               ),
             ),
@@ -245,7 +251,7 @@ class _PartnersScreenState extends State<PartnersScreen> {
     return Scaffold(
         backgroundColor: Color(0xFFFF9FAFB),
         appBar: AppBar(
-          title: Text("Partners"),
+          title: Text("Asociados"),
           actions: [
             IconButton(
               onPressed: _showAddPartnerDialog,
@@ -259,7 +265,7 @@ class _PartnersScreenState extends State<PartnersScreen> {
               child: TextField(
                 controller: _searchController,
                 decoration: InputDecoration(
-                  hintText: "Search",
+                  hintText: "Buscar",
                   prefixIcon: Icon(Icons.search),
                   filled: true,
                   fillColor: Colors.white,
@@ -283,7 +289,7 @@ class _PartnersScreenState extends State<PartnersScreen> {
                 : _filteredPartners;
 
             return partners.isEmpty
-                ? Center(child: Text("No partners found"))
+                ? Center(child: Text("No hay asociados disponibles"))
                 : ListView.builder(
                     itemCount: partners.length,
                     itemBuilder: (context, index) {
@@ -294,7 +300,7 @@ class _PartnersScreenState extends State<PartnersScreen> {
                           child: ListTile(
                             title: Text(partner.name),
                             subtitle: Text(
-                                "Phone: ${partner.contactNumber} | Email: ${partner.email}"),
+                                "Celular: ${partner.contactNumber} | Email: ${partner.email}"),
                             trailing: IconButton(
                               icon:
                                   Icon(Icons.delete, color: Color(0xFFFF69697)),

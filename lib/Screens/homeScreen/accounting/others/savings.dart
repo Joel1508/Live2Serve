@@ -6,9 +6,9 @@ class SavingsScreen extends StatefulWidget {
 }
 
 class _SavingsScreenState extends State<SavingsScreen> {
-  final List<Map<String, dynamic>> _savingsRecords = [];
-  final TextEditingController _amountController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
+  final List<Map<String, dynamic>> _registrosAhorros = [];
+  final TextEditingController _montoController = TextEditingController();
+  final TextEditingController _descripcionController = TextEditingController();
   bool _isAdding = false;
 
   void _toggleAddContainer() {
@@ -17,27 +17,27 @@ class _SavingsScreenState extends State<SavingsScreen> {
     });
   }
 
-  void _addSavingsRecord() {
-    final amount = double.tryParse(_amountController.text);
-    final description = _descriptionController.text;
+  void _agregarRegistroAhorro() {
+    final monto = double.tryParse(_montoController.text);
+    final descripcion = _descripcionController.text;
 
-    if (amount != null && description.isNotEmpty) {
+    if (monto != null && descripcion.isNotEmpty) {
       setState(() {
-        _savingsRecords.add({
-          'amount': amount,
-          'description': description,
-          'date': DateTime.now(),
+        _registrosAhorros.add({
+          'monto': monto,
+          'descripcion': descripcion,
+          'fecha': DateTime.now(),
         });
-        _amountController.clear();
-        _descriptionController.clear();
+        _montoController.clear();
+        _descripcionController.clear();
         _isAdding = false;
       });
     }
   }
 
-  void _deleteSavingsRecord(int index) {
+  void _eliminarRegistroAhorro(int index) {
     setState(() {
-      _savingsRecords.removeAt(index);
+      _registrosAhorros.removeAt(index);
     });
   }
 
@@ -70,7 +70,7 @@ class _SavingsScreenState extends State<SavingsScreen> {
                     Column(
                       children: [
                         Text(
-                          "Savings",
+                          "Ahorros",
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
@@ -78,7 +78,7 @@ class _SavingsScreenState extends State<SavingsScreen> {
                           ),
                         ),
                         Text(
-                          "Record and track your savings",
+                          "Haz el seguimiento de tus ahorros",
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.normal,
@@ -100,9 +100,9 @@ class _SavingsScreenState extends State<SavingsScreen> {
                     children: [
                       Expanded(
                         child: ListView.builder(
-                          itemCount: _savingsRecords.length,
+                          itemCount: _registrosAhorros.length,
                           itemBuilder: (context, index) {
-                            final record = _savingsRecords[index];
+                            final registro = _registrosAhorros[index];
                             return Container(
                               margin: EdgeInsets.symmetric(vertical: 8.0),
                               padding: EdgeInsets.all(16.0),
@@ -126,7 +126,7 @@ class _SavingsScreenState extends State<SavingsScreen> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        "\$${record['amount'].toStringAsFixed(2)}",
+                                        "\$${registro['monto'].toStringAsFixed(2)}",
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 18,
@@ -134,14 +134,14 @@ class _SavingsScreenState extends State<SavingsScreen> {
                                         ),
                                       ),
                                       Text(
-                                        record['description'],
+                                        registro['descripcion'],
                                         style: TextStyle(
                                           fontSize: 16,
                                           color: Colors.grey[700],
                                         ),
                                       ),
                                       Text(
-                                        "${record['date'].toLocal().toString().split(' ')[0]}",
+                                        "${registro['fecha'].toLocal().toString().split(' ')[0]}",
                                         style: TextStyle(
                                           fontSize: 14,
                                           color: Colors.grey[500],
@@ -151,14 +151,14 @@ class _SavingsScreenState extends State<SavingsScreen> {
                                   ),
                                   PopupMenuButton(
                                     onSelected: (value) {
-                                      if (value == 'delete') {
-                                        _deleteSavingsRecord(index);
+                                      if (value == 'borrar') {
+                                        _eliminarRegistroAhorro(index);
                                       }
                                     },
                                     itemBuilder: (context) => [
                                       PopupMenuItem(
-                                        value: 'delete',
-                                        child: Text("Delete"),
+                                        value: 'borrar',
+                                        child: Text("Borrar"),
                                       ),
                                     ],
                                   ),
@@ -185,15 +185,15 @@ class _SavingsScreenState extends State<SavingsScreen> {
                           child: Column(
                             children: [
                               TextField(
-                                controller: _amountController,
+                                controller: _montoController,
                                 keyboardType: TextInputType.number,
                                 decoration:
-                                    InputDecoration(labelText: "Amount (\$)"),
+                                    InputDecoration(labelText: "Monto (\$)"),
                               ),
                               TextField(
-                                controller: _descriptionController,
+                                controller: _descripcionController,
                                 decoration:
-                                    InputDecoration(labelText: "Description"),
+                                    InputDecoration(labelText: "Descripción"),
                               ),
                               SizedBox(height: 16),
                               Row(
@@ -203,9 +203,9 @@ class _SavingsScreenState extends State<SavingsScreen> {
                                   ElevatedButton(
                                     style: ElevatedButton.styleFrom(
                                         backgroundColor: Color(0xFFFB5DAB9)),
-                                    onPressed: _addSavingsRecord,
+                                    onPressed: _agregarRegistroAhorro,
                                     child: Text(
-                                      "Add",
+                                      "Añadir",
                                       style: TextStyle(color: Colors.black54),
                                     ),
                                   ),
@@ -214,7 +214,7 @@ class _SavingsScreenState extends State<SavingsScreen> {
                                         backgroundColor: Color(0xFFFB5DAB9)),
                                     onPressed: _toggleAddContainer,
                                     child: Text(
-                                      "Cancel",
+                                      "Cancelar",
                                       style: TextStyle(color: Colors.black54),
                                     ),
                                   ),

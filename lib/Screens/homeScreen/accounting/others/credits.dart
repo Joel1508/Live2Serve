@@ -7,8 +7,8 @@ class CreditsScreen extends StatefulWidget {
 
 class _CreditsScreenState extends State<CreditsScreen> {
   final List<Map<String, dynamic>> _creditRecords = [];
-  final TextEditingController _amountController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _montoController = TextEditingController();
+  final TextEditingController _descripcionController = TextEditingController();
   bool _isAdding = false;
 
   void _toggleAddContainer() {
@@ -18,18 +18,18 @@ class _CreditsScreenState extends State<CreditsScreen> {
   }
 
   void _addCreditRecord() {
-    final amount = double.tryParse(_amountController.text);
-    final description = _descriptionController.text;
+    final monto = double.tryParse(_montoController.text);
+    final descripcion = _descripcionController.text;
 
-    if (amount != null && description.isNotEmpty) {
+    if (monto != null && descripcion.isNotEmpty) {
       setState(() {
         _creditRecords.add({
-          'amount': amount,
-          'description': description,
-          'date': DateTime.now(),
+          'monto': monto,
+          'descripcion': descripcion,
+          'fecha': DateTime.now(),
         });
-        _amountController.clear();
-        _descriptionController.clear();
+        _montoController.clear();
+        _descripcionController.clear();
         _isAdding = false;
       });
     }
@@ -70,7 +70,7 @@ class _CreditsScreenState extends State<CreditsScreen> {
                     Column(
                       children: [
                         Text(
-                          "Credits",
+                          "Créditos",
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
@@ -78,7 +78,7 @@ class _CreditsScreenState extends State<CreditsScreen> {
                           ),
                         ),
                         Text(
-                          "Track your debts and dues",
+                          "Haz el seguimiento de tus deudas",
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.normal,
@@ -126,7 +126,7 @@ class _CreditsScreenState extends State<CreditsScreen> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        "-\$${record['amount'].toStringAsFixed(2)}",
+                                        "-\$${record['monto'].toStringAsFixed(2)}",
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 18,
@@ -134,14 +134,14 @@ class _CreditsScreenState extends State<CreditsScreen> {
                                         ),
                                       ),
                                       Text(
-                                        record['description'],
+                                        record['descripcion'],
                                         style: TextStyle(
                                           fontSize: 16,
                                           color: Colors.grey[700],
                                         ),
                                       ),
                                       Text(
-                                        "${record['date'].toLocal().toString().split(' ')[0]}",
+                                        "${record['fecha'].toLocal().toString().split(' ')[0]}",
                                         style: TextStyle(
                                           fontSize: 14,
                                           color: Colors.grey[500],
@@ -151,14 +151,14 @@ class _CreditsScreenState extends State<CreditsScreen> {
                                   ),
                                   PopupMenuButton(
                                     onSelected: (value) {
-                                      if (value == 'delete') {
+                                      if (value == 'borrar') {
                                         _deleteCreditRecord(index);
                                       }
                                     },
                                     itemBuilder: (context) => [
                                       PopupMenuItem(
-                                        value: 'delete',
-                                        child: Text("Delete"),
+                                        value: 'borrar',
+                                        child: Text("Borrar"),
                                       ),
                                     ],
                                   ),
@@ -185,15 +185,15 @@ class _CreditsScreenState extends State<CreditsScreen> {
                           child: Column(
                             children: [
                               TextField(
-                                controller: _amountController,
+                                controller: _montoController,
                                 keyboardType: TextInputType.number,
                                 decoration:
-                                    InputDecoration(labelText: "Amount (\$)"),
+                                    InputDecoration(labelText: "Monto (\$)"),
                               ),
                               TextField(
-                                controller: _descriptionController,
+                                controller: _descripcionController,
                                 decoration:
-                                    InputDecoration(labelText: "Description"),
+                                    InputDecoration(labelText: "Descripción"),
                               ),
                               SizedBox(height: 16),
                               Row(
@@ -205,7 +205,7 @@ class _CreditsScreenState extends State<CreditsScreen> {
                                         backgroundColor: Color(0xFFF4A5A5)),
                                     onPressed: _addCreditRecord,
                                     child: Text(
-                                      "Add",
+                                      "Añadir",
                                       style: TextStyle(color: Colors.black54),
                                     ),
                                   ),
@@ -214,7 +214,7 @@ class _CreditsScreenState extends State<CreditsScreen> {
                                         backgroundColor: Color(0xFFF4A5A5)),
                                     onPressed: _toggleAddContainer,
                                     child: Text(
-                                      "Cancel",
+                                      "Cancelar",
                                       style: TextStyle(color: Colors.black54),
                                     ),
                                   ),

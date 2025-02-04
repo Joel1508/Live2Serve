@@ -70,17 +70,17 @@ class _LogInScreenState extends State<LogInScreen> {
                         ),
                         SizedBox(height: 25),
                         Text(
-                          "Log In",
+                          "Iniciar sesión",
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontSize: 42,
+                            fontSize: 32,
                             fontWeight: FontWeight.bold,
                             color: Color(0xFFF17372A),
                           ),
                         ),
                         SizedBox(height: 5),
                         Text(
-                          "To Continue",
+                          "Para continuar",
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 16,
@@ -129,7 +129,7 @@ class _LogInScreenState extends State<LogInScreen> {
                       controller: passwordController,
                       obscureText: true,
                       decoration: const InputDecoration(
-                        hintText: 'Password',
+                        hintText: 'Contraseña',
                         prefixIcon: Icon(Icons.lock),
                         border: OutlineInputBorder(),
                       ),
@@ -152,10 +152,10 @@ class _LogInScreenState extends State<LogInScreen> {
                           );
                         } catch (error) {
                           String errorMessage = error.toString();
-                          if (errorMessage
-                              .contains('Invalid login credentials')) {
+                          if (errorMessage.contains(
+                              'Credenciales de inicio de sesión inválidas')) {
                             errorMessage =
-                                'Invalid email or password. Please try again.';
+                                'Correo o contraseña inválidos. Por favor, inténtalo de nuevo.';
                           }
 
                           // Show error message
@@ -164,7 +164,7 @@ class _LogInScreenState extends State<LogInScreen> {
                           );
                         }
                       },
-                      child: const Text('Log in'),
+                      child: const Text('Iniciar sesión'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFF8ABC8B),
                         foregroundColor: Colors.white,
@@ -187,19 +187,19 @@ class _LogInScreenState extends State<LogInScreen> {
                         GestureDetector(
                           onTap: () => Navigator.pushNamed(context, '/sign_up'),
                           child: const Text(
-                            'Create an account',
+                            'Crear una cuenta',
                             style: TextStyle(
                               color: Color(0xFFF17372A),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-                        const SizedBox(width: 40),
+                        const SizedBox(width: 26),
                         GestureDetector(
                           onTap: () =>
                               Navigator.pushNamed(context, '/recover_password'),
                           child: const Text(
-                            'Forgot Password?',
+                            'Olvidó la contraseña?',
                             style: TextStyle(
                               color: Color(0xFFF17372A),
                               fontWeight: FontWeight.bold,

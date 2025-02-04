@@ -13,28 +13,44 @@ class SignUpScreen extends StatelessWidget {
 
   Future<void> signUp(BuildContext context) async {
     try {
-      // Sign up with Supabase
-      final authResponse = await authService.signUp(
+      // First check if user already exists
+      final user = await authService.signUp(
         emailController.text,
         passwordController.text,
       );
 
-      // Save additional user profile information
-      final user = Supabase.instance.client.auth.currentUser;
-      if (user != null) {
-        await Supabase.instance.client.from('profiles').upsert({
-          'id': user.id,
-          'username': usernameController.text,
-          'email': emailController.text,
-          'notifications_enabled': true,
-        });
-      }
+      // Get the current user after successful sign up
+      final currentUser = Supabase.instance.client.auth.currentUser;
+      if (currentUser != null) {
+        // Check if profile already exists
+        final existingProfile = await Supabase.instance.client
+            .from('profiles')
+            .select()
+            .eq('id', currentUser.id)
+            .single();
 
-      // Show success and navigate
+        if (existingProfile == null) {
+          // Only create profile if it doesn't exist
+          await Supabase.instance.client.from('profiles').insert({
+            'id': currentUser.id,
+            'username': usernameController.text,
+            'notifications_enabled': true,
+          });
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Sign up successful! Please log in.')),
+        );
+        Navigator.pushNamed(context, '/log_in');
+      }
+    } on PostgrestException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Sign up successful! Please log in.')),
+        SnackBar(content: Text('Database Error: ${e.message}')),
       );
-      Navigator.pushNamed(context, '/log_in');
+    } on AuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Auth Error: ${e.message}')),
+      );
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $error')),
@@ -89,17 +105,17 @@ class SignUpScreen extends StatelessWidget {
                                 ),
                                 SizedBox(height: 15),
                                 Text(
-                                  "Sign up",
+                                  "Registrarse",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    fontSize: 36,
+                                    fontSize: 28,
                                     fontWeight: FontWeight.bold,
                                     color: Color(0xFFF17372A),
                                   ),
                                 ),
                                 SizedBox(height: 5),
                                 Text(
-                                  "To Continue",
+                                  "Para continuar",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: 14,
@@ -141,7 +157,7 @@ class SignUpScreen extends StatelessWidget {
                               TextField(
                                 controller: usernameController,
                                 decoration: const InputDecoration(
-                                  hintText: 'User name',
+                                  hintText: 'Nombre Usuario',
                                   prefixIcon: Icon(Icons.person),
                                   border: OutlineInputBorder(),
                                 ),
@@ -162,7 +178,7 @@ class SignUpScreen extends StatelessWidget {
                                 controller: passwordController,
                                 obscureText: true,
                                 decoration: const InputDecoration(
-                                  hintText: 'Password',
+                                  hintText: 'Contraseña',
                                   prefixIcon: Icon(Icons.lock),
                                   border: OutlineInputBorder(),
                                 ),
@@ -171,7 +187,7 @@ class SignUpScreen extends StatelessWidget {
                               // Sign-Up Button
                               ElevatedButton(
                                 onPressed: () => signUp(context),
-                                child: const Text('Sign up'),
+                                child: const Text('Registrarse'),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Color(0xFFF9EC9B2),
                                   foregroundColor: Color(0xFFF17372A),
@@ -191,7 +207,7 @@ class SignUpScreen extends StatelessWidget {
                                 onPressed: () =>
                                     Navigator.pushNamed(context, '/log_in'),
                                 child: const Text(
-                                  'Already have an account? Log in',
+                                  '¿Ya tienes una cuenta? Inicia sesión',
                                   style: TextStyle(fontSize: 16),
                                 ),
                                 style: TextButton.styleFrom(
@@ -205,14 +221,25 @@ class SignUpScreen extends StatelessWidget {
                                   width: 24,
                                   height: 24,
                                 ),
-                                label: const Text('Continue with Google'),
+                                label: const Text('Continua con Google'),
                                 onPressed: () async {
                                   try {
                                     await authService.logInWithGoogle();
-                                    Navigator.pushNamed(context, '/home');
+                                    // Change this line from '/home' to '/home_screen'
+                                    Navigator.pushNamed(
+                                        context, '/home_screen');
                                   } catch (error) {
+                                    // Add more specific error handling
+                                    String errorMessage =
+                                        'Error during Google sign-in';
+                                    if (error
+                                        .toString()
+                                        .contains('validation_failed')) {
+                                      errorMessage =
+                                          'Google sign-in is not properly configured. Please contact support.';
+                                    }
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Error: $error')),
+                                      SnackBar(content: Text(errorMessage)),
                                     );
                                   }
                                 },

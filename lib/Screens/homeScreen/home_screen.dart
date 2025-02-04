@@ -224,7 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Add New',
+                'Añadir nuevo',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -233,7 +233,7 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(height: 20),
               ListTile(
                 leading: Icon(Icons.receipt, color: Colors.blue),
-                title: Text('Client Invoice'),
+                title: Text('Factura para cliente'),
                 onTap: () async {
                   Navigator.pop(context);
                   final result = await Navigator.push(
@@ -245,14 +245,15 @@ class _HomeScreenState extends State<HomeScreen> {
                             await InvoiceService.instance.addInvoice(invoice);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('Invoice saved successfully'),
+                                content: Text('Factura guardada exitosamente'),
                                 backgroundColor: Colors.green,
                               ),
                             );
                           } catch (e) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('Failed to save invoice: $e'),
+                                content:
+                                    Text('Error al guardar la factura: $e'),
                                 backgroundColor: Colors.red,
                               ),
                             );
@@ -265,7 +266,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               ListTile(
                 leading: Icon(Icons.nature, color: Colors.green),
-                title: Text('Harvest Invoice'),
+                title: Text('Factura de cosecha'),
                 onTap: () {
                   Navigator.pop(context);
                   Navigator.pushNamed(context, '/add_tool');
@@ -355,7 +356,7 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Quick Actions',
+                'Acciones rápidas',
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 20,
@@ -369,16 +370,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisSpacing: 15,
                   children: [
                     _buildFeatureCard(
-                        'Customers', Icons.person, Colors.green[50]!),
+                        'Clientes', Icons.person, Colors.green[50]!),
                     _buildFeatureCard(
-                        'Partners', Icons.group, Colors.blue[50]!),
+                        'Asociados', Icons.group, Colors.blue[50]!),
                     _buildFeatureCard(
-                        'Project', Icons.business, Colors.purple[50]!),
-                    _buildFeatureCard('Accounting',
+                        'Proyecto', Icons.business, Colors.purple[50]!),
+                    _buildFeatureCard('Contabilidad',
                         Icons.account_balance_wallet, Colors.orange[50]!),
                     _buildFeatureCard(
-                        'Bill History', Icons.history, Colors.red[50]!),
-                    _buildFeatureCard('Goals', Icons.flag, Colors.teal[50]!),
+                        'Historial', Icons.history, Colors.red[50]!),
+                    _buildFeatureCard('Metas', Icons.flag, Colors.teal[50]!),
                   ],
                 ),
               ),
@@ -404,14 +405,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 Icons.home,
                 color: Colors.black54,
               ),
-              label: 'Home'),
+              label: 'Inicio'),
           BottomNavigationBarItem(
             icon: Icon(Icons.add),
-            label: 'Add',
+            label: 'Añadir',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
-            label: 'Profile',
+            label: 'Usuario',
           ),
         ],
         currentIndex: _selectedIndex,
@@ -426,22 +427,22 @@ class _HomeScreenState extends State<HomeScreen> {
     return InkWell(
       onTap: () {
         switch (title) {
-          case 'Customers':
+          case 'Clientes':
             Navigator.pushNamed(context, '/customers');
             break;
-          case 'Partners':
+          case 'Asociados':
             Navigator.pushNamed(context, '/partners');
             break;
-          case 'Project':
+          case 'Proyecto':
             Navigator.pushNamed(context, '/project');
             break;
-          case 'Accounting':
+          case 'Contabilidad':
             Navigator.pushNamed(context, '/accounting');
             break;
-          case 'Bill History':
+          case 'Historial':
             Navigator.pushNamed(context, '/invoice');
             break;
-          case 'Goals':
+          case 'Metas':
             Navigator.pushNamed(context, '/goals');
             break;
         }
