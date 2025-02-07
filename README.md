@@ -1,17 +1,25 @@
-# app
+# 📱 App Screenshots  
 
-A new Flutter project.
+Aquí te mostramos algunas capturas de pantalla de nuestra aplicación en acción.  
 
-## Getting Started
+## 🌟 Vistas de la Aplicación  
 
-This project is a starting point for a Flutter application.
+### 🖼️ Pantallas Principales  
 
-A few resources to get you started if this is your first Flutter project:
+| Inicio | Perfil | Registrarse | Intro |
+|--------|--------|-------------|-------|
+| ![Inicio](assets/github/inicio.png) | ![Perfil](assets/github/usuario.png) | ![Registrarse](assets/github/iniciar.png) | ![Intro](assets/github/intro.png) |
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### 📊 Funcionalidades Clave  
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-# app
+| Estadísticas | Transacciones | Historial | Otros |
+|--------------|---------------|-----------|-------|
+| ![Estadísticas](assets/github/contabilidad.png) | ![Añadir transacciones](assets/github/add_transac.png) | ![Historial](assets/github/historial.png) | ![Otros](assets/github/otros.png) |
+
+### 🛠️ Opciones Avanzadas  
+
+| Facturación | Asociados | Calendario |
+|-------------|-----------|---------|
+| ![Clientes](assets/github/factura_clientes.png) | ![Asociados](assets/github/factura_cosecha.png) | ![Calendario](assets/github/calendario.png) |
+
+---
